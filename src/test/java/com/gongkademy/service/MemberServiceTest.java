@@ -1,7 +1,6 @@
 package com.gongkademy.service;
 
 import com.gongkademy.domain.member.dto.MemberInfoDTO;
-import com.gongkademy.domain.member.dto.MemberPasswordUpdateDTO;
 import com.gongkademy.domain.member.dto.MemberUpdateDTO;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.entity.MemberRole;
@@ -45,16 +44,6 @@ class MemberServiceTest {
         assertThat("userB").isEqualTo(infoDto.getNickname());
     }
 
-    @Test
-    void 비밀번호_수정(){
-        //TODO 비밀번호수정 테스트
-        Member member1 = setMember();
-        String password = passwordEncoder.encode("123456");
-        MemberPasswordUpdateDTO dto = new MemberPasswordUpdateDTO(member1.getEmail(), password);
-        service.updatePassword(dto);
-        Member member2 = repository.findById(member1.getId()).get();
-        assertThat(password).isEqualTo(member2.getPassword());
-    }
     @Test
     void 회원삭제(){
         //TODO여기부터 짜기

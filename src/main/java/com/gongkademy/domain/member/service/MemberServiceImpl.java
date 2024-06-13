@@ -7,7 +7,6 @@ import com.gongkademy.global.exception.ErrorCode;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.dto.MemberSignUpDTO;
 import com.gongkademy.domain.member.dto.MemberUpdateDTO;
-import com.gongkademy.domain.member.dto.MemberPasswordUpdateDTO;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
 import org.springframework.stereotype.Service;
@@ -50,17 +49,10 @@ public class MemberServiceImpl implements MemberService {
         });
     }
 
-
     @Override
     public void updateNickname(MemberUpdateDTO dto) {
         Member member = memberRepository.findByEmail(dto.getEmail()).orElseThrow(IllegalArgumentException::new);
         member.updateNickname(dto.getNewNickname());
-    }
-
-    @Override
-    public void updatePassword(MemberPasswordUpdateDTO dto) {
-        Member member = memberRepository.findByEmail(dto.getEmail()).orElseThrow(IllegalArgumentException::new);
-        member.updatePassword(dto.getNewPassword());
     }
 
     @Override

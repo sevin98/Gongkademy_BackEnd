@@ -3,7 +3,6 @@ package com.gongkademy.domain.member.controller;
 import com.gongkademy.domain.member.dto.MemberInfoDTO;
 import com.gongkademy.global.exception.ErrorCode;
 import com.gongkademy.domain.member.service.MemberService;
-import com.gongkademy.domain.member.dto.MemberPasswordUpdateDTO;
 import com.gongkademy.domain.member.dto.MemberSignUpDTO;
 import com.gongkademy.domain.member.dto.MemberUpdateDTO;
 import com.gongkademy.global.exception.CustomException;
@@ -66,11 +65,6 @@ public class MemberController {
         return HttpStatus.OK;
     }
 
-    @PatchMapping("update-password")
-    public HttpStatus updatePassword(@RequestBody MemberPasswordUpdateDTO dto){
-        memberService.updatePassword(dto);
-        return HttpStatus.OK;
-    }
     //acesstoken의 헤더를 받아서 만료됐는지 보고
     //리프레시 토큰은 만료안됐는지를 봐라
     @PostMapping("refresh")

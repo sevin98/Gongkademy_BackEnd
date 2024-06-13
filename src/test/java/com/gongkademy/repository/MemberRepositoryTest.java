@@ -1,4 +1,4 @@
-package com.gongkademyback.repository;
+package com.gongkademy.repository;
 
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;

@@ -1,4 +1,4 @@
-package com.gongkademyback.service;
+package com.gongkademy.service;
 
 import com.gongkademy.domain.member.dto.MemberInfoDTO;
 import com.gongkademy.domain.member.dto.MemberPasswordUpdateDTO;

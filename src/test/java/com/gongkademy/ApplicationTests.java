@@ -1,10 +1,10 @@
-package com.gongkademyback;
+package com.gongkademy;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class GongkademyBackApplicationTests {
+class ApplicationTests {
 
 	@Test
 	void contextLoads() {

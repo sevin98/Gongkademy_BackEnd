@@ -1,9 +1,6 @@
 package com.gongkademy.domain.member.controller;
 
-import com.gongkademy.domain.member.dto.EmailCheckDto;
-import com.gongkademy.domain.member.dto.EmailRequestDto;
 import com.gongkademy.domain.member.dto.MemberInfoDTO;
-import com.gongkademy.domain.member.service.MailSendService;
 import com.gongkademy.global.exception.ErrorCode;
 import com.gongkademy.domain.member.service.MemberService;
 import com.gongkademy.domain.member.dto.MemberPasswordUpdateDTO;
@@ -11,7 +8,6 @@ import com.gongkademy.domain.member.dto.MemberSignUpDTO;
 import com.gongkademy.domain.member.dto.MemberUpdateDTO;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.security.util.JWTUtil;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.log4j.Log4j2;
@@ -29,7 +25,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Log4j2
 public class MemberController {
-    private final MailSendService mailSendService;
     private final MemberService memberService;
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -47,22 +42,6 @@ public class MemberController {
     }
 
 
-
-    @PostMapping("mailSend")
-    public String mailSend(@RequestBody @Valid EmailRequestDto emailDto){
-        log.info("이메일 인증 이메일: "+emailDto.getEmail());
-        return mailSendService.joinEmail(emailDto.getEmail());
-    }
-
-    @PostMapping("mailauthCheck")
-    public String AuthCheck(@RequestBody @Valid EmailCheckDto emailCheckDto){
-        Boolean isChecked = mailSendService.CheckAuthNum(emailCheckDto.getEmail(),emailCheckDto.getAuthNum());
-        if(isChecked){
-            return "ok";
-        }else{
-            throw new NullPointerException("잘못됐습니다");
-        }
-    }
     @GetMapping("/{memberId}")
     public ResponseEntity<MemberInfoDTO> getMemberInfo(@PathVariable(name="memberId") long memberId) {
         MemberInfoDTO dto = memberService.getMemberInfo(memberId);

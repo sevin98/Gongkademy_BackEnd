@@ -1,5 +1,4 @@
 package com.gongkademy.domain.community.service;
-;
 import com.gongkademy.domain.community.dto.request.CommentLikeRequestDTO;
 import com.gongkademy.domain.community.dto.response.CommentLikeResponseDTO;
 

@@ -14,7 +14,7 @@ public class QnaBoardService {
     private final QnaBoardRepository qnaBoardRepository;
 
     public List<QnaBoard> findQnaBoardsAll() {
-        return qnaBoardRepository.findQnaBoardsAll();
+        return qnaBoardRepository.findAll();
     }
 
 }

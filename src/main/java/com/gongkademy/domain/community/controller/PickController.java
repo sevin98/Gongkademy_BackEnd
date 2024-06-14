@@ -1,8 +1,8 @@
 package com.gongkademy.domain.community.controller;
 
-import com.gongkademy.domain.board.dto.request.PickRequestDTO;
-import com.gongkademy.domain.board.dto.response.PickResponseDTO;
-import com.gongkademy.domain.board.service.PickService;
+import com.gongkademy.domain.community.dto.request.PickRequestDTO;
+import com.gongkademy.domain.community.dto.response.PickResponseDTO;
+import com.gongkademy.domain.community.service.PickService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

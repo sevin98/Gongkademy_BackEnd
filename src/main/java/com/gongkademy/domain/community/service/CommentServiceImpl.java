@@ -1,9 +1,9 @@
 package com.gongkademy.domain.community.service;
 
-import com.gongkademy.domain.board.dto.request.CommentRequestDTO;
-import com.gongkademy.domain.board.dto.response.CommentResponseDTO;
-import com.gongkademy.domain.board.entity.comment.Comment;
-import com.gongkademy.domain.board.repository.CommentRepository;
+import com.gongkademy.domain.community.dto.request.CommentRequestDTO;
+import com.gongkademy.domain.community.dto.response.CommentResponseDTO;
+import com.gongkademy.domain.community.entity.comment.Comment;
+import com.gongkademy.domain.community.repository.CommentRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepositoryImpl;
 import lombok.RequiredArgsConstructor;

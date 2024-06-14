@@ -1,8 +1,8 @@
 package com.gongkademy.domain.community.controller;
 
-import com.gongkademy.domain.board.dto.request.BoardRequestDTO;
-import com.gongkademy.domain.board.dto.response.BoardResponseDTO;
-import com.gongkademy.domain.board.service.BoardService;
+import com.gongkademy.domain.community.dto.request.BoardRequestDTO;
+import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
+import com.gongkademy.domain.community.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

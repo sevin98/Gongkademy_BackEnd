@@ -1,6 +1,6 @@
 package com.gongkademy.domain.community.repository;
 
-import com.gongkademy.domain.board.entity.pick.Pick;
+import com.gongkademy.domain.community.entity.pick.Pick;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

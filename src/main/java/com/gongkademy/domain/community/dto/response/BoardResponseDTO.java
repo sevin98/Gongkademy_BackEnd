@@ -1,6 +1,6 @@
 package com.gongkademy.domain.community.dto.response;
 
-import com.gongkademy.domain.board.entity.board.BoardType;
+import com.gongkademy.domain.community.entity.board.BoardType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

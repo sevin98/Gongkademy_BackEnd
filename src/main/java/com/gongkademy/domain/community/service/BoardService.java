@@ -1,7 +1,7 @@
 package com.gongkademy.domain.community.service;
 
-import com.gongkademy.domain.board.dto.request.BoardRequestDTO;
-import com.gongkademy.domain.board.dto.response.BoardResponseDTO;
+import com.gongkademy.domain.community.dto.request.BoardRequestDTO;
+import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
 
 import java.util.List;
 

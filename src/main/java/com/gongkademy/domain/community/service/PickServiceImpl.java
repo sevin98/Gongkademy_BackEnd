@@ -1,11 +1,12 @@
 package com.gongkademy.domain.community.service;
 
-import com.gongkademy.domain.board.dto.request.PickRequestDTO;
-import com.gongkademy.domain.board.dto.response.PickResponseDTO;
-import com.gongkademy.domain.board.entity.board.Board;
-import com.gongkademy.domain.board.entity.pick.Pick;
-import com.gongkademy.domain.board.repository.BoardRepository;
-import com.gongkademy.domain.board.repository.PickRepository;
+
+import com.gongkademy.domain.community.dto.request.PickRequestDTO;
+import com.gongkademy.domain.community.dto.response.PickResponseDTO;
+import com.gongkademy.domain.community.entity.board.Board;
+import com.gongkademy.domain.community.entity.pick.Pick;
+import com.gongkademy.domain.community.repository.BoardRepository;
+import com.gongkademy.domain.community.repository.PickRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepositoryImpl;
 import lombok.RequiredArgsConstructor;

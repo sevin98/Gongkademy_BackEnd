@@ -1,6 +1,6 @@
 package com.gongkademy.domain.community.dto.request;
 
-import com.gongkademy.domain.board.entity.pick.PickType;
+import com.gongkademy.domain.community.entity.pick.PickType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

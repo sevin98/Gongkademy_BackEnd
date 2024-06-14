@@ -1,9 +1,9 @@
 package com.gongkademy.domain.community.service;
 
-import com.gongkademy.domain.board.dto.request.BoardRequestDTO;
-import com.gongkademy.domain.board.dto.response.BoardResponseDTO;
-import com.gongkademy.domain.board.entity.board.Board;
-import com.gongkademy.domain.board.repository.BoardRepository;
+import com.gongkademy.domain.community.dto.request.BoardRequestDTO;
+import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
+import com.gongkademy.domain.community.entity.board.Board;
+import com.gongkademy.domain.community.repository.BoardRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepositoryImpl;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor

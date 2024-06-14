@@ -1,7 +1,8 @@
 package com.gongkademy.domain.community.service;
 
-import com.gongkademy.domain.board.dto.request.PickRequestDTO;
-import com.gongkademy.domain.board.dto.response.PickResponseDTO;
+
+import com.gongkademy.domain.community.dto.request.PickRequestDTO;
+import com.gongkademy.domain.community.dto.response.PickResponseDTO;
 
 import java.util.List;
 

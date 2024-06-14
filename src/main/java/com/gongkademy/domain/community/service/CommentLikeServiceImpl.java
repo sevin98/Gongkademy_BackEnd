@@ -1,11 +1,11 @@
 package com.gongkademy.domain.community.service;
 
-import com.gongkademy.domain.board.dto.request.CommentLikeRequestDTO;
-import com.gongkademy.domain.board.dto.response.CommentLikeResponseDTO;
-import com.gongkademy.domain.board.entity.comment.Comment;
-import com.gongkademy.domain.board.entity.comment.CommentLike;
-import com.gongkademy.domain.board.repository.CommentLikeRepository;
-import com.gongkademy.domain.board.repository.CommentRepository;
+import com.gongkademy.domain.community.dto.request.CommentLikeRequestDTO;
+import com.gongkademy.domain.community.dto.response.CommentLikeResponseDTO;
+import com.gongkademy.domain.community.entity.comment.Comment;
+import com.gongkademy.domain.community.entity.comment.CommentLike;
+import com.gongkademy.domain.community.repository.CommentLikeRepository;
+import com.gongkademy.domain.community.repository.CommentRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepositoryImpl;
 import lombok.RequiredArgsConstructor;

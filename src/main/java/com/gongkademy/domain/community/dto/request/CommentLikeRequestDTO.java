@@ -1,6 +1,6 @@
 package com.gongkademy.domain.community.dto.request;
 
-import com.gongkademy.domain.board.entity.comment.CommentType;
+import com.gongkademy.domain.community.entity.comment.CommentType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

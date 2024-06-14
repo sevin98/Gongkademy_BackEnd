@@ -4,7 +4,6 @@ import com.gongkademy.domain.member.dto.MemberInfoDTO;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.dto.MemberSignUpDTO;
 import com.gongkademy.domain.member.dto.MemberUpdateDTO;
-import com.gongkademy.domain.member.dto.MemberPasswordUpdateDTO;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -14,7 +13,6 @@ public interface MemberService {
 
     Member join(MemberSignUpDTO dto);
     void updateNickname(MemberUpdateDTO dto);
-    void updatePassword(MemberPasswordUpdateDTO dto);
     void deleteMember(Long id);
     void validateDuplicateNickname(String nickname);
     void validateDuplicateEmail(String email);
@@ -33,11 +31,7 @@ public interface MemberService {
                 .birthday(LocalDate.parse(dto.getBirthday(), DateTimeFormatter.ofPattern("yyyyMMdd")))
                 .build();
     }
-    default Member memberPasswordUpdateDTOtoEntity(MemberPasswordUpdateDTO dto){
-        return Member.builder()
-                .password(dto.getNewPassword())
-                .build();
-    }
+
     default Member memberUpdateDTOtoEntity(MemberUpdateDTO dto){
         return Member.builder()
                 .nickname(dto.getNewNickname())

@@ -3,8 +3,6 @@ package com.gongkademy.global.config;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.domain.member.service.UserDetailsServiceImpl;
 import com.gongkademy.global.security.filter.JWTCheckFilter;
-import com.gongkademy.global.security.handler.APILoginFailureHandler;
-import com.gongkademy.global.security.handler.APILoginSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,9 +51,9 @@ public class SecurityConfig {
             //member/login url로 id,password를 같이 요청하면 => loadByUsername메소드가 실행
             config.loginPage("/api/v1/members/login");
             //성공하면 괄호 안에 내용을 실행할거야
-            config.successHandler(new APILoginSuccessHandler());
+//            config.successHandler(new APILoginSuccessHandler());
             //실패하면
-            config.failureHandler(new APILoginFailureHandler());
+//            config.failureHandler(new APILoginFailureHandler());
         });
 
         //필터 추가

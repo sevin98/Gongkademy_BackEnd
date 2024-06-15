@@ -35,6 +35,8 @@ public class Board {
 
     private Long hit;
 
+    private Long commentCount;  // 댓글 수 추가
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BoardType boardType;
@@ -46,5 +48,10 @@ public class Board {
     public void setMember(Member member) {
         this.member = member;
         member.getBoards().add(this);
+    }
+
+    // 댓글 수 업데이트 메서드
+    public void updateCommentCount() {
+        this.commentCount = (long) comments.size();
     }
 }

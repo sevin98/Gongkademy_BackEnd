@@ -1,15 +1,13 @@
 package com.gongkademy.domain.community.dto.request;
 
 import com.gongkademy.domain.community.entity.board.BoardType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class BoardRequestDTO {
 
     private BoardType boardType;

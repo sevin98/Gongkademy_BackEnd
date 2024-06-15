@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/boards")
+@RequestMapping("/notice")
 @RequiredArgsConstructor
 public class BoardController {
 
@@ -39,6 +39,13 @@ public class BoardController {
     @GetMapping
     public ResponseEntity<List<BoardResponseDTO>> getAllBoards() {
         List<BoardResponseDTO> boardResponseDTOS = boardService.getAllBoards();
+        return ResponseEntity.ok(boardResponseDTOS);
+    }
+
+    // 최신 순 3개 가져오기
+    @GetMapping("/top3latest")
+    public ResponseEntity<List<BoardResponseDTO>> getTop3LatestBoards() {
+        List<BoardResponseDTO> boardResponseDTOS = boardService.getLatestBoards(3);
         return ResponseEntity.ok(boardResponseDTOS);
     }
 

@@ -18,4 +18,6 @@ public interface BoardService {
     void deleteBoard(Long id);
 
     void incrementHit(Long id);
+
+    List<BoardResponseDTO> getLatestBoards(int index);
 }

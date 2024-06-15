@@ -2,13 +2,17 @@ package com.gongkademy.domain.community.service;
 
 import com.gongkademy.domain.community.dto.request.BoardRequestDTO;
 import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
+import com.gongkademy.domain.community.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.entity.board.Board;
 import com.gongkademy.domain.community.repository.BoardRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepositoryImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,6 +53,7 @@ public class BoardServiceImpl implements BoardService {
         Optional<Board> boardOptional = boardRepository.findById(id);
         if (boardOptional.isPresent()) {
             Board board = boardOptional.get();
+            // 조회 수 추가
             incrementHit(board.getArticleId());
             return convertToDTO(boardOptional.get());
         }
@@ -57,8 +62,13 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public List<BoardResponseDTO> getAllBoards() {
+
         List<Board> boards = boardRepository.findAll();
-        return List.of();
+        List<BoardResponseDTO> boardResponseDTOS = new ArrayList<>();
+        for (Board board : boards) {
+            boardResponseDTOS.add(convertToDTO(board));
+        }
+        return boardResponseDTOS;
     }
 
     @Override
@@ -79,6 +89,19 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
+    @Override
+    public List<BoardResponseDTO> getLatestBoards(int index) {
+        Pageable pageable = PageRequest.of(0, index);
+        List<Board> boards = boardRepository.findAllByOrderByCreateTimeDesc(pageable).getContent();
+
+        List<BoardResponseDTO> boardResponseDTOS = new ArrayList<>();
+
+        for (Board board : boards) {
+            boardResponseDTOS.add(convertToDTO(board));
+        }
+        return boardResponseDTOS;
+    }
+
     private Board convertToEntity(BoardRequestDTO boardRequestDTO) {
         Board board = new Board();
         board.setBoardType(boardRequestDTO.getBoardType());
@@ -94,19 +117,23 @@ public class BoardServiceImpl implements BoardService {
         board.setContent(boardRequestDTO.getContent());
         board.setHit(0L);
         board.setLikeCount(0L);
+        board.setCommentCount(0L);
         return board;
     }
 
     private BoardResponseDTO convertToDTO(Board board) {
-        BoardResponseDTO boardResponseDTO = new BoardResponseDTO();
-        boardResponseDTO.setArticleId(board.getArticleId());
-        boardResponseDTO.setBoardType(board.getBoardType());
-        boardResponseDTO.setMemberId(board.getMember().getId());
-        boardResponseDTO.setTitle(board.getTitle());
-        boardResponseDTO.setContent(board.getContent());
-        boardResponseDTO.setCreateTime(board.getCreateTime());
-        boardResponseDTO.setLikeCount(board.getLikeCount());
-        boardResponseDTO.setHit(board.getHit());
-        return boardResponseDTO;
+        return BoardResponseDTO.builder().
+                articleId(board.getArticleId())
+                .boardType(board.getBoardType())
+                .memberId(board.getMember().getId())
+                .nickname(board.getMember().getNickname())
+                .title(board.getTitle())
+                .content(board.getContent())
+                .createTime(board.getCreateTime())
+                .likeCount(board.getLikeCount())
+                .hit(board.getHit())
+                .commentCount(board.getCommentCount())
+                .build();
+
     }
 }

@@ -26,7 +26,7 @@ dependencies {
 	runtimeOnly 'com.h2database:h2'  //h2 데이터베이스 사용
 
 	//spring security
-	implementation 'org.springframework.boot:spring-boot-starter-security'
+	  'org.springframework.boot:spring-boot-starter-security'
 
 	//gson라이브러리
 	implementation 'com.google.code.gson:gson:2.10.1'

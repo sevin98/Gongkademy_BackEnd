@@ -5,7 +5,7 @@ import com.gongkademy.domain.member.dto.MemberUpdateDTO;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.entity.MemberRole;
 import com.gongkademy.domain.member.repository.MemberRepository;
-import com.gongkademy.domain.member.service.MemberServiceImpl;
+import com.gongkademy.domain.member.service.OAuth2MemberService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,8 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Transactional
 class MemberServiceTest {
+
     @Autowired
-    MemberServiceImpl service;
+    OAuth2MemberService oAuth2Service;
     @Autowired
     private PasswordEncoder passwordEncoder; //테스트시 비밀번호는 인코딩된 상태로 넣어야함.
     @Autowired
@@ -39,8 +40,8 @@ class MemberServiceTest {
     void 닉네임_수정(){
         Member member1 = setMember();
         MemberUpdateDTO dto = new MemberUpdateDTO(member1.getEmail(),"userB");
-        service.updateNickname(dto);
-        MemberInfoDTO infoDto = service.getMemberInfo(member1.getId());
+        oAuth2Service.updateNickname(dto);
+        MemberInfoDTO infoDto = oAuth2Service.getMemberInfo(member1.getId());
         assertThat("userB").isEqualTo(infoDto.getNickname());
     }
 
@@ -48,7 +49,7 @@ class MemberServiceTest {
     void 회원삭제(){
         //TODO여기부터 짜기
         Member member1 = setMember();
-        service.deleteMember(member1.getId());
+        oAuth2Service.deleteMember(member1.getId());
         Optional<Member> member2 = repository.findById(member1.getId());
         assertThat(member2).isEmpty();
     }

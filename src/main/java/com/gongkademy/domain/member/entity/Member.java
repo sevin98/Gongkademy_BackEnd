@@ -7,7 +7,6 @@ import com.gongkademy.domain.community.entity.pick.Pick;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -34,26 +33,28 @@ public class Member {
 
     private LocalDate birthday;
 
-    public void updateNickname(String nickname) {
-        this.nickname = nickname;
+    public void updateNickname(String nickname){
+            this.nickname = nickname;
     }
-
-    public void updatePassword(String password) {
+    public void updatePassword(String password){
         this.password = password;
     }
+
+    private String university;
+    private String major;
+    private String minor;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default
     private List<MemberRole> memberRoleList = new ArrayList<>();
 
-    public void addRole(MemberRole memberRole) {
+    public void addRole(MemberRole memberRole){
         memberRoleList.add(memberRole);
     }
 
-    public void clearRole() {
+    public void clearRole(){
         memberRoleList.clear();
     }
-
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Pick> picks = new ArrayList<>();

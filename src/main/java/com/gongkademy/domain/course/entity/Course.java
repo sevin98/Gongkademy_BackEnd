@@ -23,7 +23,7 @@ public class Course {
 	
 	private Long totalCourseTime;
 	
-	private String courseTitle;
+	private String title;
 	
 	private double avgRating;
 	

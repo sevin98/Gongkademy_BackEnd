@@ -4,6 +4,11 @@ import com.gongkademy.domain.community.entity.board.Board;
 import com.gongkademy.domain.community.entity.comment.Comment;
 import com.gongkademy.domain.community.entity.comment.CommentLike;
 import com.gongkademy.domain.community.entity.pick.Pick;
+import com.gongkademy.domain.course.entity.CourseComment;
+import com.gongkademy.domain.course.entity.CourseReview;
+import com.gongkademy.domain.course.entity.RegistCourse;
+import com.gongkademy.domain.course.entity.Scrap;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
@@ -71,7 +76,22 @@ public class Member {
     @OneToMany(mappedBy = "member")
     @Builder.Default
     private List<Board> boards = new ArrayList<>();
-
+    
+	@OneToMany(mappedBy="member")
+    @Builder.Default
+	private List<CourseComment> courseComments = new ArrayList<>();
+	
+	@OneToMany(mappedBy="member")
+    @Builder.Default
+	private List<CourseReview> courseReviews = new ArrayList<>();
+	
+	@OneToMany(mappedBy="member")
+    @Builder.Default
+	private List<RegistCourse> registCourses = new ArrayList<>();
+	
+	@OneToMany(mappedBy="member")
+    @Builder.Default
+	private List<Scrap> scraps = new ArrayList<>();
 
     // 연관관계 편의 메서드
     public void addPick(Pick pick) {
@@ -92,6 +112,26 @@ public class Member {
     public void addBoard(Board board) {
         boards.add(board);
         board.setMember(this);
+    }
+    
+    public void addCourseComment(CourseComment courseComment) {
+        courseComments.add(courseComment);
+        courseComment.setMember(this);
+    }
+    
+    public void addCourseReview(CourseReview courseReview) {
+        courseReviews.add(courseReview);
+        courseReview.setMember(this);
+    }
+    
+    public void addRegistCourse(RegistCourse registCourse) {
+        registCourses.add(registCourse);
+        registCourse.setMember(this);
+    }
+    
+    public void addScrap(Scrap scrap) {
+        scraps.add(scrap);
+        scrap.setMember(this);
     }
 
 }

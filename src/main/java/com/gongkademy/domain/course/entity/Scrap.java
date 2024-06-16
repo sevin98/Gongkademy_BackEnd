@@ -10,9 +10,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Getter
+@Getter @Setter
 public class Scrap {
 	
 	@Id
@@ -24,7 +25,6 @@ public class Scrap {
 	@JoinColumn(name="course_id")
 	private Course course;
 	
-	// **Member Entity에 scrap list 메서드 추가**
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="id")
 	private Member member;

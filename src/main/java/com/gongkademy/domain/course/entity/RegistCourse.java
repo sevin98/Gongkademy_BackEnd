@@ -14,9 +14,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Getter
+@Getter @Setter
 public class RegistCourse {
 
 	@Id
@@ -34,7 +35,6 @@ public class RegistCourse {
 	@JoinColumn(name="course_id")
 	private Course course;
 	
-	// **Member Entity에 regist_course list 메서드 추가**
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="id")
 	private Member member;

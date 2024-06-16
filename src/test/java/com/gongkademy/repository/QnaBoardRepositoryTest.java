@@ -42,7 +42,6 @@ class QnaBoardRepositoryTest {
         qnaBoardRepository.save(qnaBoard);
         List<QnaBoard> qnaBoards = qnaBoardRepository.findAll();
 
-
         QnaBoard result = qnaBoards.get(0);
     }
 }

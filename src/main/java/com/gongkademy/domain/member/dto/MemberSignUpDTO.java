@@ -10,8 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class MemberSignUpDTO {
-    private String nickname;
     private String email;
-    private String password;
+    private String name;
+    private String nickname;
     private String birthday;
+    private String university;
+    private String major;
+    private String minor;
 }

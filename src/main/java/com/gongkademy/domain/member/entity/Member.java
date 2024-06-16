@@ -31,28 +31,27 @@ public class Member {
     private Long id;
 
     @NotEmpty
+    private String name;
+    @NotEmpty
     private String email;
     @NotEmpty
     private String nickname;
     @NotEmpty
-    private String password;
-
     private LocalDate birthday;
-
-    public void updateNickname(String nickname){
-            this.nickname = nickname;
-    }
-    public void updatePassword(String password){
-        this.password = password;
-    }
 
     private String university;
     private String major;
     private String minor;
 
+    private String refreshToken;
+
     @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default
     private List<MemberRole> memberRoleList = new ArrayList<>();
+
+    public void updateName(String name){
+        this.name = name;
+    }
 
     public void addRole(MemberRole memberRole){
         memberRoleList.add(memberRole);
@@ -61,6 +60,11 @@ public class Member {
     public void clearRole(){
         memberRoleList.clear();
     }
+
+    public void updateRefreshToken(String updateRefreshToken) {
+        this.refreshToken = updateRefreshToken;
+    }
+
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Pick> picks = new ArrayList<>();

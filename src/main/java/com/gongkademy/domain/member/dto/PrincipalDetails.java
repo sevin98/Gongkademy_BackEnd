@@ -25,6 +25,11 @@ public class PrincipalDetails implements OAuth2User, UserDetails {
         return Arrays.asList(new SimpleGrantedAuthority("ROLE_" + member.getMemberRoleList().toString()));
     }
 
+    @Override
+    public String getPassword() {
+        return "";
+    }
+
     //Oauth2인증 시 제공된 맵 반환
     @Override
     public Map<String, Object> getAttributes() {
@@ -42,31 +47,36 @@ public class PrincipalDetails implements OAuth2User, UserDetails {
     }
 
     //password 반환
-    public String getPassword() {
-        return member.getPassword();
-    }
+    //공카데미서비스는 기본적으로 유저의 password가 따로 피룡하지 않음.
+    //imple하고있는 UserDetails에서 기본적으로 password를 포함하고있기떄ㅓ문에ㅐ
+    //강제적으로 method를 만들어줘야함
 
     @Override
     public String getUsername() {
         //email로관리
         return member.getEmail();
     }
+    //pringsecurity.userdetails.UserDetails 를 imple하면 작성해줘야만 하는 메소드
 
+    //계정이 만료되지 않았는지를 리턴, true를 리턴하면 만료되지 않았음을 표시
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
+    //계정이 잠겨있지 않은지를 리턴, true를 리턴하면 잠겨있지 않았음을 표시
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
+    //계정의 패스워드가 만료되지 않았는지를 리턴, true를 리턴하면 만료되지 않았음을 표시
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
+    //계정이 사용 가능한 계정인지를 리턴, true를 리턴하면 사용가능한 계정임을 의미
     @Override
     public boolean isEnabled() {
         return true;

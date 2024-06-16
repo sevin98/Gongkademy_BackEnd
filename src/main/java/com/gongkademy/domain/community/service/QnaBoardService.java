@@ -1,17 +1,14 @@
 package com.gongkademy.domain.community.service;
 
-import com.gongkademy.domain.community.dto.request.BoardRequestDTO;
 import com.gongkademy.domain.community.dto.request.QnaBoardRequestDto;
-import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
 import com.gongkademy.domain.community.dto.response.QnaBoardResponseDto;
-import com.gongkademy.domain.community.entity.board.ImageBoard;
-import com.gongkademy.domain.community.entity.board.QnaBoard;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface QnaBoardService {
     // 모든 Qna 게시글 조회하기
-    List<QnaBoardResponseDto> findQnaBoardsAll();
+    List<QnaBoardResponseDto> findQnaBoardsAll(int pageNo, String criteria);
 
     // Qna 게시글 작성하기
     QnaBoardResponseDto createQnaBoard(QnaBoardRequestDto qnaBoardRequestDto);

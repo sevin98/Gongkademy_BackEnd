@@ -8,7 +8,7 @@ import com.gongkademy.domain.community.entity.pick.Pick;
 import com.gongkademy.domain.community.repository.BoardRepository;
 import com.gongkademy.domain.community.repository.PickRepository;
 import com.gongkademy.domain.member.entity.Member;
-import com.gongkademy.domain.member.repository.MemberRepositoryImpl;
+import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class PickServiceImpl implements PickService {
 
     private final PickRepository pickRepository;
     private final BoardRepository boardRepository;
-    private final MemberRepositoryImpl memberRepositoryImpl;
+    private final MemberRepository memberRepository;
 
     @Override
     public PickResponseDTO createPick(PickRequestDTO pickRequestDTO) {
@@ -83,7 +83,7 @@ public class PickServiceImpl implements PickService {
             throw new CustomException(ErrorCode.INVALID_BOARD_ID);
         }
 
-        Optional<Member> memberOptional = memberRepositoryImpl.findById(pickRequestDTO.getMemberId());
+        Optional<Member> memberOptional = memberRepository.findById(pickRequestDTO.getMemberId());
         if (memberOptional.isPresent()) {
             pick.setMember(memberOptional.get());
         } else {

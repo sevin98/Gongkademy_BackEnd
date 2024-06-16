@@ -4,7 +4,7 @@ import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
 import com.gongkademy.domain.community.entity.board.Board;
 import com.gongkademy.domain.community.repository.BoardRepository;
 import com.gongkademy.domain.member.entity.Member;
-import com.gongkademy.domain.member.repository.MemberRepositoryImpl;
+import com.gongkademy.domain.member.repository.MemberRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,7 +28,7 @@ class BoardServiceImplTest {
     private BoardRepository boardRepository;
 
     @Mock
-    private MemberRepositoryImpl memberRepositoryImpl;
+    private MemberRepository memberRepositoryImpl;
 
     @InjectMocks
     private BoardServiceImpl boardServiceImpl;

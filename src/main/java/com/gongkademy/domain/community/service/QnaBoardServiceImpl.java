@@ -11,6 +11,10 @@ import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,17 +27,14 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
     private final QnaBoardRepository qnaBoardRepository;
     private final MemberRepository memberRepository;
+    private final int PAGE_SIZE = 10;
 
     // 전체 QnaBoard 조회
-    public List<QnaBoardResponseDto> findQnaBoardsAll() {
-        List<QnaBoard> qnaBoards = qnaBoardRepository.findAll();
-        List<QnaBoardResponseDto> qnaBoardResponseDto = new ArrayList<>();
-
-        for (QnaBoard qnaBoard : qnaBoards) {
-            qnaBoardResponseDto.add(convertToDto(qnaBoard));
-        }
-
-        return qnaBoardResponseDto;
+    public List<QnaBoardResponseDto> findQnaBoardsAll(int pageNo, String criteria) {
+        // 정렬 기준 내림차순  정렬
+        Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
+        Page<QnaBoardResponseDto> page = qnaBoardRepository.findAll(pageable).map(this::convertToDto);
+        return page.getContent();
     }
 
     // QnaBoard 생성
@@ -51,6 +52,8 @@ public class QnaBoardServiceImpl implements QnaBoardService {
             QnaBoard qnaBoard = optionalQnaBoard.get();
 
             // 조회수 기능 넣어야 함
+            // 이거 update 기능으로 바꿔서 작업하는게 나을 것 같기도?
+            qnaBoard.setHit(qnaBoard.getHit() + 1);
             return convertToDto(qnaBoard);
         }
 
@@ -79,6 +82,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
     public void deleteQnaBoard(Long articleId) {
         qnaBoardRepository.deleteById(articleId);
     }
+
 
     private QnaBoard convertToEntity(QnaBoardRequestDto qnaBoardRequestDto) {
         QnaBoard qnaBoard = new QnaBoard();

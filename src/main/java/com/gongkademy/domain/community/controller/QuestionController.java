@@ -18,10 +18,15 @@ import java.util.List;
 public class QuestionController {
     private final QnaBoardService qnaboardService;
 
+    private final String START_PAGE_NO = "0";
+    private final String BASE_CRITERIA = "createTime";
+    private final String REQUEST_PARAM_PAGE = "page";
+    private final String REQUEST_PARAM_CRITERIA = "criteria";
     // Qna 전체 리스트 반환
     @GetMapping("/question")
-    public ResponseEntity<?> selectAllQna(){
-        List<QnaBoardResponseDto> result = qnaboardService.findQnaBoardsAll();
+    public ResponseEntity<?> selectAllQna( @RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
+                                           @RequestParam(defaultValue = BASE_CRITERIA, value = REQUEST_PARAM_CRITERIA) String criteria){
+        List<QnaBoardResponseDto> result = qnaboardService.findQnaBoardsAll(pageNo, criteria);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 

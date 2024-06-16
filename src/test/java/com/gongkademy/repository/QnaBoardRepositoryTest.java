@@ -31,7 +31,7 @@ class QnaBoardRepositoryTest {
     @Test
     void crud() throws Exception{
         QnaBoard qnaBoard = new QnaBoard();
-        Member member = Member.builder().email("ssafy@naver.com").password("12345").nickname("ssafy").build();
+        Member member = Member.builder().email("ssafy@naver.com").nickname("ssafy").build();
 
         memberRepository.save(member);
 

@@ -17,17 +17,7 @@ public class BoardController {
 
     private final BoardService boardService;
 
-    @PostMapping
-    public ResponseEntity<?> createBoard(@RequestBody BoardRequestDTO boardRequestDTO) {
-        BoardResponseDTO boardResponseDTO = boardService.createBoard(boardRequestDTO);
-        return new ResponseEntity<>(boardResponseDTO, HttpStatus.CREATED);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateBoard(@PathVariable Long id, @RequestBody BoardRequestDTO boardRequestDTO) {
-        BoardResponseDTO boardResponseDTO = boardService.updateBoard(id, boardRequestDTO);
-        return ResponseEntity.ok(boardResponseDTO);
-    }
+    private final int LIMIT = 3;
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getBoard(@PathVariable Long id) {
@@ -43,10 +33,24 @@ public class BoardController {
     }
 
     // 최신 순 3개 가져오기
-    @GetMapping("/top3latest")
-    public ResponseEntity<List<BoardResponseDTO>> getTop3LatestBoards() {
-        List<BoardResponseDTO> boardResponseDTOS = boardService.getLatestBoards(3);
+    @GetMapping("/top_latest")
+    public ResponseEntity<List<BoardResponseDTO>> getLimitLatestBoards(int LIMIT) {
+        List<BoardResponseDTO> boardResponseDTOS = boardService.getLatestBoards(LIMIT);
         return ResponseEntity.ok(boardResponseDTOS);
+    }
+
+    /*
+    관리자 전용
+    @PostMapping
+    public ResponseEntity<?> createBoard(@RequestBody BoardRequestDTO boardRequestDTO) {
+        BoardResponseDTO boardResponseDTO = boardService.createBoard(boardRequestDTO);
+        return new ResponseEntity<>(boardResponseDTO, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateBoard(@PathVariable Long id, @RequestBody BoardRequestDTO boardRequestDTO) {
+        BoardResponseDTO boardResponseDTO = boardService.updateBoard(id, boardRequestDTO);
+        return ResponseEntity.ok(boardResponseDTO);
     }
 
     @DeleteMapping("/{id}")
@@ -54,4 +58,6 @@ public class BoardController {
         boardService.deleteBoard(id);
         return ResponseEntity.noContent().build();
     }
+
+     */
 }

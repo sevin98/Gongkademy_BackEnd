@@ -3,9 +3,11 @@ package com.gongkademy.domain.community.entity.board;
 import com.gongkademy.domain.community.entity.comment.Comment;
 import com.gongkademy.domain.member.entity.Member;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,6 +18,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
+@SuperBuilder
 public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +32,7 @@ public class Board {
 
     private String content;
 
+    @Builder.Default
     private LocalDateTime createTime = LocalDateTime.now();
 
     private Long likeCount;
@@ -42,6 +46,7 @@ public class Board {
     private BoardType boardType;
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Comment> comments = new ArrayList<>();
 
     // 연관관계 편의 메서드

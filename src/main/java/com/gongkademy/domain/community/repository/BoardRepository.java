@@ -19,6 +19,6 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     List<QnaBoard> findAllQnAByBoardType(BoardType boardType);
 
     // 최신순 조회
-    Page<Board> findAllByOrderByCreateTimeDesc(Pageable pageable);
+    Page<Board> findByOrderByCreateTimeDesc(Pageable pageable);
 
 }

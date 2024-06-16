@@ -23,15 +23,10 @@ public class CommentController {
         return new ResponseEntity<>(commentResponseDTO, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateComment(@PathVariable Long id, @RequestBody CommentRequestDTO commentRequestDTO) {
-        CommentResponseDTO commentResponseDTO = commentService.updateComment(id, commentRequestDTO);
-        return ResponseEntity.ok(commentResponseDTO);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<CommentResponseDTO>> getAllComments() {
-        List<CommentResponseDTO> commentResponseDTOS = commentService.getAllComments();
+    @GetMapping("/{boardId}")
+    public ResponseEntity<List<CommentResponseDTO>> getComments(@PathVariable Long boardId) {
+        Long currentMemberId = 0L;  // 사용자 아이디를 가져오는 방법은 프로젝트 방향성에 따라 다르다
+        List<CommentResponseDTO> commentResponseDTOS = commentService.getComments(boardId, currentMemberId);
         return ResponseEntity.ok(commentResponseDTOS);
     }
 

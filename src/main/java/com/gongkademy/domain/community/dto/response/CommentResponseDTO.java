@@ -1,15 +1,15 @@
 package com.gongkademy.domain.community.dto.response;
 
 import com.gongkademy.domain.community.entity.comment.CommentType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class CommentResponseDTO {
 
     private Long commentId;
@@ -20,5 +20,7 @@ public class CommentResponseDTO {
     private Long likeCount;
     private CommentType commentType;
     private Long parentId;  // 대댓글 시 부모 댓글 ID
+    private List<CommentResponseDTO> children;
+    private boolean isAuthor;   // 작성자 확인
 
 }

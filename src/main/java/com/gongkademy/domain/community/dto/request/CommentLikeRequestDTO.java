@@ -1,6 +1,5 @@
 package com.gongkademy.domain.community.dto.request;
 
-import com.gongkademy.domain.community.entity.comment.CommentType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +13,5 @@ public class CommentLikeRequestDTO {
 
     private Long memberId;
     private Long commentId;
-    private CommentType commentType;
 
 }

@@ -24,8 +24,9 @@ public class CommentLike {
     @JoinColumn(name = "comment_id", nullable = false)
     private Comment comment;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private CommentType commentType;
+    public CommentLike(Member member, Comment comment) {
+        this.member = member;
+        this.comment = comment;
+    }
 
 }

@@ -38,10 +38,6 @@ public class Comment {
     @Builder.Default
     private LocalDateTime createTime = LocalDateTime.now();
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private CommentType commentType;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Comment parent;
@@ -54,5 +50,10 @@ public class Comment {
     public void addChildComment(Comment child) {
         children.add(child);
         child.setParent(this);
+    }
+
+    // 부모 댓글인지 확인하는 메서드
+    public boolean isParent() {
+        return this.parent == null;
     }
 }

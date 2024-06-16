@@ -7,9 +7,12 @@ import com.gongkademy.domain.community.entity.board.Board;
 import com.gongkademy.domain.community.repository.BoardRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepositoryImpl;
+import com.gongkademy.global.exception.CustomException;
+import com.gongkademy.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -47,7 +50,7 @@ public class BoardServiceImpl implements BoardService {
             return convertToDTO(board);
         }
 
-        throw new IllegalStateException("게시판 찾을 수 없음");
+        throw new CustomException(ErrorCode.INVALID_BOARD_ID);
     }
 
     @Override
@@ -59,7 +62,7 @@ public class BoardServiceImpl implements BoardService {
             incrementHit(board.getArticleId());
             return convertToDTO(boardOptional.get());
         }
-        throw new IllegalStateException("게시판 찾을 수 없음");
+        throw new CustomException(ErrorCode.INVALID_BOARD_ID);
     }
 
     @Override
@@ -87,7 +90,7 @@ public class BoardServiceImpl implements BoardService {
             board.setHit(board.getHit() + 1);
             boardRepository.save(board);
         } else {
-            throw new IllegalStateException("게시판 없음");
+            throw new CustomException(ErrorCode.INVALID_BOARD_ID);
         }
     }
 
@@ -112,7 +115,7 @@ public class BoardServiceImpl implements BoardService {
         if (memberOptional.isPresent()) {
             board.setMember(memberOptional.get());
         } else {
-            throw new IllegalStateException("사용자 찾을 수 없음");
+            throw new CustomException(ErrorCode.INVALID_MEMBER_ID);
         }
 
         board.setTitle(boardRequestDTO.getTitle());

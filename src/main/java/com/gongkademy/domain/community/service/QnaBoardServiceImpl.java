@@ -9,6 +9,8 @@ import com.gongkademy.domain.community.entity.board.QnaBoard;
 import com.gongkademy.domain.community.repository.QnaBoardRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepositoryImpl;
+import com.gongkademy.global.exception.CustomException;
+import com.gongkademy.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +55,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
             return convertToDto(qnaBoard);
         }
 
-        throw new IllegalStateException("게시판 찾을 수 없음");
+        throw new CustomException(ErrorCode.INVALID_BOARD_ID);
     }
 
     // QnaBoard 수정
@@ -87,7 +89,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         if (memberOptional.isPresent()) {
             qnaBoard.setMember(memberOptional.get());
         } else {
-            throw new IllegalStateException("사용자 찾을 수 없음");
+            throw new CustomException(ErrorCode.INVALID_MEMBER_ID);
         }
 
         List<ImageRequestDto> imageRequestDtoList = qnaBoardRequestDto.getImages();

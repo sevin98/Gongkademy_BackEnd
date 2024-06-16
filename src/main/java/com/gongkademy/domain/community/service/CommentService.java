@@ -15,4 +15,7 @@ public interface CommentService {
     List<CommentResponseDTO> getComments(Long articleId, Long currentMemberId); // 현재 사용자 아이디 추가
 
     void deleteComment(Long id);
+
+    void toggleLikeComment(Long commentId, Long memberId);
+
 }

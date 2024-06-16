@@ -4,11 +4,14 @@ import com.gongkademy.domain.community.dto.request.CommentRequestDTO;
 import com.gongkademy.domain.community.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.entity.board.Board;
 import com.gongkademy.domain.community.entity.comment.Comment;
-import com.gongkademy.domain.community.entity.comment.CommentType;
+import com.gongkademy.domain.community.entity.comment.CommentLike;
 import com.gongkademy.domain.community.repository.BoardRepository;
+import com.gongkademy.domain.community.repository.CommentLikeRepository;
 import com.gongkademy.domain.community.repository.CommentRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepositoryImpl;
+import com.gongkademy.global.exception.CustomException;
+import com.gongkademy.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +27,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final MemberRepositoryImpl memberRepositoryImpl;
     private final BoardRepository boardRepository;
+    private final CommentLikeRepository commentLikeRepository;
 
 
     @Override
@@ -50,11 +54,38 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.deleteById(id);
     }
 
+    @Override
+    @Transactional
+    public void toggleLikeComment(Long commentId, Long memberId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_COMMENT_ID));
+        Member member = memberRepositoryImpl.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+
+        Optional<CommentLike> commentLikeOptional = commentLikeRepository.findByCommentAndMember(comment, member);
+
+        // 좋아요 눌려 있다면
+        if (commentLikeOptional.isPresent()) {
+            CommentLike commentLike = commentLikeOptional.get();
+            commentLikeRepository.delete(commentLike);
+            comment.setLikeCount(comment.getLikeCount() - 1);
+        }
+        // 좋아요 눌려있지 않다면
+        else {
+            CommentLike commentLike = new CommentLike(member, comment);
+            commentLikeRepository.save(commentLike);
+            comment.setLikeCount(comment.getLikeCount() + 1);
+        }
+
+        commentRepository.save(comment);
+    }
+
+
     private Comment convertToEntity(CommentRequestDTO commentRequestDTO) {
         Board board = boardRepository.findById(commentRequestDTO.getArticleId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글 없음"));
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_BOARD_ID));
         Member member = memberRepositoryImpl.findById(commentRequestDTO.getMemberId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저 없음"));
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
         // All 생성자와 빌더 필요
         Comment.CommentBuilder commentBuilder = Comment.builder()
@@ -62,13 +93,12 @@ public class CommentServiceImpl implements CommentService {
                 .member(member)
                 .content(commentRequestDTO.getContent())
                 .nickname(member.getNickname())
-                .likeCount(0L)
-                .commentType(commentRequestDTO.getCommentType());
+                .likeCount(0L);
 
         // 대댓글 로직
         if (commentRequestDTO.getParentId() != null) {
             Comment parent = commentRepository.findById(commentRequestDTO.getParentId())
-                    .orElseThrow(() -> new IllegalArgumentException("해당 댓글 없음"));
+                    .orElseThrow(() -> new CustomException(ErrorCode.INVALID_PARENT_COMMENT_ID));
             commentBuilder.parent(parent);
         }
 
@@ -88,7 +118,6 @@ public class CommentServiceImpl implements CommentService {
                 .nickname(comment.getNickname())
                 .content(comment.getContent())
                 .likeCount(comment.getLikeCount())
-                .commentType(comment.getCommentType())
                 .parentId(comment.getParent() != null ? comment.getParent().getCommentId() : null)
                 .children(childrenDTOs)
                 .isAuthor(comment.getMember().getId().equals(currentMemberId))  // 작성자인지 아닌지 확인하는 메서드

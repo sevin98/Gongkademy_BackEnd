@@ -10,10 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> {
-
-    // 댓글 좋아요를 이미 눌렀는지 아닌지
-    boolean existsByCommentAndMember(Comment comment, Member member);
-
+    
     // 유저가 누른 좋아요 저장
     Optional<CommentLike> findByCommentAndMember(Comment comment, Member member);
 }

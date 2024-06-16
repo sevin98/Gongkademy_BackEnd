@@ -66,7 +66,7 @@ class BoardServiceImplTest {
 
         Page<Board> boardPage = new PageImpl<>(Arrays.asList(board4, board3, board2), PageRequest.of(0, 3), 4);
 
-        when(boardRepository.findAllByOrderByCreateTimeDesc(PageRequest.of(0, 3)))
+        when(boardRepository.findByOrderByCreateTimeDesc(PageRequest.of(0, 3)))
                 .thenReturn(boardPage);
 
         // Act

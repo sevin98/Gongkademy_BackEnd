@@ -6,7 +6,7 @@ import com.gongkademy.domain.community.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.entity.board.Board;
 import com.gongkademy.domain.community.repository.BoardRepository;
 import com.gongkademy.domain.member.entity.Member;
-import com.gongkademy.domain.member.repository.MemberRepositoryImpl;
+import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import java.util.Optional;
 public class BoardServiceImpl implements BoardService {
 
     private final BoardRepository boardRepository;
-    private final MemberRepositoryImpl memberRepositoryImpl;
+    private final MemberRepository memberRepository;
 
     // 최신 순 매직넘버 시작
     private final int DEFAULT_TOP = 0;
@@ -111,7 +111,7 @@ public class BoardServiceImpl implements BoardService {
         Board board = new Board();
         board.setBoardType(boardRequestDTO.getBoardType());
 
-        Optional<Member> memberOptional = memberRepositoryImpl.findById(boardRequestDTO.getMemberId());
+        Optional<Member> memberOptional = memberRepository.findById(boardRequestDTO.getMemberId());
         if (memberOptional.isPresent()) {
             board.setMember(memberOptional.get());
         } else {

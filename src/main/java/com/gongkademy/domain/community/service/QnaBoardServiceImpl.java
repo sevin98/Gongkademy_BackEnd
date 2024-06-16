@@ -1,6 +1,5 @@
 package com.gongkademy.domain.community.service;
 
-import com.gongkademy.domain.community.dto.request.ImageRequestDto;
 import com.gongkademy.domain.community.dto.request.QnaBoardRequestDto;
 import com.gongkademy.domain.community.dto.response.ImageResponseDto;
 import com.gongkademy.domain.community.dto.response.QnaBoardResponseDto;
@@ -8,7 +7,7 @@ import com.gongkademy.domain.community.entity.board.ImageBoard;
 import com.gongkademy.domain.community.entity.board.QnaBoard;
 import com.gongkademy.domain.community.repository.QnaBoardRepository;
 import com.gongkademy.domain.member.entity.Member;
-import com.gongkademy.domain.member.repository.MemberRepositoryImpl;
+import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,7 @@ import java.util.Optional;
 public class QnaBoardServiceImpl implements QnaBoardService {
 
     private final QnaBoardRepository qnaBoardRepository;
-    private final MemberRepositoryImpl memberRepositoryImpl;
+    private final MemberRepository memberRepository;
 
     // 전체 QnaBoard 조회
     public List<QnaBoardResponseDto> findQnaBoardsAll() {
@@ -85,22 +84,22 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         QnaBoard qnaBoard = new QnaBoard();
         qnaBoard.setBoardType(qnaBoardRequestDto.getBoardType());
 
-        Optional<Member> memberOptional = memberRepositoryImpl.findById(qnaBoardRequestDto.getMemberId());
+        Optional<Member> memberOptional = memberRepository.findById(qnaBoardRequestDto.getMemberId());
         if (memberOptional.isPresent()) {
             qnaBoard.setMember(memberOptional.get());
         } else {
             throw new CustomException(ErrorCode.INVALID_MEMBER_ID);
         }
-
-        List<ImageRequestDto> imageRequestDtoList = qnaBoardRequestDto.getImages();
-
-        if (!imageRequestDtoList.isEmpty()) {
-            for (ImageRequestDto imageRequestDto : imageRequestDtoList) {
-                qnaBoard.setSaveImage(imageRequestDto.getSaveImage());
-                qnaBoard.setOriginalImage(imageRequestDto.getOriginalImage());
-                qnaBoard.setSavedFolder(imageRequestDto.getSavedFolder());
-            }
-        }
+        // image는 따로 저장해야할 듯
+//        List<ImageRequestDto> imageRequestDtoList = qnaBoardRequestDto.getImages();
+//
+//        if (!imageRequestDtoList.isEmpty()) {
+//            for (ImageRequestDto imageRequestDto : imageRequestDtoList) {
+//                qnaBoard.setSaveImage(imageRequestDto.getSaveImage());
+//                qnaBoard.setOriginalImage(imageRequestDto.getOriginalImage());
+//                qnaBoard.setSavedFolder(imageRequestDto.getSavedFolder());
+//            }
+//        }
 
         qnaBoard.setTitle(qnaBoardRequestDto.getTitle());
         qnaBoard.setContent(qnaBoardRequestDto.getContent());
@@ -111,24 +110,27 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
 
     private QnaBoardResponseDto convertToDto(QnaBoard qnaBoard) {
-        QnaBoardResponseDto qnaBoardResponseDto = new QnaBoardResponseDto();
+
         List<ImageResponseDto> imageResponseDtos = new ArrayList<>();
         List<ImageBoard> imageBoards = qnaBoardRepository.findImageBoards(qnaBoard.getBoardType(), qnaBoard.getArticleId());
 
         for (ImageBoard imageBoard : imageBoards) {
-            imageResponseDtos.add(new ImageResponseDto(imageBoard.getOriginalImage(), imageBoard.getSaveImage(), imageBoard.getSavedFolder()));
+            imageResponseDtos.add(ImageResponseDto.builder().
+                    originalImage(imageBoard.getOriginalImage())
+                    .saveImage(imageBoard.getSaveImage())
+                    .savedFolder(imageBoard.getSavedFolder()).build());
         }
 
-        qnaBoardResponseDto.setBoardType(qnaBoard.getBoardType());
-        qnaBoardResponseDto.setArticleId(qnaBoard.getArticleId());
-        qnaBoardResponseDto.setMemberId(qnaBoard.getMember().getId());
-        qnaBoardResponseDto.setTitle(qnaBoard.getTitle());
-        qnaBoardResponseDto.setContent(qnaBoard.getContent());
-        qnaBoardResponseDto.setLikeCount(qnaBoard.getLikeCount());
-        qnaBoardResponseDto.setHit(qnaBoard.getHit());
-        qnaBoardResponseDto.setCreateTime(qnaBoard.getCreateTime());
-        qnaBoardResponseDto.setImages(imageResponseDtos);
+        return QnaBoardResponseDto.builder().
+                boardType(qnaBoard.getBoardType())
+                .articleId(qnaBoard.getArticleId())
+                .memberId(qnaBoard.getMember().getId())
+                .title(qnaBoard.getTitle())
+                .content(qnaBoard.getContent())
+                .likeCount(qnaBoard.getLikeCount())
+                .hit(qnaBoard.getHit())
+                .createTime(qnaBoard.getCreateTime())
+                .images(imageResponseDtos).build();
 
-        return qnaBoardResponseDto;
     }
 }

@@ -9,7 +9,7 @@ import com.gongkademy.domain.community.repository.BoardRepository;
 import com.gongkademy.domain.community.repository.CommentLikeRepository;
 import com.gongkademy.domain.community.repository.CommentRepository;
 import com.gongkademy.domain.member.entity.Member;
-import com.gongkademy.domain.member.repository.MemberRepositoryImpl;
+import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import java.util.Optional;
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
-    private final MemberRepositoryImpl memberRepositoryImpl;
+    private final MemberRepository memberRepository;
     private final BoardRepository boardRepository;
     private final CommentLikeRepository commentLikeRepository;
 
@@ -59,7 +59,7 @@ public class CommentServiceImpl implements CommentService {
     public void toggleLikeComment(Long commentId, Long memberId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_COMMENT_ID));
-        Member member = memberRepositoryImpl.findById(memberId)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
         Optional<CommentLike> commentLikeOptional = commentLikeRepository.findByCommentAndMember(comment, member);
@@ -84,7 +84,7 @@ public class CommentServiceImpl implements CommentService {
     private Comment convertToEntity(CommentRequestDTO commentRequestDTO) {
         Board board = boardRepository.findById(commentRequestDTO.getArticleId())
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_BOARD_ID));
-        Member member = memberRepositoryImpl.findById(commentRequestDTO.getMemberId())
+        Member member = memberRepository.findById(commentRequestDTO.getMemberId())
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
         // All 생성자와 빌더 필요

@@ -31,7 +31,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
     // 전체 QnaBoard 조회
     public List<QnaBoardResponseDto> findQnaBoardsAll(int pageNo, String criteria) {
-        // 정렬 기준 내림차순  정렬
+        // 정렬 기준 내림차순 정렬
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
         Page<QnaBoardResponseDto> page = qnaBoardRepository.findAll(pageable).map(this::convertToDto);
         return page.getContent();
@@ -50,9 +50,6 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
         if(optionalQnaBoard.isPresent()) {
             QnaBoard qnaBoard = optionalQnaBoard.get();
-
-            // 조회수 기능 넣어야 함
-            // 이거 update 기능으로 바꿔서 작업하는게 나을 것 같기도?
             qnaBoard.setHit(qnaBoard.getHit() + 1);
             return convertToDto(qnaBoard);
         }
@@ -71,7 +68,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
         QnaBoard qnaBoard = optQnaBoard.get();
 
-        // 이미지 관련 메서드 정의
+        //TODO: 이미지 관련 메서드 정의
 
         // 항목 수정하기
         qnaBoard.update(qnaBoardRequestDto);
@@ -94,7 +91,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         } else {
             throw new CustomException(ErrorCode.INVALID_MEMBER_ID);
         }
-        // image는 따로 저장해야할 듯
+        //TODO: image는 따로 저장해야할 듯
 //        List<ImageRequestDto> imageRequestDtoList = qnaBoardRequestDto.getImages();
 //
 //        if (!imageRequestDtoList.isEmpty()) {

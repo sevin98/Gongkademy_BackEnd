@@ -2,7 +2,9 @@ package com.gongkademy.global.config;
 
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.domain.member.service.UserDetailsServiceImpl;
+import com.gongkademy.global.redis.RedisUtil;
 import com.gongkademy.global.security.filter.JWTCheckFilter;
+import com.gongkademy.global.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +29,14 @@ import java.util.List;
 @Log4j2
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    @Autowired
+    JWTUtil jwtUtil;
+    @Autowired
+    RedisUtil redisUtil;
     @Autowired
     MemberRepository memberRepository;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         log.info("---------------security config--------------------");
@@ -58,7 +66,7 @@ public class SecurityConfig {
 
         //필터 추가
         //UsernamePasswordAuthent~Filter앞에서 JWTFilter를 실행시켜줘
-        http.addFilterBefore(new JWTCheckFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new JWTCheckFilter(memberRepository, jwtUtil, redisUtil), UsernamePasswordAuthenticationFilter.class);
 //        http.addFilterBefore(new CorsFilter(), SecurityContextHolderFilter.class);
 
         return http.build();

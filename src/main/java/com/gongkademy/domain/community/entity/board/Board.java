@@ -35,7 +35,9 @@ public class Board {
     @Builder.Default
     private LocalDateTime createTime = LocalDateTime.now();
 
-    private Long likeCount;
+    private Long likeCount = 0L;    // 좋아요 수
+
+    private Long scrapCount = 0L;   // 스크랩 수
 
     private Long hit;
 

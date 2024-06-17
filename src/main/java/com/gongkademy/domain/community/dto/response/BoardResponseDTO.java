@@ -20,6 +20,7 @@ public class BoardResponseDTO {
     private String content;
     private LocalDateTime createTime;
     private Long likeCount;
+    private Long scrapCount;
     private Long hit;
     private Long commentCount;
 }

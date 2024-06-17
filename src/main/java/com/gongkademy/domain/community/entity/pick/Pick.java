@@ -28,4 +28,10 @@ public class Pick {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PickType pickType;
+
+    public Pick(Board board, Member member, PickType pickType) {
+        this.board = board;
+        this.member = member;
+        this.pickType = pickType;
+    }
 }

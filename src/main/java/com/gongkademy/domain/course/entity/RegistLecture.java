@@ -2,6 +2,8 @@ package com.gongkademy.domain.course.entity;
 
 import java.time.LocalDateTime;
 
+import com.gongkademy.domain.member.entity.Member;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -36,4 +38,8 @@ public class RegistLecture {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="regist_course_id")
 	private RegistCourse registCourse;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="member_id")
+	private Member member;
 }

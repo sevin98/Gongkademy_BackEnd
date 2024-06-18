@@ -38,6 +38,10 @@ public class CourseReview {
 	private RegistCourse registCourse;
 	
 	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="course_id")
+	private Course course;
+	
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="member_id")
 	private Member member;
 	

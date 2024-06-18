@@ -7,4 +7,6 @@ import com.gongkademy.domain.course.entity.RegistCourse;
 @Repository
 public interface RegistCourseRepository extends JpaRepository<RegistCourse, Long>{
 
+	Boolean existsByMemberIdAndCourseId(Long memberId, Long courseId);
+	 
 }

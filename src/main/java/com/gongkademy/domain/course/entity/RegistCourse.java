@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.gongkademy.domain.member.entity.Member;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -39,7 +40,12 @@ public class RegistCourse {
 	@JoinColumn(name="id")
 	private Member member;
 	
-	@OneToMany(mappedBy = "registCourse")
+	@OneToMany(mappedBy = "registCourse" , cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<RegistLecture> registLectures = new ArrayList<>();
 	
+	// 수강 강의 생성
+	public void addRegistLecture(RegistLecture registLecture) {
+        registLecture.setRegistCourse(this);
+        this.registLectures.add(registLecture);
+    }
 }

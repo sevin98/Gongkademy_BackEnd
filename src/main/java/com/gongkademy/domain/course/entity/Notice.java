@@ -27,6 +27,8 @@ public class Notice {
 	
 	private String content;
 	
+	private Long courseCommentCount;
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="course_id")
 	private Course course;
@@ -38,5 +40,10 @@ public class Notice {
 	public void addCourseComment(CourseComment courseComment) {
 		courseComments.add(courseComment);
 		courseComment.setNotice(this);
+	}
+	
+	// 댓글 수
+	public void updateCourseCommentCount() {
+		this.courseCommentCount = (long) courseComments.size();
 	}
 }

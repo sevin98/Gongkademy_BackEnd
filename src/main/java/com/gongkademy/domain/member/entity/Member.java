@@ -7,6 +7,7 @@ import com.gongkademy.domain.community.entity.pick.Pick;
 import com.gongkademy.domain.course.entity.CourseComment;
 import com.gongkademy.domain.course.entity.CourseReview;
 import com.gongkademy.domain.course.entity.RegistCourse;
+import com.gongkademy.domain.course.entity.RegistLecture;
 import com.gongkademy.domain.course.entity.Scrap;
 
 import jakarta.persistence.*;
@@ -86,6 +87,10 @@ public class Member {
 	@OneToMany(mappedBy="member")
     @Builder.Default
 	private List<RegistCourse> registCourses = new ArrayList<>();
+	
+	@OneToMany(mappedBy="member")
+    @Builder.Default
+	private List<RegistLecture> registLectures = new ArrayList<>();
 	
 	@OneToMany(mappedBy="member")
     @Builder.Default

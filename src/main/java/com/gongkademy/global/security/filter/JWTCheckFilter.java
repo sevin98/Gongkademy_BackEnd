@@ -24,6 +24,9 @@ import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.gongkademy.global.exception.ErrorCode.JWT_EXPIRED;
+import static com.gongkademy.global.exception.ErrorCode.JWT_INVALID;
+
 @Log4j2
 @RequiredArgsConstructor
 public class JWTCheckFilter extends OncePerRequestFilter {
@@ -55,103 +58,49 @@ public class JWTCheckFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         log.info("JWTCheckFilter doFilterInternal 메소드 ===================");
 
-        String authHeaderStr = request.getHeader("Authorization");
-        if (authHeaderStr == null || !authHeaderStr.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        //accessToken 처리
+        String accessToken = jwtUtil.extractToken(request).toString();
 
-        try {
-            String accessToken = authHeaderStr.substring(7);
-            Map<String, Object> claims = JWTUtil.validateToken(accessToken);
-            log.info(claims);
+            //access 토큰검증
+            if (jwtUtil.isTokenValid(accessToken)) {
+                //검증한 토큰이 만료
+                if(jwtUtil.isExpired(accessToken)) {
+                    long memberId = jwtUtil.extractMemberId(accessToken).get();
+                    // Refresh Token 처리 로직 추가
+                    //memberId로 refreshToken 가져옴
+                    Optional<String> refreshToken = jwtUtil.getRefreshToken(memberId);
 
-            Optional<Long> userId = Optional.ofNullable(((Number) claims.get("pk")).longValue());
-            userId.ifPresent(id -> {
-                if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                    memberRepository.findById(id).ifPresent(this::saveAuthentication);
+                    //refreshToken 유효성 검증 , 유효한 토큰이라면 accessToken 재발급
+                    if (refreshToken.isPresent()) {
+                        if (jwtUtil.isTokenValid(refreshToken.get())) {
+                            String newAccessToken = jwtUtil.createAccessToken(memberId);
+                            jwtUtil.sendAccessToken(response, newAccessToken);
+                            saveAuthentication(memberId);
+                        }
+                    } else log.info("refresh token is empty");
                 }
-            });
-
-            // Refresh Token 처리 로직 추가
-            String refreshToken = request.getHeader("RefreshToken");
-            if (refreshToken != null && JWTUtil.isRefreshTokenValid(refreshToken)) {
-                checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
-            } else {
-                checkAccessTokenAndAuthentication(request, response, filterChain);
+                else{
+                    //만료되지 않았다면
+                    long memberId = jwtUtil.extractMemberId(accessToken).get();
+                    //securityContextHolder에 저장
+                    saveAuthentication(memberId);
+                }
             }
-        } catch (Exception e) {
-            log.error("JWT 에러갖미 ======================", e);
-            log.error(e.getMessage());
-
-            Gson gson = new Gson();
-            String msg = gson.toJson(Map.of("error", "ERROR_ACCESS_TOKEN"));
-
-            response.setContentType("application/json");
-            PrintWriter printWriter = response.getWriter();
-            printWriter.println(msg);
-            printWriter.close();
-            return;
-        }
-
         filterChain.doFilter(request, response);
     }
 
     /**
      * 인증 객체를 생성하고 SecurityContextHolder에 설정하는 메서드
-     * @param member 인증할 회원 객체
      */
-    private void saveAuthentication(Member member) {
-        PrincipalDetails principalDetails = new PrincipalDetails(member, null);
+    private void saveAuthentication(Long memberId) {
+        memberRepository.findById(memberId).ifPresent(member -> {
+            PrincipalDetails principalDetails = new PrincipalDetails(member, null);
 
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                principalDetails, null, authoritiesMapper.mapAuthorities(principalDetails.getAuthorities())
-        );
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    principalDetails, null, authoritiesMapper.mapAuthorities(principalDetails.getAuthorities())
+            );
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
-
-    /**
-     * refreshToken 검사
-     * accessToken과 refreshToken 토큰 발급
-     */
-    private void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) {
-        if (JWTUtil.isTokenValid(refreshToken)) {
-            Map<String, Object> claims = JWTUtil.validateToken(refreshToken);
-            Long memberId = Long.parseLong(claims.get("pk").toString());
-            String redisRefreshToken = redisUtil.getData(String.valueOf(memberId));
-
-            if (refreshToken.equals(redisRefreshToken)) {
-                String reIssuedRefreshToken = JWTUtil.createRefreshToken(memberId);
-                jwtUtil.updateRefreshToken(memberId, reIssuedRefreshToken); // static메소드로 바꾸지 않고 인스턴스 메소드 호출
-            }
-        }
-    }
-
-
-    /**
-     * 재발급된 refreshToekn return
-     */
-    private String reIssueRefreshToken(Long memberId) {
-        String reIssuedRefreshToken = JWTUtil.createRefreshToken(memberId);
-        jwtUtil.updateRefreshToken(memberId, reIssuedRefreshToken);
-        return reIssuedRefreshToken;
-    }
-
-    /**
-     * accessToken 검사 / 인증
-     */
-    private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("checkAccessTokenAndAuthentication() 호출");
-
-        jwtUtil.extractToken(request)
-                .filter(JWTUtil::isTokenValid)
-                .ifPresent(accessToken -> {
-                    Map<String, Object> claims = JWTUtil.validateToken(accessToken);
-                    Long userId = ((Number) claims.get("pk")).longValue();
-                    memberRepository.findById(userId).ifPresent(this::saveAuthentication);
-                });
-
-        filterChain.doFilter(request, response);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        });
     }
 }

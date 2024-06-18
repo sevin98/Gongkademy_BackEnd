@@ -43,8 +43,6 @@ public class Member {
     private String major;
     private String minor;
 
-    private String refreshToken;
-
     @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default
     private List<MemberRole> memberRoleList = new ArrayList<>();
@@ -59,10 +57,6 @@ public class Member {
 
     public void clearRole(){
         memberRoleList.clear();
-    }
-
-    public void updateRefreshToken(String updateRefreshToken) {
-        this.refreshToken = updateRefreshToken;
     }
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)

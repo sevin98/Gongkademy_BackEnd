@@ -1,9 +1,13 @@
 package com.gongkademy.global.config;
 
+import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
+import com.gongkademy.domain.member.service.OAuth2MemberService;
 import com.gongkademy.domain.member.service.UserDetailsServiceImpl;
 import com.gongkademy.global.redis.RedisUtil;
 import com.gongkademy.global.security.filter.JWTCheckFilter;
+import com.gongkademy.global.security.handler.OAuth2LoginFailureHandler;
+import com.gongkademy.global.security.handler.OAuth2LoginSuccessHandler;
 import com.gongkademy.global.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -29,77 +33,77 @@ import java.util.List;
 @Log4j2
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-    @Autowired
-    JWTUtil jwtUtil;
-    @Autowired
-    RedisUtil redisUtil;
-    @Autowired
-    MemberRepository memberRepository;
+    //passwordEncoder
+    //cors설정
+    //filterchain
+    //corsConfigruationSource
+    //userDetailService를 컨테이너에올리기
+    private final MemberRepository memberRepository;
+    private final RedisUtil redisUtil;
+    private final JWTUtil jwtUtil;
+    private final OAuth2MemberService oAuth2MemberService;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
-        log.info("---------------security config--------------------");
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/private/**").authenticated() // private으로 시작하는 url은 로그인이 필수
+                        .requestMatchers("/admin/**").hasRole("ADMIN") // admin으로 시작하는건 admin만 접근 가능
+                        .anyRequest().permitAll()) // 나머지는 아무나 가능
 
-        //아래에서 정의한 cors설정을 사용하겠다.
-        http.cors(httpSecurityCorsConfigurer -> {
-            httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource());
-        });
-
-        //세션은 만들지 않겠다. => 왜 안만들지?
-        http.sessionManagement(httpSecuritySessionManagementConfigurer -> {
-            httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.NEVER);
-        });
-
-        //csrf설정
-        http.csrf(AbstractHttpConfigurer::disable);
-
-        //로그인 시도
-        http.formLogin(config->{
-            //member/login url로 id,password를 같이 요청하면 => loadByUsername메소드가 실행
-            config.loginPage("/api/v1/members/login");
-            //성공하면 괄호 안에 내용을 실행할거야
-//            config.successHandler(new APILoginSuccessHandler());
-            //실패하면
-//            config.failureHandler(new APILoginFailureHandler());
-        });
-
-        //필터 추가
-        //UsernamePasswordAuthent~Filter앞에서 JWTFilter를 실행시켜줘
-        http.addFilterBefore(new JWTCheckFilter(memberRepository, jwtUtil, redisUtil), UsernamePasswordAuthenticationFilter.class);
-//        http.addFilterBefore(new CorsFilter(), SecurityContextHolderFilter.class);
+                //외부 post 요청을 받아야 하는 csrf // disable
+                //람다를 메서드참조로 바꾸기(왜?)
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(new JWTCheckFilter(memberRepository, jwtUtil, redisUtil), UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/loginForm")
+                        .defaultSuccessUrl("/", true)
+                        .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2MemberService))
+                        .successHandler(new OAuth2LoginSuccessHandler(jwtUtil))
+                        .failureHandler(new OAuth2LoginFailureHandler()));
 
         return http.build();
     }
 
-    //패스워드 인코더는 필수임
+
+    //passwordEncoder
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
 
-    //CORS설정
     @Bean
-    public CorsConfigurationSource corsConfigurationSource(){
-
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedMethods(Arrays.asList("HEAD","GET","POST","PUT","DELETE","OPTIONS"));
+        //허용할 Http 메소드들 // 또뭐있지 모르겠음
+        configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        //허용할 origin 설정
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization","Cache-Control","Content-Type","Access-Control-Allow-Origin","credentials"));
+
+        // 허용할 Http 헤더 설정
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Access-Control-Allow-Origin", "credentials"));
+
+        //자격 증명
         configuration.setAllowCredentials(true);
-        log.info("corsconfiguration: "+configuration.getAllowedOrigins());
-    //
+
+        //로그찍어보기
+        log.info("corsconfiguration: " + configuration.getAllowedOrigins());
+
+        // URL 패턴에 Cors 등록
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**",configuration);
+        source.registerCorsConfiguration("/**", configuration);
 
         return source;
     }
 
-    //userdetailservice를 컨테이너에 올리기
+    //컨테이너에 userDetailService 올리기/ 이건 이해 필요
     @Bean
-    public UserDetailsService UserDetailsServiceImpl() {
+    public UserDetailsService userDetailsService() {
         return new UserDetailsServiceImpl(memberRepository);
     }
 }

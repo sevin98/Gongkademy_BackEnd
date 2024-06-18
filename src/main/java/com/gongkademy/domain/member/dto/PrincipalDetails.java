@@ -118,6 +118,8 @@ public class PrincipalDetails implements OAuth2User, UserDetails {
     // id를식별자로?
     @Override
     public String getName() {
-        return member.getEmail();
+        return member.getName();
     }
+
+    public long getMemberId() { return member.getId(); }
 }

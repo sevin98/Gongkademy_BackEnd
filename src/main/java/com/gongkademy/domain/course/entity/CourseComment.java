@@ -52,14 +52,14 @@ public class CourseComment {
 	/*
 	 * 좋아요 증가
 	 */
-	public void addLikeCount() {
+	public void increaseLikeCount() {
 		this.likeCount++;
 	}
 	
 	/*
 	 * 좋아요 감소
 	 */
-	public void removeLikeCount() {
+	public void decreaseLikeCount() {
 		this.likeCount--;
 	}
 	

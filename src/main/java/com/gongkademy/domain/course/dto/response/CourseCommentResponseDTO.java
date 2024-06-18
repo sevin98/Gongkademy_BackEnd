@@ -12,12 +12,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CourseCommentResponseDTO {
-	
-    private Long courseCommentId;
-    private Long courseReviewId;
-    private Long noticeId;
-    private CommentCateg commentCateg;
-    private Long memberId;
+
+	private Long courseCommentId;
+	private Long courseReviewId;
+	private Long noticeId;
+	private CommentCateg commentCateg;
+	private Long memberId;
 	private String nickname;
 	private String content;
 	private int likeCount;

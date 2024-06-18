@@ -17,7 +17,7 @@ import com.gongkademy.domain.course.repository.CourseCommentRepositoryImpl;
 import com.gongkademy.domain.course.repository.CourseReviewRepositoryImpl;
 import com.gongkademy.domain.course.repository.NoticeRepositoryImpl;
 import com.gongkademy.domain.member.entity.Member;
-import com.gongkademy.domain.member.repository.MemberRepositoryImpl;
+import com.gongkademy.domain.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class CourseCommentServiceImpl implements CourseCommentService {
 
 	private final CourseCommentRepositoryImpl courseCommentRepositoryImpl;
-	private final MemberRepositoryImpl memberRepositoryImpl;
+	private final MemberRepository memberRepository;
 	private final CourseReviewRepositoryImpl courseReviewRepositoryImpl;
 	private final NoticeRepositoryImpl noticeRepositoryImpl;
 	
@@ -86,7 +86,7 @@ public class CourseCommentServiceImpl implements CourseCommentService {
         }
         
         comment.setCommentCateg(courseCommentRequestDTO.getCommentType());
-        Optional<Member> memberOptional = memberRepositoryImpl.findById(courseCommentRequestDTO.getMemberId());
+        Optional<Member> memberOptional = memberRepository.findById(courseCommentRequestDTO.getMemberId());
         if (memberOptional.isPresent()) {
            comment.setMember(memberOptional.get());
         } else {

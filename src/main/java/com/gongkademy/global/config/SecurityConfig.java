@@ -22,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -52,7 +53,9 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN") // admin으로 시작하는건 admin만 접근 가능
                         .requestMatchers("/member/**").hasAnyRole("USER", "ADMIN")//member url은 user혹은 admin만
                         .anyRequest().permitAll()) //TODO: 특정 url만 permitALl 로 두고, 다른곳을 다 authenticated로 막던지 상의 해보면 좋을듯
-
+                .logout((logout) -> logout
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/members/logout"))
+                        .logoutSuccessUrl("/"))
                 //외부 post 요청을 받아야 하는 csrf // disable
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -60,7 +63,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JWTCheckFilter(memberRepository, jwtUtil, redisUtil), UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/loginForm")
+                        .loginPage("/login")
                         //로그인 성공하면 redirection될 기본 url
                         .defaultSuccessUrl("/", true)
                         //로그인에 성공하면 가져온 user의 정보를 oAuth2MemberService가 처리한다(loadUser 호출)
@@ -70,7 +73,7 @@ public class SecurityConfig {
 
         return http.build();
     }
-    
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

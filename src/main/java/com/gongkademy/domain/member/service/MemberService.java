@@ -9,13 +9,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public interface MemberService {
-    MemberInfoDTO getMemberInfo(Long id);
-    Member join(MemberSignUpDTO dto);
-    void updateNickname(MemberUpdateDTO dto);
-// 현재는 닉네임 중복 허용이므로 주석처리
-//    void validateDuplicateNickname(String nickname);
-    void validateDuplicateEmail(String email);
-
+    MemberInfoDTO getMemberInfo(long id);
+    Long joinMember(long id, MemberSignUpDTO dto);
+    Long modifyMember(long id, MemberUpdateDTO dto);
+    void deleteMember(long id);
 
     /**
      * 회원 엔티티를 회원 정보 DTO로 변환.

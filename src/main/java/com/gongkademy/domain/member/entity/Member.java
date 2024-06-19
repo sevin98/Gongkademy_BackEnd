@@ -10,11 +10,14 @@ import com.gongkademy.domain.course.entity.RegistCourse;
 import com.gongkademy.domain.course.entity.RegistLecture;
 import com.gongkademy.domain.course.entity.Scrap;
 
+import com.gongkademy.domain.member.dto.MemberSignUpDTO;
+import com.gongkademy.domain.member.dto.MemberUpdateDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +61,21 @@ public class Member {
 
     public void clearRole(){
         memberRoleList.clear();
+    }
+
+    public void signup(MemberSignUpDTO memberSignUpDTO) {
+        this.nickname = memberSignUpDTO.getNickname();
+        this.birthday = LocalDate.parse(memberSignUpDTO.getBirthday(), DateTimeFormatter.ofPattern("yyyyMMdd"));
+        this.university = memberSignUpDTO.getUniversity();
+        this.major = memberSignUpDTO.getMajor();
+        this.minor = memberSignUpDTO.getMinor();
+    }
+
+    public void update(MemberUpdateDTO memberUpdateDTO) {
+        this.nickname = memberUpdateDTO.getNewNickname();
+        this.university = memberUpdateDTO.getUniversity();
+        this.major = memberUpdateDTO.getMajor();
+        this.minor = memberUpdateDTO.getMinor();
     }
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)

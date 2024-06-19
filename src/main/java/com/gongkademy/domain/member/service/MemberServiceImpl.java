@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,63 +31,51 @@ public class MemberServiceImpl implements MemberService{
      * @return 회원 정보 DTO
      */
     @Override
-    public MemberInfoDTO getMemberInfo(Long id) {
+    public MemberInfoDTO getMemberInfo(long id) {
         Member member = memberRepository.findById(id).orElseThrow(IllegalArgumentException::new);
         //TODO: 회원 못찾으면 예외처리
         return entityToMemberInfoDTO(member);
     }
 
     /**
-     * 새로운 회원을 가입시킵니다.
-     * @param dto 회원 가입 정보 DTO
-     * @return 저장된 회원 엔티티
+     * @param id 회원 ID
+     * @param memberSignUpDTO 회원가입 정보
+     * @return 회원 ID
      */
     @Override
-    public Member join(MemberSignUpDTO dto) {
-        Member member = memberSignUpDTOtoEntity(dto);
+    public Long joinMember(long id, MemberSignUpDTO memberSignUpDTO) {
+        Optional<Member> optMember = memberRepository.findById(id);
+
+        if (optMember.isEmpty()) return null;
+
+        Member member = optMember.get();
         member.addRole(MemberRole.USER);
-        return memberRepository.save(member);
+        member.signup(memberSignUpDTO);
+
+        return member.getId();
     }
 
     /**
-     * 중복된 닉네임이 있는지 검증합니다.
-     * @param nickname 닉네임
-     * 현재는 닉네임 중복 허용이므로 주석처리
-     */
-//    @Override
-//    public void validateDuplicateNickname(String nickname) {
-//        memberRepository.findByNickname(nickname).ifPresent(m -> {
-//            throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
-//        });
-//    }
-
-    /**
-     * 중복된 이메일이 있는지 검증합니다.
-     * @param email 이메일
+     * @param id 회원 ID
+     * @param memberUpdateDTO 회원수정 정보
+     * @return 회원 ID
      */
     @Override
-    public void validateDuplicateEmail(String email) {
-        memberRepository.findByEmail(email).ifPresent(m -> {
-            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
-        });
-    }
+    public Long modifyMember(long id, MemberUpdateDTO memberUpdateDTO) {
+        Optional<Member> optMember = memberRepository.findById(id);
 
-    /**.
-     * @param dto 회원 업데이트 정보 DTO
-     */
-    @Override
-    public void updateNickname(MemberUpdateDTO dto) {
-        Member member = memberRepository.findByEmail(dto.getEmail()).orElseThrow(IllegalArgumentException::new);
-//        member.updateNickname(dto.getNewNickname());
+        if (optMember.isEmpty()) return null;
+
+        Member member = optMember.get();
+        member.addRole(MemberRole.USER);
+        member.update(memberUpdateDTO);
+
+        return member.getId();
     }
 
     /**
      * @param id 회원 ID
      */
-//    @Override
-//    public void deleteMember(Long id) {
-//        memberRepository.deleteMember(id);
-//    }
-
-
+    @Override
+    public void deleteMember(long id) { memberRepository.deleteById(id); }
 }

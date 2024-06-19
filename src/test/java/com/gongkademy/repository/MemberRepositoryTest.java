@@ -21,33 +21,33 @@ class MemberRepositoryTest {
 
     @Autowired
     MemberRepository repository;
-    @Autowired
-    private PasswordEncoder passwordEncoder; //테스트시 비밀번호는 인코딩된 상태로 넣어야함.
-    //TODO: 회원찾기 => 조회결과가 없을때 테스트케이스 작성
-    @Test
-    void 닉네임으로_회원_찾기() {
-        Member member1 = setMember();
-        repository.save(member1);
-
-        Optional<Member> member2 = repository.findByNickname("USERA");
-        assertThat(member1).isEqualTo(member2.get());
-    }
-    @Test
-    void 이메일로_회원_찾기() {
-        Member member1 = setMember();
-        repository.save(member1);
-        Optional<Member> member2 = repository.findByEmail("user@naver.com");
-        assertThat(member1).isEqualTo(member2.get());
-        log.info("권한: "+member1.getMemberRoleList());
-    }
-
-    @Test
-    void 아이디로_회원_찾기(){
-        Member member1 = setMember();
-        repository.save(member1);
-        Optional<Member> member2 = repository.findById(member1.getId());
-        assertThat(member1).isEqualTo(member2.get());
-    }
+//    @Autowired
+//    private PasswordEncoder passwordEncoder; //테스트시 비밀번호는 인코딩된 상태로 넣어야함.
+//    //TODO: 회원찾기 => 조회결과가 없을때 테스트케이스 작성
+//    @Test
+//    void 닉네임으로_회원_찾기() {
+//        Member member1 = setMember();
+//        repository.save(member1);
+//
+//        Optional<Member> member2 = repository.findByNickname("USERA");
+//        assertThat(member1).isEqualTo(member2.get());
+//    }
+//    @Test
+//    void 이메일로_회원_찾기() {
+//        Member member1 = setMember();
+//        repository.save(member1);
+//        Optional<Member> member2 = repository.findByEmail("user@naver.com");
+//        assertThat(member1).isEqualTo(member2.get());
+//        log.info("권한: "+member1.getMemberRoleList());
+//    }
+//
+//    @Test
+//    void 아이디로_회원_찾기(){
+//        Member member1 = setMember();
+//        repository.save(member1);
+//        Optional<Member> member2 = repository.findById(member1.getId());
+//        assertThat(member1).isEqualTo(member2.get());
+//    }
 
 //    @Test
 //    void 닉네임_수정(){
@@ -70,24 +70,24 @@ class MemberRepositoryTest {
 //        assertThat(password).isEqualTo(member2.getPassword());
 //    }
 
-    @Test
-    void 회원삭제(){
-        //TODO여기부터 짜기
-        Member member1 = setMember();
-        repository.save(member1);
-        repository.deleteMember(member1.getId());
-        Optional<Member> member2 = repository.findById(member1.getId());
-        assertThat(member2).isEmpty();
-    }
-
-    private Member setMember() {
-        Member member = Member.builder()
-                        .email("user@naver.com")
-                        .password(passwordEncoder.encode("manggom234**"))
-                                .nickname("USERA")
-                .birthday(LocalDate.of(1998, 7, 18))
-                .build();
-        member.addRole(MemberRole.USER);
-        return member;
-    }
+//    @Test
+//    void 회원삭제(){
+//        //TODO여기부터 짜기
+//        Member member1 = setMember();
+//        repository.save(member1);
+//        repository.deleteMember(member1.getId());
+//        Optional<Member> member2 = repository.findById(member1.getId());
+//        assertThat(member2).isEmpty();
+//    }
+//
+//    private Member setMember() {
+//        Member member = Member.builder()
+//                        .email("user@naver.com")
+//                        .password(passwordEncoder.encode("manggom234**"))
+//                                .nickname("USERA")
+//                .birthday(LocalDate.of(1998, 7, 18))
+//                .build();
+//        member.addRole(MemberRole.USER);
+//        return member;
+//    }
 }

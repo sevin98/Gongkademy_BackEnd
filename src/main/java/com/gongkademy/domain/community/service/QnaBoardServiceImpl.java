@@ -3,6 +3,9 @@ package com.gongkademy.domain.community.service;
 import com.gongkademy.domain.community.dto.request.QnaBoardRequestDto;
 import com.gongkademy.domain.community.dto.response.QnaBoardResponseDto;
 import com.gongkademy.domain.community.entity.board.QnaBoard;
+import com.gongkademy.domain.community.entity.pick.Pick;
+import com.gongkademy.domain.community.entity.pick.PickType;
+import com.gongkademy.domain.community.repository.PickRepository;
 import com.gongkademy.domain.community.repository.QnaBoardRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
@@ -24,12 +27,13 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
     private final QnaBoardRepository qnaBoardRepository;
     private final MemberRepository memberRepository;
+    private final PickRepository pickRepository;
     private final S3FileService s3FileService;
 
     private final int PAGE_SIZE = 10;
-    private final String FORDER_DIR = "/src/main/resources/static/images/";
 
     // 전체 QnaBoard 조회
+    @Override
     public List<QnaBoardResponseDto> findQnaBoardsAll(int pageNo, String criteria) {
         // 정렬 기준 내림차순 정렬
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
@@ -38,6 +42,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
     }
 
     // QnaBoard 생성
+    @Override
     public QnaBoardResponseDto createQnaBoard(QnaBoardRequestDto qnaBoardRequestDto) {
         QnaBoard qnaBoard = convertToEntity(qnaBoardRequestDto);
         QnaBoard saveBoard = qnaBoardRepository.save(qnaBoard);
@@ -45,6 +50,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
     }
 
     // QnaBoard 조회
+    @Override
     public QnaBoardResponseDto findQnaBoard(Long articleId) {
         Optional<QnaBoard> optionalQnaBoard = qnaBoardRepository.findById(articleId);
 
@@ -58,6 +64,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
     }
 
     // QnaBoard 수정
+    @Override
     public Long updateQnaBoard(Long articleId, QnaBoardRequestDto qnaBoardRequestDto) {
         Optional<QnaBoard> optQnaBoard = qnaBoardRepository.findById(articleId);
 
@@ -68,6 +75,84 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         QnaBoard qnaBoard = optQnaBoard.get();
         qnaBoard.update(qnaBoardRequestDto);
         return qnaBoard.getArticleId();
+    }
+
+    @Override
+    public void toggleLikeBoard(Long articleId, Long memberId) {
+        QnaBoard qnaBoard = qnaBoardRepository.findById(articleId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_BOARD_ID));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+
+        Optional<Pick> pickOptional = pickRepository.findByBoardAndMemberAndPickType(qnaBoard, member, PickType.LIKE);
+
+
+        pickOptional.stream().peek(pick -> {
+            pickRepository.delete(pick);
+            qnaBoard.setLikeCount(qnaBoard.getLikeCount() - 1);
+        }).findAny().orElseGet(() -> {
+            Pick newPick = new Pick(qnaBoard, member, PickType.LIKE);
+            pickRepository.save(newPick);
+            qnaBoard.setLikeCount(qnaBoard.getLikeCount() + 1);
+            return newPick;
+        });
+
+        qnaBoardRepository.save(qnaBoard);
+    }
+
+    @Override
+    public void toggleScrapBoard(Long articleId, Long memberId) {
+        QnaBoard qnaBoard = qnaBoardRepository.findById(articleId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_BOARD_ID));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+
+        Optional<Pick> pickOptional = pickRepository.findByBoardAndMemberAndPickType(qnaBoard, member, PickType.SCRAP);
+
+        pickOptional.stream().peek(pick -> {
+            pickRepository.delete(pick);
+            qnaBoard.setScrapCount(qnaBoard.getScrapCount() - 1);
+        }).findAny().orElseGet(() -> {
+            Pick newPick = new Pick(qnaBoard, member, PickType.SCRAP);
+            pickRepository.save(newPick);
+            qnaBoard.setScrapCount(qnaBoard.getScrapCount() + 1);
+            return newPick;
+        });
+
+        qnaBoardRepository.save(qnaBoard);
+    }
+
+    // 좋아요한 게시글 조회
+    @Override
+    public List<QnaBoardResponseDto> getLikeBoards(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+
+        List<Pick> likes = pickRepository.findAllByMemberAndPickType(member, PickType.LIKE);
+        List<QnaBoardResponseDto> likeBoardDTOs = new ArrayList<>();
+
+        for (Pick like : likes) {
+            likeBoardDTOs.add(convertToDto((QnaBoard) like.getBoard()));
+        }
+
+        return likeBoardDTOs;
+    }
+
+    // 스크랩한 게시글 조회
+    @Override
+    public List<QnaBoardResponseDto> getScrapBoards(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+
+        List<Pick> likes = pickRepository.findAllByMemberAndPickType(member, PickType.SCRAP);
+        List<QnaBoardResponseDto> scrapBoardDTOs = new ArrayList<>();
+
+        for (Pick like : likes) {
+            scrapBoardDTOs.add(convertToDto((QnaBoard) like.getBoard()));
+        }
+
+        return scrapBoardDTOs;
+
     }
 
     // QnaBoard 삭제

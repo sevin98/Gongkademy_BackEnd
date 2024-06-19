@@ -1,6 +1,7 @@
 package com.gongkademy.domain.community.service;
 
 import com.gongkademy.domain.community.dto.request.QnaBoardRequestDto;
+import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
 import com.gongkademy.domain.community.dto.response.QnaBoardResponseDto;
 import org.springframework.data.domain.Page;
 
@@ -21,4 +22,16 @@ public interface QnaBoardService {
 
     // Qna 게시글 삭제하기
     void deleteQnaBoard(Long articleId);
+
+    // Qna 게시글 좋아요
+    void toggleLikeBoard(Long articleId, Long memberId);
+
+    // Qna 게시글 스크랩
+    void toggleScrapBoard(Long articleId, Long memberId);
+
+    // Qna 좋아요한 게시글 조회
+    List<QnaBoardResponseDto> getLikeBoards(Long memberId);
+
+    // Qna 스크랩한 게시글 조회
+    List<QnaBoardResponseDto> getScrapBoards(Long memberId);
 }

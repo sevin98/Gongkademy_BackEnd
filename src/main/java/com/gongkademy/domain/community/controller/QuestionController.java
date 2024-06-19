@@ -1,12 +1,15 @@
 package com.gongkademy.domain.community.controller;
 
 import com.gongkademy.domain.community.dto.request.QnaBoardRequestDto;
+import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
 import com.gongkademy.domain.community.dto.response.QnaBoardResponseDto;
 import com.gongkademy.domain.community.service.QnaBoardService;
+import com.gongkademy.domain.member.dto.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -62,5 +65,38 @@ public class QuestionController {
     public ResponseEntity<?> deleteQna(@PathVariable Long articleNo) {
         qnaboardService.deleteQnaBoard(articleNo);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    // Qna 좋아요
+    @PostMapping("/{articleId}/like")
+    public ResponseEntity<?> toggleLikeCount(@AuthenticationPrincipal PrincipalDetails principalDetails, @PathVariable Long articleId) {
+        Long currentMemberId = principalDetails.getMemberId();
+        qnaboardService.toggleLikeBoard(articleId, currentMemberId);
+        return ResponseEntity.ok().build();
+    }
+
+
+    // Qna 스크랩
+    @PostMapping("/{articleId}/scrap")
+    public ResponseEntity<?> toggleScrapCount(@AuthenticationPrincipal PrincipalDetails principalDetails, @PathVariable Long articleId) {
+        Long currentMemberId = principalDetails.getMemberId();
+        qnaboardService.toggleScrapBoard(articleId, currentMemberId);
+        return ResponseEntity.ok().build();
+    }
+
+    // Qna 좋아요한 게시글 가져오기
+    @GetMapping("/{articleId}/liked")
+    public ResponseEntity<List<QnaBoardResponseDto>> getLikeBoards(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam String boardType) {
+        Long currentMemberId = principalDetails.getMemberId();
+        List<QnaBoardResponseDto> likeBoards = qnaboardService.getLikeBoards(currentMemberId);
+        return ResponseEntity.ok(likeBoards);
+    }
+
+    // Qna 스크랩한 게시글 가져오기
+    @GetMapping("/{articleId}/scrapped")
+    public ResponseEntity<List<QnaBoardResponseDto>> getScrapBoards(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam String boardType) {
+        Long currentMemberId = principalDetails.getMemberId();
+        List<QnaBoardResponseDto> scrapBoards = qnaboardService.getScrapBoards(currentMemberId);
+        return ResponseEntity.ok(scrapBoards);
     }
 }

@@ -17,43 +17,60 @@ import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
+@Setter
 @Entity
 public class CourseReview {
-	
-	@Id @GeneratedValue
-	@Column(name="course_review_id")
+
+	@Id
+	@GeneratedValue
+	@Column(name = "course_review_id")
 	private Long id;
-	 
+
 	private int rating;
-	
+
 	private LocalDateTime createdTime;
-	
+
 	private String content;
-	
-	private int like_count;
-	
+
+	private int likeCount;
+
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="regist_course_id")
+	@JoinColumn(name = "regist_course_id")
 	private RegistCourse registCourse;
-	
+
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="course_id")
+	@JoinColumn(name = "course_id")
 	private Course course;
-	
+
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="member_id")
+	@JoinColumn(name = "member_id")
 	private Member member;
-	
+
 	private String nickname;
-	
-	@OneToMany(mappedBy="courseReview")
+
+	@OneToMany(mappedBy = "courseReview")
 	private List<CourseComment> courseComments = new ArrayList<>();
-	
-	//==연관관계 메서드==//
+
+	// ==연관관계 메서드==//
 	public void addCourseComment(CourseComment courseComment) {
 		courseComments.add(courseComment);
 		courseComment.setCourseReview(this);
 	}
-	
+
+	// ==비즈니스 로직==//
+	/*
+	 * 좋아요 증가
+	 */
+	public void increaseLikeCount() {
+		this.likeCount++;
+	}
+
+	/*
+	 * 좋아요 감소
+	 */
+	public void decreaseLikeCount() {
+		this.likeCount--;
+	}
+
 }

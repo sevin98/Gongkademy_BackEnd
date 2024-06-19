@@ -14,7 +14,7 @@ import com.gongkademy.domain.course.entity.CourseComment;
 import com.gongkademy.domain.course.entity.CourseReview;
 import com.gongkademy.domain.course.entity.Notice;
 import com.gongkademy.domain.course.repository.CourseCommentRepositoryImpl;
-import com.gongkademy.domain.course.repository.CourseReviewRepositoryImpl;
+import com.gongkademy.domain.course.repository.CourseReviewRepository;
 import com.gongkademy.domain.course.repository.NoticeRepositoryImpl;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
@@ -28,7 +28,7 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 
 	private final CourseCommentRepositoryImpl courseCommentRepositoryImpl;
 	private final MemberRepository memberRepository;
-	private final CourseReviewRepositoryImpl courseReviewRepositoryImpl;
+	private final CourseReviewRepository courseReviewRepository;
 	private final NoticeRepositoryImpl noticeRepositoryImpl;
 	
 	@Override
@@ -71,7 +71,7 @@ public class CourseCommentServiceImpl implements CourseCommentService {
     private CourseComment convertToEntity(CourseCommentRequestDTO courseCommentRequestDTO) {
     	CourseComment comment = new CourseComment();
     	
-        Optional<CourseReview> reviewOptional = courseReviewRepositoryImpl.findById(courseCommentRequestDTO.getCourseReviewId());
+        Optional<CourseReview> reviewOptional = courseReviewRepository.findById(courseCommentRequestDTO.getCourseReviewId());
         if (reviewOptional.isPresent()) {
         	comment.setCourseReview(reviewOptional.get());
         } else {

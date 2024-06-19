@@ -13,9 +13,9 @@ import com.gongkademy.domain.course.entity.CommentCateg;
 import com.gongkademy.domain.course.entity.CourseComment;
 import com.gongkademy.domain.course.entity.CourseReview;
 import com.gongkademy.domain.course.entity.Notice;
-import com.gongkademy.domain.course.repository.CourseCommentRepositoryImpl;
+import com.gongkademy.domain.course.repository.CourseCommentRepository;
 import com.gongkademy.domain.course.repository.CourseReviewRepository;
-import com.gongkademy.domain.course.repository.NoticeRepositoryImpl;
+import com.gongkademy.domain.course.repository.NoticeRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
 
@@ -26,26 +26,26 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CourseCommentServiceImpl implements CourseCommentService {
 
-	private final CourseCommentRepositoryImpl courseCommentRepositoryImpl;
+	private final CourseCommentRepository courseCommentRepository;
 	private final MemberRepository memberRepository;
 	private final CourseReviewRepository courseReviewRepository;
-	private final NoticeRepositoryImpl noticeRepositoryImpl;
+	private final NoticeRepository noticeRepository;
 	
 	@Override
 	public CourseCommentResponseDTO createComment(CourseCommentRequestDTO courseCommentRequestDTO) {
         CourseComment comment = convertToEntity(courseCommentRequestDTO);
-        CourseComment saveComment = courseCommentRepositoryImpl.save(comment);
+        CourseComment saveComment = courseCommentRepository.save(comment);
         return convertToDTO(saveComment);
 	}
 
 	@Override
 	public CourseCommentResponseDTO updateComment(Long id, CourseCommentRequestDTO courseCommentRequestDTO) {
-        Optional<CourseComment> commentOptional = courseCommentRepositoryImpl.findById(id);
+        Optional<CourseComment> commentOptional = courseCommentRepository.findById(id);
 
         if (commentOptional.isPresent()) {
             CourseComment comment = commentOptional.get();
             comment.setContent(courseCommentRequestDTO.getContent());
-            courseCommentRepositoryImpl.save(comment);
+            courseCommentRepository.save(comment);
             return convertToDTO(comment);
         }
 
@@ -55,7 +55,7 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<CourseCommentResponseDTO> getAllComments(CommentCateg categ, Long id) {
-        List<CourseComment> comments = courseCommentRepositoryImpl.findAll(categ, id);
+        List<CourseComment> comments = courseCommentRepository.findAllByCategAndId(categ, id);
         List<CourseCommentResponseDTO> courseCommentResponseDTOs = new ArrayList<>();
         for (CourseComment comment : comments) {
         	courseCommentResponseDTOs.add(convertToDTO(comment));
@@ -65,7 +65,7 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 
 	@Override
 	public void deleteComment(Long id) {
-		courseCommentRepositoryImpl.deleteById(id);
+		courseCommentRepository.deleteById(id);
 	}
 	
     private CourseComment convertToEntity(CourseCommentRequestDTO courseCommentRequestDTO) {
@@ -78,7 +78,7 @@ public class CourseCommentServiceImpl implements CourseCommentService {
             throw new IllegalStateException("리뷰 찾을 수 없음");
         }
 
-        Optional<Notice> noticeOptional = noticeRepositoryImpl.findById(courseCommentRequestDTO.getNoticeId());
+        Optional<Notice> noticeOptional = noticeRepository.findById(courseCommentRequestDTO.getNoticeId());
         if (noticeOptional.isPresent()) {
         	comment.setNotice(noticeOptional.get());
         } else {

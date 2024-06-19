@@ -8,6 +8,7 @@ import com.gongkademy.domain.member.entity.MemberRole;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
+import com.gongkademy.global.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.util.Optional;
 public class MemberServiceImpl implements MemberService{
 
     private final MemberRepository memberRepository;
+    private final JWTUtil jwtUtil;
 
     /**
      * 주어진 회원 ID로 회원 정보를 가져옵니다.
@@ -51,6 +53,9 @@ public class MemberServiceImpl implements MemberService{
         Member member = optMember.get();
         member.addRole(MemberRole.USER);
         member.signup(memberSignUpDTO);
+
+        String refreshToken = jwtUtil.createRefreshToken(member.getId());
+        jwtUtil.setRefreshToken(member.getId(), refreshToken);
 
         return member.getId();
     }

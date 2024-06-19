@@ -37,7 +37,6 @@ public class SecurityConfig {
     //cors설정
     //filterchain
     //corsConfigruationSource
-    //userDetailService를 컨테이너에올리기
     private final MemberRepository memberRepository;
     private final RedisUtil redisUtil;
     private final JWTUtil jwtUtil;
@@ -47,40 +46,37 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
+                        //TODO: member 말고 다른 domain의 로그인이 필요한 영역도 적어줘야하는거겠지
+                        //TODO: board나 comment 나 그건 그때 가서 상의
                         .requestMatchers("/private/**").authenticated() // private으로 시작하는 url은 로그인이 필수
                         .requestMatchers("/admin/**").hasRole("ADMIN") // admin으로 시작하는건 admin만 접근 가능
-                        .anyRequest().permitAll()) // 나머지는 아무나 가능
+                        .requestMatchers("/member/**").hasAnyRole("USER", "ADMIN")//member url은 user혹은 admin만
+                        .anyRequest().permitAll()) //TODO: 특정 url만 permitALl 로 두고, 다른곳을 다 authenticated로 막던지 상의 해보면 좋을듯
 
                 //외부 post 요청을 받아야 하는 csrf // disable
-                //람다를 메서드참조로 바꾸기(왜?)
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                //JWT등을 사용할떄 SpringSecurity가 세션을 생성하지도않고, 기본것을 사용하지도 않게끔 STATELESS로 설정
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JWTCheckFilter(memberRepository, jwtUtil, redisUtil), UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/loginForm")
+                        //로그인 성공하면 redirection될 기본 url
                         .defaultSuccessUrl("/", true)
+                        //로그인에 성공하면 가져온 user의 정보를 oAuth2MemberService가 처리한다(loadUser 호출)
                         .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2MemberService))
                         .successHandler(new OAuth2LoginSuccessHandler(jwtUtil))
                         .failureHandler(new OAuth2LoginFailureHandler()));
 
         return http.build();
     }
-
-
-    //passwordEncoder
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-
+    
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        //허용할 Http 메소드들 // 또뭐있지 모르겠음
-        configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        //허용할 Http 메소드들 //TODO: 또뭐있지 모르겠음
+        configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PATCH ", "DELETE", "OPTIONS"));
 
         //허용할 origin 설정
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
@@ -99,11 +95,5 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
-    }
-
-    //컨테이너에 userDetailService 올리기/ 이건 이해 필요
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return new UserDetailsServiceImpl(memberRepository);
     }
 }

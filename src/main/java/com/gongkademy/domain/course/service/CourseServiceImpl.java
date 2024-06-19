@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.gongkademy.domain.course.dto.request.CourseRequestDTO;
 import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseResponseDTO;
+import com.gongkademy.domain.course.dto.response.NoticeResponseDTO;
 import com.gongkademy.domain.course.entity.Course;
 import com.gongkademy.domain.course.entity.Lecture;
 import com.gongkademy.domain.course.entity.Notice;
@@ -128,10 +132,17 @@ public class CourseServiceImpl implements CourseService {
 	}
 	
 	@Override
-	public List<Notice> getCourseNotices(Long courseId) {
-		// TODO : 페이지네이션
-		List<Notice> notices = noticeRepository.findByCourseId(courseId);
-		return notices;
+	public Page<NoticeResponseDTO> getCourseNotices(Long courseId, int pageNum, int pageSize) {
+		Pageable pageable = PageRequest.of(pageNum, pageSize);
+		
+		Page<Notice> notices = noticeRepository.findAllByCourseId(courseId, pageable);
+		Page<NoticeResponseDTO> noticeResponseDtos = notices.map(m -> NoticeResponseDTO.builder()
+                .id(m.getId())
+                .createdTime(m.getCreatedTime())
+                .content(m.getContent())
+                .courseCommentCount(m.getCourseCommentCount())
+                .build());
+		return noticeResponseDtos;
 	}
 	
 	// 수강 강좌에 대한 수강 강의 생성

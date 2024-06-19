@@ -2,6 +2,7 @@ package com.gongkademy.domain.course.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gongkademy.domain.course.dto.request.CourseRequestDTO;
 import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseResponseDTO;
+import com.gongkademy.domain.course.dto.response.NoticeResponseDTO;
 import com.gongkademy.domain.course.entity.Notice;
 import com.gongkademy.domain.course.service.CourseService;
 
@@ -26,6 +28,8 @@ import lombok.RequiredArgsConstructor;
 public class CourseController {
 
 	private final CourseService courseService;
+	
+    private final int pageSize = 3;
 	
 	// 1. 전체 강좌 관련
 	// - 전체 강좌 목록 조회
@@ -71,9 +75,16 @@ public class CourseController {
 		return new ResponseEntity<>(courseResponseDTO, HttpStatus.OK);
 	}
 	
+	// - 공지사항 조회
+	@GetMapping("/notice/{course_id}/{page_num}")
+	public ResponseEntity<?> getCourseNoticesPerPage(@PathVariable("course_id") Long courseId, 
+			@PathVariable("page_num") int pageNum){
+		Page<NoticeResponseDTO> notices = courseService.getCourseNotices(courseId, pageNum, pageSize);
+		return new ResponseEntity<>(notices, HttpStatus.OK);
+	}
+
 	/* TODO 
 	 * - 강좌 소개 조회, 강의 자료 다운로드
-	 * - 공지사항 페이지네이션
 	 * */ 
 	
 	@GetMapping("/info/{course_id}")
@@ -84,10 +95,10 @@ public class CourseController {
 		return null;
 	}
 	
-	// - 공지사항 조회
-	@GetMapping("/notice/{course_id}")
-	public ResponseEntity<?> getCourseNotices(@PathVariable("course_id") Long id){
-		List<Notice> notices = courseService.getCourseNotices(id);
-		return new ResponseEntity<>(notices, HttpStatus.OK);
+	@GetMapping("/detail/{course_id}")
+	public ResponseEntity<?> downloadCourseFile(){
+
+		return null;
 	}
+	
 }

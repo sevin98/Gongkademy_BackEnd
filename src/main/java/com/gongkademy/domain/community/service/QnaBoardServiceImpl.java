@@ -1,15 +1,14 @@
 package com.gongkademy.domain.community.service;
 
 import com.gongkademy.domain.community.dto.request.QnaBoardRequestDto;
-import com.gongkademy.domain.community.dto.response.ImageResponseDto;
 import com.gongkademy.domain.community.dto.response.QnaBoardResponseDto;
-import com.gongkademy.domain.community.entity.board.ImageBoard;
 import com.gongkademy.domain.community.entity.board.QnaBoard;
 import com.gongkademy.domain.community.repository.QnaBoardRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
+import com.gongkademy.infra.s3.service.S3FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,9 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +24,10 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
     private final QnaBoardRepository qnaBoardRepository;
     private final MemberRepository memberRepository;
+    private final S3FileService s3FileService;
+
     private final int PAGE_SIZE = 10;
+    private final String FORDER_DIR = "/src/main/resources/static/images/";
 
     // 전체 QnaBoard 조회
     public List<QnaBoardResponseDto> findQnaBoardsAll(int pageNo, String criteria) {
@@ -65,12 +65,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         if (optQnaBoard.isEmpty()) {
             return null;
         }
-
         QnaBoard qnaBoard = optQnaBoard.get();
-
-        //TODO: 이미지 관련 메서드 정의
-
-        // 항목 수정하기
         qnaBoard.update(qnaBoardRequestDto);
         return qnaBoard.getArticleId();
     }
@@ -82,46 +77,22 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
 
     private QnaBoard convertToEntity(QnaBoardRequestDto qnaBoardRequestDto) {
-        QnaBoard qnaBoard = new QnaBoard();
-        qnaBoard.setBoardType(qnaBoardRequestDto.getBoardType());
+        Member member = memberRepository.findById(qnaBoardRequestDto.getMemberId())
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
-        Optional<Member> memberOptional = memberRepository.findById(qnaBoardRequestDto.getMemberId());
-        if (memberOptional.isPresent()) {
-            qnaBoard.setMember(memberOptional.get());
-        } else {
-            throw new CustomException(ErrorCode.INVALID_MEMBER_ID);
-        }
-        //TODO: image는 따로 저장해야할 듯
-//        List<ImageRequestDto> imageRequestDtoList = qnaBoardRequestDto.getImages();
-//
-//        if (!imageRequestDtoList.isEmpty()) {
-//            for (ImageRequestDto imageRequestDto : imageRequestDtoList) {
-//                qnaBoard.setSaveImage(imageRequestDto.getSaveImage());
-//                qnaBoard.setOriginalImage(imageRequestDto.getOriginalImage());
-//                qnaBoard.setSavedFolder(imageRequestDto.getSavedFolder());
-//            }
-//        }
-
-        qnaBoard.setTitle(qnaBoardRequestDto.getTitle());
-        qnaBoard.setContent(qnaBoardRequestDto.getContent());
-        qnaBoard.setHit(0L);
-        qnaBoard.setLikeCount(0L);
-        return qnaBoard;
+        return QnaBoard.builder().
+                boardType(qnaBoardRequestDto.getBoardType())
+                .member(member)
+                .title(qnaBoardRequestDto.getTitle())
+                .content(qnaBoardRequestDto.getTitle())
+                .hit(0L)
+                .likeCount(0L)
+                .scrapCount(0L)
+                .commentCount(0L).build();
     }
 
 
     private QnaBoardResponseDto convertToDto(QnaBoard qnaBoard) {
-
-        List<ImageResponseDto> imageResponseDtos = new ArrayList<>();
-        List<ImageBoard> imageBoards = qnaBoardRepository.findImageBoards(qnaBoard.getBoardType(), qnaBoard.getArticleId());
-
-        for (ImageBoard imageBoard : imageBoards) {
-            imageResponseDtos.add(ImageResponseDto.builder().
-                    originalImage(imageBoard.getOriginalImage())
-                    .saveImage(imageBoard.getSaveImage())
-                    .savedFolder(imageBoard.getSavedFolder()).build());
-        }
-
         return QnaBoardResponseDto.builder().
                 boardType(qnaBoard.getBoardType())
                 .articleId(qnaBoard.getArticleId())
@@ -130,8 +101,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
                 .content(qnaBoard.getContent())
                 .likeCount(qnaBoard.getLikeCount())
                 .hit(qnaBoard.getHit())
-                .createTime(qnaBoard.getCreateTime())
-                .images(imageResponseDtos).build();
+                .createTime(qnaBoard.getCreateTime()).build();
 
     }
 }

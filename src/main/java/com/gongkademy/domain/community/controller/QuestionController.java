@@ -24,9 +24,16 @@ public class QuestionController {
     private final String REQUEST_PARAM_CRITERIA = "criteria";
     // Qna 전체 리스트 반환
     @GetMapping("/question")
-    public ResponseEntity<?> selectAllQna( @RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
+    public ResponseEntity<?> getAllQna( @RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
                                            @RequestParam(defaultValue = BASE_CRITERIA, value = REQUEST_PARAM_CRITERIA) String criteria){
         List<QnaBoardResponseDto> result = qnaboardService.findQnaBoardsAll(pageNo, criteria);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    // Qna 상세 조회
+    @GetMapping("/question/{articleNo}")
+    public ResponseEntity<?> getQna(@PathVariable Long articleNo) {
+        QnaBoardResponseDto result = qnaboardService.findQnaBoard(articleNo);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 

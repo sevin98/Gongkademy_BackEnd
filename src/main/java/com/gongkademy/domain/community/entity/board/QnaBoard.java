@@ -12,7 +12,7 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-public class QnaBoard extends ImageBoard {
+public class QnaBoard extends Board {
 
     private String lectureTitle;
     private String courseTitle;

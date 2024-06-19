@@ -27,6 +27,9 @@ public enum ErrorCode {
     //Board
     INVALID_BOARD_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 게시글 ID입니다."),
 
+    //QnaBoard
+    EMPTY_IMAGE(HttpStatus.NO_CONTENT, "이미지가 존재하지 않습니다."),
+
     //Comment
     INVALID_COMMENT_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 댓글 ID입니다."),
     INVALID_PARENT_COMMENT_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 부모 댓글 ID입니다."),

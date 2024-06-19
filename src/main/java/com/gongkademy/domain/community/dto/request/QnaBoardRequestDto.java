@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,6 +23,4 @@ public class QnaBoardRequestDto {
 
     private String lectureTitle;
     private String courseTitle;
-
-    private List<ImageRequestDto> images;
 }

@@ -15,10 +15,10 @@ public class PlayerResponseDTO {
 	// 강의 재생 응답 dto
 	
 	// [수강관련]
-	// 	- 수강 강의 id
+	//	- 회원 Id
 	//	- 수강 강의 savepoint
 	// 	- 수강 강의 recentDate
-	private Long RegistLectureId;
+	private Long memberId;
 	private Long savePoint;
 	private LocalDateTime recentDate;
 	

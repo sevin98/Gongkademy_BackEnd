@@ -5,11 +5,11 @@ import com.gongkademy.domain.course.dto.response.PlayerResponseDTO;
 
 public interface PlayerService {
 
-	PlayerResponseDTO getPlayerLatest(Long id);
+	PlayerResponseDTO getPlayerLatestCourse(Long courseId, Long memberId);
+	
+	PlayerResponseDTO getPlayerLatestLecture(Long courseId, Long memberId);
 	
 	void updatePlayerLatest(PlayerRequestDTO playerRequestDTO);
 	
-	PlayerResponseDTO getPlayerNext(PlayerRequestDTO playerRequestDTO);
-
-	PlayerResponseDTO getPlayerPrev(PlayerRequestDTO playerRequestDTO);
+	PlayerResponseDTO getPlayerNextPrev(PlayerRequestDTO playerRequestDTO, int dir);
 }

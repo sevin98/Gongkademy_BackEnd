@@ -2,9 +2,7 @@ package com.gongkademy.domain.course.repository;
 
 import java.util.Optional;
 
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -20,7 +18,8 @@ public interface RegistLectureRepository extends JpaRepository<RegistLecture, Lo
 	// 수강 강의 id로 수강 강의 조회
 	Optional<RegistLecture> findById(Long id);
 		
-	Optional<RegistLecture> findByLectureId(Long id);
+	// memberId, lectureId로 수강 강의 조회
+	Optional<RegistLecture> findByLectureIdAndMemberId(Long lectureId, Long membeId);
 
 	Boolean existsByMemberIdAndLectureIdAndComplete(Long memberId, Long LectureId, boolean complete);
 

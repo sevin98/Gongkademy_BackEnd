@@ -24,4 +24,7 @@ public class CourseResponseDTO {
 	// 해당 강좌 수강&저장 여부
 	private Boolean isRegistered;
 	private Boolean isSaved;
+	
+	
+	// TODO : 강의 대표이미지
 }

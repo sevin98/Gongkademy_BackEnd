@@ -40,7 +40,7 @@ public class CourseController {
 	}
 	
 	// - 목차 조회
-	@GetMapping("list")
+	@GetMapping("/list")
 	public ResponseEntity<?> getCourseContents(@RequestBody CourseRequestDTO courseRequestDTO){
 		List<CourseContentsResponseDTO> courseContentsDTOs = courseService.getCourseContents(courseRequestDTO);
 		return new ResponseEntity<>(courseContentsDTOs, HttpStatus.OK);
@@ -82,6 +82,16 @@ public class CourseController {
 		Page<NoticeResponseDTO> notices = courseService.getCourseNotices(courseId, pageNum, pageSize);
 		return new ResponseEntity<>(notices, HttpStatus.OK);
 	}
+	
+	// 3. 마이페이지
+	//	- 수강 중인 강좌
+	@GetMapping("/nocomplete")
+	public ResponseEntity<?> getRegistCoursesNoComplete(@RequestBody Long memberId){
+		List<CourseResponseDTO> courseResponseDTOs = courseService.getRegistCoursesNoComplete(memberId);
+		return new ResponseEntity<>(courseResponseDTOs, HttpStatus.OK);
+	}
+	
+	// - 수강 완료 강좌
 
 	/* TODO 
 	 * - 강좌 소개 조회, 강의 자료 다운로드

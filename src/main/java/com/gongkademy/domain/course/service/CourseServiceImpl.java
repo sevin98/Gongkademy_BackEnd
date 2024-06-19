@@ -58,6 +58,41 @@ public class CourseServiceImpl implements CourseService {
 		}
 		return courseResponseDTOs;
 	}
+	
+	@Override
+	public List<CourseResponseDTO> getRegistCoursesNoComplete(Long memberId) {
+		List<CourseResponseDTO> courseResponseDTOs = new ArrayList<>();
+		
+		List<RegistCourse> registCourses = registCourseRepository.findAllByMemberIdAndComplete(memberId, false);
+		
+		for(RegistCourse registCourse : registCourses) {
+			Course course = courseRepository.findById(registCourse.getCourse().getId())
+					.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
+
+            CourseResponseDTO dto = this.convertToDTO(course);
+			dto.setIsRegistered(true);
+            courseResponseDTOs.add(dto);
+		}
+		return courseResponseDTOs;
+	}
+
+	@Override
+	public List<CourseResponseDTO> getRegistCoursesComplete(Long memberId) {
+		List<CourseResponseDTO> courseResponseDTOs = new ArrayList<>();
+		
+		List<RegistCourse> registCourses = registCourseRepository.findAllByMemberIdAndComplete(memberId, true);
+		
+		for(RegistCourse registCourse : registCourses) {
+			Course course = courseRepository.findById(registCourse.getCourse().getId())
+					.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
+
+            CourseResponseDTO dto = this.convertToDTO(course);
+			dto.setIsRegistered(true);
+            courseResponseDTOs.add(dto);
+		}
+		return courseResponseDTOs;
+	}
+
 
 	@Override
 	public List<CourseContentsResponseDTO> getCourseContents(CourseRequestDTO courseRequestDTO) {
@@ -166,7 +201,6 @@ public class CourseServiceImpl implements CourseService {
 		courseResponseDTO.setTotalCourseTime(course.getTotalCourseTime());
 		courseResponseDTO.setAvgRating(course.getAvgRating());
 		courseResponseDTO.setReviewCount(course.getReviewCount());
-		courseResponseDTO.setCourseId(course.getId());
 		courseResponseDTO.setCourseId(course.getId());
 
 		return courseResponseDTO;

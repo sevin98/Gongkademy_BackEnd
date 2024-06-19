@@ -27,7 +27,11 @@ public interface CourseService {
 	CourseResponseDTO getCourseDetail(Long courseId);
 	
 	Page<NoticeResponseDTO> getCourseNotices(Long courseId, int pageNum, int pageSize);
+
+	List<CourseResponseDTO> getRegistCoursesNoComplete(Long memberId);
 	
+	List<CourseResponseDTO> getRegistCoursesComplete(Long memberId);
+
 	
 	/*
 	 * TODO

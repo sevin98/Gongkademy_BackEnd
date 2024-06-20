@@ -4,15 +4,17 @@ import com.amazonaws.Response;
 import com.gongkademy.domain.community.dto.request.BoardRequestDTO;
 import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
 import com.gongkademy.domain.community.service.BoardService;
+import com.gongkademy.domain.member.dto.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/notice")
+@RequestMapping("/community")
 @RequiredArgsConstructor
 public class BoardController {
 
@@ -20,7 +22,8 @@ public class BoardController {
 
     private final int LIMIT = 3;
 
-    @GetMapping("/{articleId}")
+    // 공지사항 상세보기
+    @GetMapping("/notice/{articleId}")
     public ResponseEntity<?> getBoard(@PathVariable Long articleId) {
         BoardResponseDTO boardResponseDTO = boardService.getBoard(articleId);
         boardService.incrementHit(articleId);
@@ -28,41 +31,41 @@ public class BoardController {
     }
 
     // 최신 순 3개 가져오기
-    @GetMapping("/top_latest")
+    @GetMapping("/notice/top_latest")
     public ResponseEntity<List<BoardResponseDTO>> getLimitLatestBoards(int LIMIT) {
         List<BoardResponseDTO> boardResponseDTOS = boardService.getLatestBoards(LIMIT);
         return ResponseEntity.ok(boardResponseDTOS);
     }
 
     // Authentication 필요
-    @PostMapping("/{articleId}/like")
-    public ResponseEntity<?> toggleLikeCount(@PathVariable Long articleId) {
-        Long currentMemberId = 1L;
+    @PostMapping("/notice/{articleId}/like")
+    public ResponseEntity<?> toggleLikeCount(@PathVariable Long articleId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Long currentMemberId = principalDetails.getMemberId();
         boardService.toggleLikeBoard(articleId, currentMemberId);
         return ResponseEntity.ok().build();
     }
 
 
     // Authentication 필요
-    @PostMapping("/{articleId}/scrap")
-    public ResponseEntity<?> toggleScrapCount(@PathVariable Long articleId) {
-        Long currentMemberId = 1L;
+    @PostMapping("/notice/{articleId}/scrap")
+    public ResponseEntity<?> toggleScrapCount(@PathVariable Long articleId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Long currentMemberId = principalDetails.getMemberId();
         boardService.toggleScrapBoard(articleId, currentMemberId);
         return ResponseEntity.ok().build();
     }
 
     // Authentication 필요
-    @GetMapping("/{articleId}/liked")
-    public ResponseEntity<List<BoardResponseDTO>> getLikeBoards() {
-        Long currentMemberId = 1L;
+    @GetMapping("/notice/liked")
+    public ResponseEntity<List<BoardResponseDTO>> getLikeBoards(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Long currentMemberId = principalDetails.getMemberId();
         List<BoardResponseDTO> likeBoards = boardService.getLikeBoards(currentMemberId);
         return ResponseEntity.ok(likeBoards);
     }
 
     // Authentication 필요
-    @GetMapping("/{articleId}/scrapped")
-    public ResponseEntity<List<BoardResponseDTO>> getScrapBoards() {
-        Long currentMemberId = 1L;
+    @GetMapping("/notice/scrapped")
+    public ResponseEntity<List<BoardResponseDTO>> getScrapBoards(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Long currentMemberId = principalDetails.getMemberId();
         List<BoardResponseDTO> scrapBoards = boardService.getScrapBoards(currentMemberId);
         return ResponseEntity.ok(scrapBoards);
     }

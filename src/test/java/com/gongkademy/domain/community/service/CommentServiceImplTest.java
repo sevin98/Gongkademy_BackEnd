@@ -161,7 +161,7 @@ class CommentServiceImplTest {
         when(commentRepository.save(any(Comment.class))).thenReturn(parentComment);
 
         // 댓글 삭제
-        commentService.deleteComment(1L);
+        commentService.deleteComment(1L, 1L);
 
 //        verify(commentRepository, times(1)).findById(anyLong());
 //        verify(memberRepository, times(1)).findById(anyLong());

@@ -35,7 +35,22 @@ public class CommentServiceImpl implements CommentService {
     public CommentResponseDTO createComment(CommentRequestDTO commentRequestDTO) {
         Comment comment = convertToEntity(commentRequestDTO);
         commentRepository.save(comment);
-        return convertToDTO(comment, comment.getMember().getId());
+        return convertToDTO(comment);
+    }
+
+    @Override
+    @Transactional
+    public CommentResponseDTO updateComment(Long commentId, Long memberId, CommentRequestDTO commentRequestDTO) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_COMMENT_ID));
+
+        if (!comment.getMember().getId().equals(memberId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+
+        comment.setContent(commentRequestDTO.getContent());
+        commentRepository.save(comment);
+        return convertToDTO(comment);
     }
 
     @Override
@@ -43,15 +58,27 @@ public class CommentServiceImpl implements CommentService {
         List<Comment> comments = commentRepository.findByBoardArticleIdAndParentIsNullOrderByCreateTimeAsc(articleId);
         List<CommentResponseDTO> commentResponseDTOS = new ArrayList<>();
         for (Comment comment : comments) {
-            commentResponseDTOS.add(convertToDTO(comment, currentMemberId));
+            commentResponseDTOS.add(convertToDTO(comment));
         }
         return commentResponseDTOS;
     }
 
     @Override
     @Transactional
-    public void deleteComment(Long id) {
-        commentRepository.deleteById(id);
+    public void deleteComment(Long commentId, Long memberId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_COMMENT_ID));
+
+        if (!comment.getMember().getId().equals(memberId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+
+        if (comment.getChildren().isEmpty()) {
+            commentRepository.delete(comment);
+        } else {
+            comment.setContent("삭제된 메세지입니다.");
+            commentRepository.save(comment);
+        }
     }
 
     @Override
@@ -105,10 +132,10 @@ public class CommentServiceImpl implements CommentService {
         return commentBuilder.build();
     }
 
-    private CommentResponseDTO convertToDTO(Comment comment, Long currentMemberId) {
+    private CommentResponseDTO convertToDTO(Comment comment) {
         List<CommentResponseDTO> childrenDTOs = new ArrayList<>();
         for (Comment child : comment.getChildren()) {
-            childrenDTOs.add(convertToDTO(child, currentMemberId));
+            childrenDTOs.add(convertToDTO(child));
         }
 
         return CommentResponseDTO.builder()
@@ -120,7 +147,6 @@ public class CommentServiceImpl implements CommentService {
                 .likeCount(comment.getLikeCount())
                 .parentId(comment.getParent() != null ? comment.getParent().getCommentId() : null)
                 .children(childrenDTOs)
-                .isAuthor(comment.getMember().getId().equals(currentMemberId))  // 작성자인지 아닌지 확인하는 메서드
                 .build();
     }
 }

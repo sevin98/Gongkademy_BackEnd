@@ -37,9 +37,11 @@ public enum ErrorCode {
     NOT_YET_LIKED(HttpStatus.CONFLICT, "아직 좋아요를 누르지 않았습니다"),
 
     //Pick
-    INVALID_PICK_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 픽입니다.");
+    INVALID_PICK_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 픽입니다."),
 
-
+    // 권한 관련
+    FORBIDDEN(HttpStatus.FORBIDDEN, "권한이 없습니다"),
+;
     private final HttpStatus httpStatus;
     private final String message;
 

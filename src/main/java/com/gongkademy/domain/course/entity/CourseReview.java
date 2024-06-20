@@ -52,10 +52,18 @@ public class CourseReview {
 	@OneToMany(mappedBy = "courseReview")
 	private List<CourseComment> courseComments = new ArrayList<>();
 
+	@OneToMany(mappedBy = "courseReview")
+	private List<CourseLike> courseLikes = new ArrayList<>();
+
 	// ==연관관계 메서드==//
 	public void addCourseComment(CourseComment courseComment) {
 		courseComments.add(courseComment);
 		courseComment.setCourseReview(this);
+	}
+
+	public void addCourseLike(CourseLike courseLike) {
+		courseLikes.add(courseLike);
+		courseLike.setCourseReview(this);
 	}
 
 	// ==비즈니스 로직==//

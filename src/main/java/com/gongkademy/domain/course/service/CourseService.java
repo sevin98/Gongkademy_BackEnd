@@ -4,8 +4,12 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 
+import com.gongkademy.domain.course.dto.request.CourseCommentRequestDTO;
+import com.gongkademy.domain.course.dto.request.CourseLikeRequestDTO;
 import com.gongkademy.domain.course.dto.request.CourseRequestDTO;
+import com.gongkademy.domain.course.dto.response.CourseCommentResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
+import com.gongkademy.domain.course.dto.response.CourseLikeResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseResponseDTO;
 import com.gongkademy.domain.course.dto.response.NoticeResponseDTO;
 import com.gongkademy.domain.course.entity.Course;
@@ -32,7 +36,9 @@ public interface CourseService {
 	
 	List<CourseResponseDTO> getRegistCoursesComplete(Long memberId);
 
+	CourseLikeResponseDTO like(CourseLikeRequestDTO courseLikeDTO);
 	
+	void deleteLike(Long id);
 	/*
 	 * TODO
 	 * - 강좌 소개 조회

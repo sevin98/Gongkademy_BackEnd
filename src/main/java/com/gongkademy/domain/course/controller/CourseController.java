@@ -13,11 +13,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gongkademy.domain.course.dto.request.CourseLikeRequestDTO;
 import com.gongkademy.domain.course.dto.request.CourseRequestDTO;
 import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
+import com.gongkademy.domain.course.dto.response.CourseLikeResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseResponseDTO;
 import com.gongkademy.domain.course.dto.response.NoticeResponseDTO;
-import com.gongkademy.domain.course.entity.Notice;
 import com.gongkademy.domain.course.service.CourseService;
 
 import lombok.RequiredArgsConstructor;
@@ -89,6 +90,19 @@ public class CourseController {
 	public ResponseEntity<?> getRegistCoursesNoComplete(@RequestBody Long memberId){
 		List<CourseResponseDTO> courseResponseDTOs = courseService.getRegistCoursesNoComplete(memberId);
 		return new ResponseEntity<>(courseResponseDTOs, HttpStatus.OK);
+	}
+	
+	// 4. 좋아요
+	@PostMapping("/like")
+	public ResponseEntity<?> Like(@RequestBody CourseLikeRequestDTO courseLikeDTO){
+		CourseLikeResponseDTO CourseLikeResponseDTO = courseService.like(courseLikeDTO);
+		return new ResponseEntity<>(CourseLikeResponseDTO, HttpStatus.CREATED);
+	}
+	
+	@DeleteMapping("/like/{course_like_id}")
+	public ResponseEntity<?> LikeCancel(@PathVariable("course_like_id") Long id){
+		courseService.deleteLike(id);
+		return ResponseEntity.noContent().build();
 	}
 	
 	// - 수강 완료 강좌

@@ -10,17 +10,28 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.gongkademy.domain.course.dto.request.CourseCommentRequestDTO;
+import com.gongkademy.domain.course.dto.request.CourseLikeRequestDTO;
 import com.gongkademy.domain.course.dto.request.CourseRequestDTO;
+import com.gongkademy.domain.course.dto.response.CourseCommentResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
+import com.gongkademy.domain.course.dto.response.CourseLikeResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseResponseDTO;
 import com.gongkademy.domain.course.dto.response.NoticeResponseDTO;
 import com.gongkademy.domain.course.entity.Course;
+import com.gongkademy.domain.course.entity.CourseComment;
+import com.gongkademy.domain.course.entity.CourseLike;
+import com.gongkademy.domain.course.entity.CourseLikeCateg;
+import com.gongkademy.domain.course.entity.CourseReview;
 import com.gongkademy.domain.course.entity.Lecture;
 import com.gongkademy.domain.course.entity.Notice;
 import com.gongkademy.domain.course.entity.RegistCourse;
 import com.gongkademy.domain.course.entity.RegistLecture;
 import com.gongkademy.domain.course.entity.Scrap;
+import com.gongkademy.domain.course.repository.CourseCommentRepository;
+import com.gongkademy.domain.course.repository.CourseLikeRepository;
 import com.gongkademy.domain.course.repository.CourseRepository;
+import com.gongkademy.domain.course.repository.CourseReviewRepository;
 import com.gongkademy.domain.course.repository.LectureRepository;
 import com.gongkademy.domain.course.repository.NoticeRepository;
 import com.gongkademy.domain.course.repository.RegistCourseRepository;
@@ -43,6 +54,9 @@ public class CourseServiceImpl implements CourseService {
 	private final CourseRepository courseRepository;
 	private final NoticeRepository noticeRepository;
 	private final LectureRepository lectureRepository;
+	private final CourseLikeRepository courseLikeRepository;
+	private final CourseReviewRepository courseReviewRepository;
+	private final CourseCommentRepository courseCommentRepository;
 
 	@Override
 	public List<CourseResponseDTO> getAllCourses(Long memberId) {
@@ -194,6 +208,37 @@ public class CourseServiceImpl implements CourseService {
         }
         registLectureRepository.saveAll(registCourse.getRegistLectures());
     }
+	
+	@Override
+	public CourseLikeResponseDTO like(CourseLikeRequestDTO courseLikeRequestDTO) {
+		if(courseLikeRequestDTO.getLikeCateg()== CourseLikeCateg.REVIEW) {
+			if (courseLikeRepository.existsByMemberIdAndReviewId(courseLikeRequestDTO.getMemberId(), courseLikeRequestDTO.getCourseReviewId())) {
+				new IllegalArgumentException("이미 좋아요를 누른 수강평입니다.");
+			} else {
+		        CourseLike like = convertToEntityCourseLike(courseLikeRequestDTO);
+		        CourseLike saveLike = courseLikeRepository.save(like);
+		        return convertToDTOCourseLike(saveLike);
+			}
+		} else if(courseLikeRequestDTO.getLikeCateg()== CourseLikeCateg.COMMENT) {
+			if (courseLikeRepository.existsByMemberIdAndCourseCommentId(courseLikeRequestDTO.getMemberId(), courseLikeRequestDTO.getCourseCommentId())) {
+				new IllegalArgumentException("이미 좋아요를 누른 댓글입니다.");
+			} else {
+		        CourseLike like = convertToEntityCourseLike(courseLikeRequestDTO);
+		        CourseLike saveLike = courseLikeRepository.save(like);
+		        return convertToDTOCourseLike(saveLike);
+			}
+		}
+		return null;
+	}
+	
+	@Override
+	public void deleteLike(Long id) {
+		if(courseLikeRepository.existsByCourseLikeId(id)) {
+			courseLikeRepository.deleteById(id);
+		} else {
+			new IllegalArgumentException("좋아요를 누른 적이 없습니다.");
+		}
+	}
 
 	private CourseResponseDTO convertToDTO(Course course) {
 		CourseResponseDTO courseResponseDTO = new CourseResponseDTO();
@@ -240,4 +285,48 @@ public class CourseServiceImpl implements CourseService {
 		scrap.setMember(member);
 		return scrap;
 	}
+	
+    private CourseLike convertToEntityCourseLike(CourseLikeRequestDTO courseLikeDTO) {
+    	CourseLike like = new CourseLike();
+    	
+    	like.setLikeCateg(courseLikeDTO.getLikeCateg());
+    	
+    	if(courseLikeDTO.getLikeCateg()== CourseLikeCateg.REVIEW) {
+    		Optional<CourseReview> reviewOptional = courseReviewRepository.findById(courseLikeDTO.getCourseReviewId());
+    		if (reviewOptional.isPresent()) {
+    			like.setCourseReview(reviewOptional.get());
+    		} else {
+    			throw new IllegalStateException("리뷰 찾을 수 없음");
+    		}
+    	}
+        
+    	if(courseLikeDTO.getLikeCateg()== CourseLikeCateg.COMMENT) {
+    		Optional<CourseComment> commentOptional = courseCommentRepository.findById(courseLikeDTO.getCourseCommentId());
+    		if (commentOptional.isPresent()) {
+    			like.setCourseComment(commentOptional.get());
+    		} else {
+    			throw new IllegalStateException("댓글 찾을 수 없음");
+    		}
+    	}
+        
+        Optional<Member> memberOptional = memberRepository.findById(courseLikeDTO.getMemberId());
+        if (memberOptional.isPresent()) {
+        	like.setMember(memberOptional.get());
+        } else {
+            throw new IllegalStateException("사용자 찾을 수 없음");
+        }
+        
+        return like;
+    }
+
+    private CourseLikeResponseDTO convertToDTOCourseLike(CourseLike courseLike) {
+    	CourseLikeResponseDTO courseLikeResponseDTO = new CourseLikeResponseDTO();
+    	courseLikeResponseDTO.setCourseLikeId(courseLike.getId());
+    	courseLikeResponseDTO.setLikeCateg(courseLike.getLikeCateg());
+    	courseLikeResponseDTO.setCourseReviewId(courseLike.getCourseReview().getId());
+    	courseLikeResponseDTO.setCourseCommentId(courseLike.getCourseComment().getId());
+    	courseLikeResponseDTO.setMemberId(courseLike.getMember().getId());
+        return courseLikeResponseDTO;
+    }
+
 }

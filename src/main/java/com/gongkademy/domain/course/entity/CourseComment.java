@@ -1,5 +1,8 @@
 package com.gongkademy.domain.course.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.gongkademy.domain.member.entity.Member;
 
 import jakarta.persistence.Column;
@@ -11,6 +14,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,6 +51,15 @@ public class CourseComment {
 	private String content;
 	
 	private int likeCount;
+	
+	@OneToMany(mappedBy = "courseComment")
+	private List<CourseLike> courseLikes = new ArrayList<>();
+
+	// ==연관관계 메서드==//
+	public void addCourseLike(CourseLike courseLike) {
+		courseLikes.add(courseLike);
+		courseLike.setCourseComment(this);
+	}
 	
 	//==비즈니스 로직==//
 	/*

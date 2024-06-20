@@ -5,6 +5,7 @@ import com.gongkademy.domain.community.entity.comment.Comment;
 import com.gongkademy.domain.community.entity.comment.CommentLike;
 import com.gongkademy.domain.community.entity.pick.Pick;
 import com.gongkademy.domain.course.entity.CourseComment;
+import com.gongkademy.domain.course.entity.CourseLike;
 import com.gongkademy.domain.course.entity.CourseReview;
 import com.gongkademy.domain.course.entity.RegistCourse;
 import com.gongkademy.domain.course.entity.RegistLecture;
@@ -113,6 +114,10 @@ public class Member {
 	@OneToMany(mappedBy="member")
     @Builder.Default
 	private List<Scrap> scraps = new ArrayList<>();
+	
+	@OneToMany(mappedBy="member")
+    @Builder.Default
+	private List<CourseLike> courseLikes = new ArrayList<>();
 
     // 연관관계 편의 메서드
     public void addPick(Pick pick) {
@@ -153,6 +158,11 @@ public class Member {
     public void addScrap(Scrap scrap) {
         scraps.add(scrap);
         scrap.setMember(this);
+    }
+    
+    public void addCourseLike(CourseLike courseLike) {
+        courseLikes.add(courseLike);
+        courseLike.setMember(this);
     }
 
 }

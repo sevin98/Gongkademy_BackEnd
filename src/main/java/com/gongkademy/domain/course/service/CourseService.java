@@ -36,7 +36,7 @@ public interface CourseService {
 	
 	List<CourseResponseDTO> getRegistCoursesComplete(Long memberId);
 
-	CourseLikeResponseDTO like(CourseLikeRequestDTO courseLikeDTO);
+	CourseLikeResponseDTO like(CourseLikeRequestDTO courseLikeRequestDTO);
 	
 	void deleteLike(Long id);
 	/*

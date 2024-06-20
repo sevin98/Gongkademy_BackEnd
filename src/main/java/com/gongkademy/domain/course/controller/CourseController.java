@@ -94,8 +94,8 @@ public class CourseController {
 	
 	// 4. 좋아요
 	@PostMapping("/like")
-	public ResponseEntity<?> Like(@RequestBody CourseLikeRequestDTO courseLikeDTO){
-		CourseLikeResponseDTO CourseLikeResponseDTO = courseService.like(courseLikeDTO);
+	public ResponseEntity<?> Like(@RequestBody CourseLikeRequestDTO courseLikeRequestDTO){
+		CourseLikeResponseDTO CourseLikeResponseDTO = courseService.like(courseLikeRequestDTO);
 		return new ResponseEntity<>(CourseLikeResponseDTO, HttpStatus.CREATED);
 	}
 	

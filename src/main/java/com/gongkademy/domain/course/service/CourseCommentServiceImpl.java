@@ -55,7 +55,7 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<CourseCommentResponseDTO> getAllComments(CommentCateg categ, Long id) {
-        List<CourseComment> comments = courseCommentRepository.findAllByCategAndId(categ, id);
+        List<CourseComment> comments = courseCommentRepository.findAllByCommentCategAndId(categ, id);
         List<CourseCommentResponseDTO> courseCommentResponseDTOs = new ArrayList<>();
         for (CourseComment comment : comments) {
         	courseCommentResponseDTOs.add(convertToDTO(comment));
@@ -71,20 +71,22 @@ public class CourseCommentServiceImpl implements CourseCommentService {
     private CourseComment convertToEntity(CourseCommentRequestDTO courseCommentRequestDTO) {
     	CourseComment comment = new CourseComment();
     	
-        Optional<CourseReview> reviewOptional = courseReviewRepository.findById(courseCommentRequestDTO.getCourseReviewId());
-        if (reviewOptional.isPresent()) {
-        	comment.setCourseReview(reviewOptional.get());
-        } else {
-            throw new IllegalStateException("리뷰 찾을 수 없음");
-        }
-
-        Optional<Notice> noticeOptional = noticeRepository.findById(courseCommentRequestDTO.getNoticeId());
-        if (noticeOptional.isPresent()) {
-        	comment.setNotice(noticeOptional.get());
-        } else {
-            throw new IllegalStateException("공지사항 찾을 수 없음");
-        }
-        
+    	if(courseCommentRequestDTO.getCommentType()==CommentCateg.REVIEW) {
+    		Optional<CourseReview> reviewOptional = courseReviewRepository.findById(courseCommentRequestDTO.getCourseReviewId());
+    		if (reviewOptional.isPresent()) {
+    			comment.setCourseReview(reviewOptional.get());
+    		} else {
+    			throw new IllegalStateException("리뷰 찾을 수 없음");
+    		}
+    	}
+    	if(courseCommentRequestDTO.getCommentType()==CommentCateg.NOTICE) {
+    		Optional<Notice> noticeOptional = noticeRepository.findById(courseCommentRequestDTO.getNoticeId());
+    		if (noticeOptional.isPresent()) {
+    			comment.setNotice(noticeOptional.get());
+    		} else {
+    			throw new IllegalStateException("공지사항 찾을 수 없음");
+    		}
+    	}
         comment.setCommentCateg(courseCommentRequestDTO.getCommentType());
         Optional<Member> memberOptional = memberRepository.findById(courseCommentRequestDTO.getMemberId());
         if (memberOptional.isPresent()) {

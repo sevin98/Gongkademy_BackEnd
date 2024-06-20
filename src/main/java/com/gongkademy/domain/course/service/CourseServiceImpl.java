@@ -10,10 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.gongkademy.domain.course.dto.request.CourseCommentRequestDTO;
 import com.gongkademy.domain.course.dto.request.CourseLikeRequestDTO;
 import com.gongkademy.domain.course.dto.request.CourseRequestDTO;
-import com.gongkademy.domain.course.dto.response.CourseCommentResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseLikeResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseResponseDTO;
@@ -211,20 +209,32 @@ public class CourseServiceImpl implements CourseService {
 	
 	@Override
 	public CourseLikeResponseDTO like(CourseLikeRequestDTO courseLikeRequestDTO) {
+        Member member = memberRepository.findById(courseLikeRequestDTO.getMemberId())
+                .orElseThrow(() -> new IllegalArgumentException("사용자 찾을 수 없음"));
+		
 		if(courseLikeRequestDTO.getLikeCateg()== CourseLikeCateg.REVIEW) {
+	        CourseReview review = courseReviewRepository.findById(courseLikeRequestDTO.getCourseReviewId())
+	                .orElseThrow(() -> new IllegalArgumentException("리뷰 찾을 수 없음"));
+			
 			if (courseLikeRepository.existsByMemberIdAndReviewId(courseLikeRequestDTO.getMemberId(), courseLikeRequestDTO.getCourseReviewId())) {
 				new IllegalArgumentException("이미 좋아요를 누른 수강평입니다.");
 			} else {
 		        CourseLike like = convertToEntityCourseLike(courseLikeRequestDTO);
 		        CourseLike saveLike = courseLikeRepository.save(like);
+		        review.increaseLikeCount();
+		        courseReviewRepository.save(review);
 		        return convertToDTOCourseLike(saveLike);
 			}
 		} else if(courseLikeRequestDTO.getLikeCateg()== CourseLikeCateg.COMMENT) {
+	        CourseComment comment = courseCommentRepository.findById(courseLikeRequestDTO.getCourseCommentId())
+	                .orElseThrow(() -> new IllegalArgumentException("댓글 찾을 수 없음"));
 			if (courseLikeRepository.existsByMemberIdAndCourseCommentId(courseLikeRequestDTO.getMemberId(), courseLikeRequestDTO.getCourseCommentId())) {
 				new IllegalArgumentException("이미 좋아요를 누른 댓글입니다.");
 			} else {
 		        CourseLike like = convertToEntityCourseLike(courseLikeRequestDTO);
 		        CourseLike saveLike = courseLikeRepository.save(like);
+		        comment.increaseLikeCount();
+		        courseCommentRepository.save(comment);
 		        return convertToDTOCourseLike(saveLike);
 			}
 		}
@@ -233,8 +243,22 @@ public class CourseServiceImpl implements CourseService {
 	
 	@Override
 	public void deleteLike(Long id) {
-		if(courseLikeRepository.existsByCourseLikeId(id)) {
+        Optional<CourseLike> likeOptional = courseLikeRepository.findById(id);
+		
+		if(likeOptional.isPresent()) {
+			CourseLike like = likeOptional.get();
 			courseLikeRepository.deleteById(id);
+			if(like.getLikeCateg()==CourseLikeCateg.REVIEW) {
+		        CourseReview review = courseReviewRepository.findById(like.getCourseReview().getId())
+		                .orElseThrow(() -> new IllegalArgumentException("리뷰 찾을 수 없음"));
+		        review.decreaseLikeCount();
+		        courseReviewRepository.save(review);
+			} else if (like.getLikeCateg()==CourseLikeCateg.COMMENT) {
+				CourseComment comment = courseCommentRepository.findById(like.getCourseComment().getId())
+		                .orElseThrow(() -> new IllegalArgumentException("댓글 찾을 수 없음"));
+		        comment.decreaseLikeCount();
+		        courseCommentRepository.save(comment);
+			}
 		} else {
 			new IllegalArgumentException("좋아요를 누른 적이 없습니다.");
 		}

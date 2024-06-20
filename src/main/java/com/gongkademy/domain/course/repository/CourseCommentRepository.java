@@ -11,5 +11,5 @@ import com.gongkademy.domain.course.entity.CourseReview;
 
 public interface CourseCommentRepository extends JpaRepository<CourseComment, Long> {
 	Optional<CourseComment> findById(Long id);
-	List<CourseComment> findAllByCategAndId(CommentCateg categ, Long id);
+	List<CourseComment> findAllByCommentCategAndId(CommentCateg categ, Long id);
 }

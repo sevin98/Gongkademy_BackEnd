@@ -9,6 +9,4 @@ public interface CourseLikeRepository extends JpaRepository<CourseLike, Long>{
 	Boolean existsByMemberIdAndReviewId(Long memberId, Long reviewId);
 	
 	Boolean existsByMemberIdAndCourseCommentId(Long memberId, Long courseCommentId);
-	
-	Boolean existsByCourseLikeId(Long courseLikeId);
 }

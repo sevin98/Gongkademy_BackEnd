@@ -1,7 +1,7 @@
 package com.gongkademy.domain.community.service;
 
-import com.gongkademy.domain.community.dto.request.QnaBoardRequestDto;
-import com.gongkademy.domain.community.dto.response.QnaBoardResponseDto;
+import com.gongkademy.domain.community.dto.request.QnaBoardRequestDTO;
+import com.gongkademy.domain.community.dto.response.QnaBoardResponseDTO;
 import com.gongkademy.domain.community.entity.board.QnaBoard;
 import com.gongkademy.domain.community.entity.pick.Pick;
 import com.gongkademy.domain.community.entity.pick.PickType;
@@ -34,30 +34,30 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
     // 전체 QnaBoard 조회
     @Override
-    public List<QnaBoardResponseDto> findQnaBoardsAll(int pageNo, String criteria) {
+    public List<QnaBoardResponseDTO> findAllQnaBoards(int pageNo, String criteria) {
         // 정렬 기준 내림차순 정렬
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
-        Page<QnaBoardResponseDto> page = qnaBoardRepository.findAll(pageable).map(this::convertToDto);
+        Page<QnaBoardResponseDTO> page = qnaBoardRepository.findAll(pageable).map(this::convertToDTO);
         return page.getContent();
     }
 
     // QnaBoard 생성
     @Override
-    public QnaBoardResponseDto createQnaBoard(QnaBoardRequestDto qnaBoardRequestDto) {
+    public QnaBoardResponseDTO createQnaBoard(QnaBoardRequestDTO qnaBoardRequestDto) {
         QnaBoard qnaBoard = convertToEntity(qnaBoardRequestDto);
-        QnaBoard saveBoard = qnaBoardRepository.save(qnaBoard);
-        return convertToDto(saveBoard);
+        QnaBoard savedBoard = qnaBoardRepository.save(qnaBoard);
+        return convertToDTO(savedBoard);
     }
 
     // QnaBoard 조회
     @Override
-    public QnaBoardResponseDto findQnaBoard(Long articleId) {
+    public QnaBoardResponseDTO findQnaBoard(Long articleId) {
         Optional<QnaBoard> optionalQnaBoard = qnaBoardRepository.findById(articleId);
 
         if(optionalQnaBoard.isPresent()) {
             QnaBoard qnaBoard = optionalQnaBoard.get();
             qnaBoard.setHit(qnaBoard.getHit() + 1);
-            return convertToDto(qnaBoard);
+            return convertToDTO(qnaBoard);
         }
 
         throw new CustomException(ErrorCode.INVALID_BOARD_ID);
@@ -65,7 +65,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
     // QnaBoard 수정
     @Override
-    public Long updateQnaBoard(Long articleId, QnaBoardRequestDto qnaBoardRequestDto) {
+    public Long updateQnaBoard(Long articleId, QnaBoardRequestDTO qnaBoardRequestDto) {
         Optional<QnaBoard> optQnaBoard = qnaBoardRepository.findById(articleId);
 
         // articleId에 해당하는 게시글이 없는 경우
@@ -75,6 +75,11 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         QnaBoard qnaBoard = optQnaBoard.get();
         qnaBoard.update(qnaBoardRequestDto);
         return qnaBoard.getArticleId();
+    }
+
+    // QnaBoard 삭제
+    public void deleteQnaBoard(Long articleId) {
+        qnaBoardRepository.deleteById(articleId);
     }
 
     @Override
@@ -124,15 +129,15 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
     // 좋아요한 게시글 조회
     @Override
-    public List<QnaBoardResponseDto> getLikeBoards(Long memberId) {
+    public List<QnaBoardResponseDTO> getLikeBoards(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
         List<Pick> likes = pickRepository.findAllByMemberAndPickType(member, PickType.LIKE);
-        List<QnaBoardResponseDto> likeBoardDTOs = new ArrayList<>();
+        List<QnaBoardResponseDTO> likeBoardDTOs = new ArrayList<>();
 
         for (Pick like : likes) {
-            likeBoardDTOs.add(convertToDto((QnaBoard) like.getBoard()));
+            likeBoardDTOs.add(convertToDTO((QnaBoard) like.getBoard()));
         }
 
         return likeBoardDTOs;
@@ -140,28 +145,25 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
     // 스크랩한 게시글 조회
     @Override
-    public List<QnaBoardResponseDto> getScrapBoards(Long memberId) {
+    public List<QnaBoardResponseDTO> getScrapBoards(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
         List<Pick> likes = pickRepository.findAllByMemberAndPickType(member, PickType.SCRAP);
-        List<QnaBoardResponseDto> scrapBoardDTOs = new ArrayList<>();
+        List<QnaBoardResponseDTO> scrapBoardDTOs = new ArrayList<>();
 
         for (Pick like : likes) {
-            scrapBoardDTOs.add(convertToDto((QnaBoard) like.getBoard()));
+            scrapBoardDTOs.add(convertToDTO((QnaBoard) like.getBoard()));
         }
 
         return scrapBoardDTOs;
 
     }
 
-    // QnaBoard 삭제
-    public void deleteQnaBoard(Long articleId) {
-        qnaBoardRepository.deleteById(articleId);
-    }
 
 
-    private QnaBoard convertToEntity(QnaBoardRequestDto qnaBoardRequestDto) {
+
+    private QnaBoard convertToEntity(QnaBoardRequestDTO qnaBoardRequestDto) {
         Member member = memberRepository.findById(qnaBoardRequestDto.getMemberId())
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
@@ -169,7 +171,9 @@ public class QnaBoardServiceImpl implements QnaBoardService {
                 boardType(qnaBoardRequestDto.getBoardType())
                 .member(member)
                 .title(qnaBoardRequestDto.getTitle())
-                .content(qnaBoardRequestDto.getTitle())
+                .content(qnaBoardRequestDto.getContent())
+                .lectureTitle(qnaBoardRequestDto.getLectureTitle())
+                .courseTitle(qnaBoardRequestDto.getCourseTitle())
                 .hit(0L)
                 .likeCount(0L)
                 .scrapCount(0L)
@@ -177,14 +181,19 @@ public class QnaBoardServiceImpl implements QnaBoardService {
     }
 
 
-    private QnaBoardResponseDto convertToDto(QnaBoard qnaBoard) {
-        return QnaBoardResponseDto.builder().
+    private QnaBoardResponseDTO convertToDTO(QnaBoard qnaBoard) {
+        return QnaBoardResponseDTO.builder().
                 boardType(qnaBoard.getBoardType())
                 .articleId(qnaBoard.getArticleId())
                 .memberId(qnaBoard.getMember().getId())
+                .nickname(qnaBoard.getMember().getNickname())
                 .title(qnaBoard.getTitle())
                 .content(qnaBoard.getContent())
+                .lectureTitle(qnaBoard.getLectureTitle())
+                .courseTitle(qnaBoard.getCourseTitle())
                 .likeCount(qnaBoard.getLikeCount())
+                .commentCount(qnaBoard.getCommentCount())
+                .scrapCount(qnaBoard.getScrapCount())
                 .hit(qnaBoard.getHit())
                 .createTime(qnaBoard.getCreateTime()).build();
 

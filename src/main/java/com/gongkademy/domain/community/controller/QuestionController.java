@@ -1,8 +1,7 @@
 package com.gongkademy.domain.community.controller;
 
-import com.gongkademy.domain.community.dto.request.QnaBoardRequestDto;
-import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
-import com.gongkademy.domain.community.dto.response.QnaBoardResponseDto;
+import com.gongkademy.domain.community.dto.request.QnaBoardRequestDTO;
+import com.gongkademy.domain.community.dto.response.QnaBoardResponseDTO;
 import com.gongkademy.domain.community.service.QnaBoardService;
 import com.gongkademy.domain.member.dto.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/community")
+@RequestMapping("/community/question")
 @RequiredArgsConstructor
 @Slf4j
 public class QuestionController {
@@ -26,31 +25,31 @@ public class QuestionController {
     private final String REQUEST_PARAM_PAGE = "page";
     private final String REQUEST_PARAM_CRITERIA = "criteria";
     // Qna 전체 리스트 반환
-    @GetMapping("/question")
+    @GetMapping("")
     public ResponseEntity<?> getAllQna( @RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
                                            @RequestParam(defaultValue = BASE_CRITERIA, value = REQUEST_PARAM_CRITERIA) String criteria){
-        List<QnaBoardResponseDto> result = qnaboardService.findQnaBoardsAll(pageNo, criteria);
+        List<QnaBoardResponseDTO> result = qnaboardService.findAllQnaBoards(pageNo, criteria);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     // Qna 상세 조회
-    @GetMapping("/question/{articleNo}")
+    @GetMapping("/{articleNo}")
     public ResponseEntity<?> getQna(@PathVariable Long articleNo) {
-        QnaBoardResponseDto result = qnaboardService.findQnaBoard(articleNo);
+        QnaBoardResponseDTO result = qnaboardService.findQnaBoard(articleNo);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     // Qna 작성
-    @PostMapping("/question")
-    public ResponseEntity<?> createQna(@RequestBody QnaBoardRequestDto qnaBoardRequestDto) {
-        QnaBoardResponseDto qnaBoardResponseDto = qnaboardService.createQnaBoard(qnaBoardRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(qnaBoardResponseDto);
+    @PostMapping("")
+    public ResponseEntity<?> createQna(@RequestBody QnaBoardRequestDTO qnaBoardRequestDTO) {
+        QnaBoardResponseDTO result = qnaboardService.createQnaBoard(qnaBoardRequestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     // Qna 수정
-    @PatchMapping("/question/{articleNo}")
-    public ResponseEntity<?> updateQna(@PathVariable Long articleNo, @RequestBody QnaBoardRequestDto qnaBoardRequestDto) {
-        Long updateArticleNo = qnaboardService.updateQnaBoard(articleNo, qnaBoardRequestDto);
+    @PatchMapping("/{articleNo}")
+    public ResponseEntity<?> updateQna(@PathVariable Long articleNo, @RequestBody QnaBoardRequestDTO qnaBoardRequestDTO) {
+        Long updateArticleNo = qnaboardService.updateQnaBoard(articleNo, qnaBoardRequestDTO);
 
         // 해당 Qna 게시글이 없는 경우
         if (updateArticleNo == null) {
@@ -61,7 +60,7 @@ public class QuestionController {
     }
 
     // Qna 삭제
-    @DeleteMapping("/question/{articleNo}")
+    @DeleteMapping("/{articleNo}")
     public ResponseEntity<?> deleteQna(@PathVariable Long articleNo) {
         qnaboardService.deleteQnaBoard(articleNo);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -86,17 +85,17 @@ public class QuestionController {
 
     // Qna 좋아요한 게시글 가져오기
     @GetMapping("/{articleId}/liked")
-    public ResponseEntity<List<QnaBoardResponseDto>> getLikeBoards(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam String boardType) {
+    public ResponseEntity<List<QnaBoardResponseDTO>> getLikeBoards(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam String boardType) {
         Long currentMemberId = principalDetails.getMemberId();
-        List<QnaBoardResponseDto> likeBoards = qnaboardService.getLikeBoards(currentMemberId);
+        List<QnaBoardResponseDTO> likeBoards = qnaboardService.getLikeBoards(currentMemberId);
         return ResponseEntity.ok(likeBoards);
     }
 
     // Qna 스크랩한 게시글 가져오기
     @GetMapping("/{articleId}/scrapped")
-    public ResponseEntity<List<QnaBoardResponseDto>> getScrapBoards(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam String boardType) {
+    public ResponseEntity<List<QnaBoardResponseDTO>> getScrapBoards(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam String boardType) {
         Long currentMemberId = principalDetails.getMemberId();
-        List<QnaBoardResponseDto> scrapBoards = qnaboardService.getScrapBoards(currentMemberId);
+        List<QnaBoardResponseDTO> scrapBoards = qnaboardService.getScrapBoards(currentMemberId);
         return ResponseEntity.ok(scrapBoards);
     }
 }

@@ -1,6 +1,6 @@
 package com.gongkademy.domain.community.entity.board;
 
-import com.gongkademy.domain.community.dto.request.QnaBoardRequestDto;
+import com.gongkademy.domain.community.dto.request.QnaBoardRequestDTO;
 import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +17,7 @@ public class QnaBoard extends Board {
     private String lectureTitle;
     private String courseTitle;
 
-    public void update(QnaBoardRequestDto qnaBoardRequestDto) {
+    public void update(QnaBoardRequestDTO qnaBoardRequestDto) {
         this.setTitle(qnaBoardRequestDto.getTitle());
         this.setContent(qnaBoardRequestDto.getContent());
         this.setLectureTitle(qnaBoardRequestDto.getLectureTitle());

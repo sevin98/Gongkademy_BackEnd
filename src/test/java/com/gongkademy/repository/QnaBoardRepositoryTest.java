@@ -1,6 +1,6 @@
 package com.gongkademy.repository;
 
-import com.gongkademy.domain.community.dto.request.QnaBoardRequestDto;
+import com.gongkademy.domain.community.dto.request.QnaBoardRequestDTO;
 import com.gongkademy.domain.community.entity.board.BoardType;
 import com.gongkademy.domain.community.entity.board.QnaBoard;
 import com.gongkademy.domain.community.repository.QnaBoardRepository;
@@ -98,7 +98,7 @@ class QnaBoardRepositoryTest {
         // 게시글 객체 저장
         QnaBoard savedQnaBoard = qnaBoardRepository.save(qnaBoard);
         // 임의로 Request를 생성
-        QnaBoardRequestDto qnaBoardRequestDto = new QnaBoardRequestDto();
+        QnaBoardRequestDTO qnaBoardRequestDto = new QnaBoardRequestDTO();
         qnaBoardRequestDto.setMemberId(member.getId());
         qnaBoardRequestDto.setBoardType(qnaBoard.getBoardType());
         qnaBoardRequestDto.setTitle(updatedTitle);

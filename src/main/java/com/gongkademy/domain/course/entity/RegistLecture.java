@@ -42,4 +42,23 @@ public class RegistLecture {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="member_id")
 	private Member member;
+	
+	public void updateSavePoint(Long savePoint) {
+		this.savePoint = savePoint;
+		this.recentDate = LocalDateTime.now();
+		
+		if(savePoint > this.maxTime) {
+			this.maxTime = savePoint;
+			this.updateRegistCourse();
+		}
+	}
+
+	public void updateComplete() {
+		this.complete = true;
+	}
+
+	public void updateRegistCourse() {
+		// maxTime 바뀌면 진행률 변경
+		this.registCourse.updateProgress();
+	}
 }

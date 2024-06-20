@@ -48,4 +48,14 @@ public class RegistCourse {
         registLecture.setRegistCourse(this);
         this.registLectures.add(registLecture);
     }
+
+	public void updateProgress() {
+		this.progressTime = registLectures.stream()
+				.mapToLong(RegistLecture::getMaxTime)
+				.sum();
+		
+        this.progressPercent = Math.round(((double) this.progressTime / this.course.getTotalCourseTime()) * 10000) / 100.0;
+
+        if(this.progressPercent == 100) this.complete = true;
+	}
 }

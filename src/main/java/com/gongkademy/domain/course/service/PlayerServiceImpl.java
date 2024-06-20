@@ -1,5 +1,6 @@
 package com.gongkademy.domain.course.service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import com.gongkademy.domain.course.entity.Course;
 import com.gongkademy.domain.course.entity.Lecture;
 import com.gongkademy.domain.course.entity.RegistCourse;
 import com.gongkademy.domain.course.entity.RegistLecture;
+import com.gongkademy.domain.course.repository.CourseRepository;
 import com.gongkademy.domain.course.repository.LectureRepository;
 import com.gongkademy.domain.course.repository.RegistCourseRepository;
 import com.gongkademy.domain.course.repository.RegistLectureRepository;
@@ -21,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class PlayerServiceImpl implements PlayerService{
 	
 	private final LectureRepository lectureRepository;
+	private final CourseRepository courseRepository;
 	private final RegistCourseRepository registCourseRepository;
 	private final RegistLectureRepository registLectureRepository;
 	
@@ -60,7 +63,13 @@ public class PlayerServiceImpl implements PlayerService{
 		RegistLecture registLecture = registLectureRepository.findByLectureIdAndMemberId(lectureId, memberId)
 				.orElseThrow(() -> new IllegalArgumentException("수강 강의 찾을 수 없음"));
 
-		registLecture.setSavePoint(playerRequestDTO.getSavePoint());
+		registLecture.updateSavePoint(playerRequestDTO.getSavePoint());
+		registLecture.updateRegistCourse();
+		
+		Optional<Lecture> lecture = lectureRepository.findById(lectureId);
+		
+		if(lecture.get().getTime() == registLecture.getSavePoint()) registLecture.updateComplete();
+		
 		registLectureRepository.save(registLecture);
 	}
 
@@ -92,7 +101,6 @@ public class PlayerServiceImpl implements PlayerService{
 		return playerResponseDTO;
 	}
 
-
 	private PlayerResponseDTO convertToDTO(Lecture lecture, RegistLecture registLecture) {
 		PlayerResponseDTO dto = new PlayerResponseDTO();
 		
@@ -103,6 +111,14 @@ public class PlayerServiceImpl implements PlayerService{
 		dto.setTime(lecture.getTime());
 		dto.setLink(lecture.getLink());
 		dto.setTitle(lecture.getTitle());
+	
+		Optional<RegistCourse> registCourse = registCourseRepository.findById(registLecture.getRegistCourse().getId());
+		Optional<Course> course = courseRepository.findById(lecture.getCourse().getId());
+		
+		dto.setProgressTime(registCourse.get().getProgressTime());
+		dto.setProgressPercent(registCourse.get().getProgressPercent());
+		dto.setTotalCourseTime(course.get().getTotalCourseTime());
+
 		return dto;
 	}
 }

@@ -6,7 +6,7 @@ import com.gongkademy.domain.course.dto.request.CourseReviewRequestDTO;
 import com.gongkademy.domain.course.dto.response.CourseReviewResponseDTO;
 
 public interface CourseReviewService {
-	public CourseReviewResponseDTO createReview(CourseReviewRequestDTO courseReviewRequestDTO);
+	public CourseReviewResponseDTO createReview(CourseReviewRequestDTO courseReviewRequestDTO, Long currentMemberId);
 
 	public CourseReviewResponseDTO updateReview(Long id, CourseReviewRequestDTO courseReviewRequestDTO);
 

@@ -8,7 +8,7 @@ import com.gongkademy.domain.course.entity.CommentCateg;
 
 public interface CourseCommentService {
 
-	public CourseCommentResponseDTO createComment(CourseCommentRequestDTO courseCommentRequestDTO);
+	public CourseCommentResponseDTO createComment(CourseCommentRequestDTO courseCommentRequestDTO, Long currentMemberId);
 
 	public CourseCommentResponseDTO updateComment(Long id, CourseCommentRequestDTO courseCommentRequestDTO);
 

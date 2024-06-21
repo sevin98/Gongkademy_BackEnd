@@ -34,8 +34,9 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 	private final int pageSize = 3;
 
 	@Override
-	public CourseReviewResponseDTO createReview(CourseReviewRequestDTO courseReviewRequestDTO) {
+	public CourseReviewResponseDTO createReview(CourseReviewRequestDTO courseReviewRequestDTO, Long currentMemberId) {
 		CourseReview review = convertToEntity(courseReviewRequestDTO);
+		review.setMember(memberRepository.findById(currentMemberId).get());
 		CourseReview saveReview = courseReviewRepository.save(review);
 		return convertToDTO(saveReview);
 	}

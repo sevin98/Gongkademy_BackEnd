@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,6 +18,7 @@ import com.gongkademy.domain.course.dto.request.CourseCommentRequestDTO;
 import com.gongkademy.domain.course.dto.response.CourseCommentResponseDTO;
 import com.gongkademy.domain.course.entity.CommentCateg;
 import com.gongkademy.domain.course.service.CourseCommentService;
+import com.gongkademy.domain.member.dto.PrincipalDetails;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,8 +30,9 @@ public class CourseCommentController {
     private final CourseCommentService courseCommentService;
 
     @PostMapping
-    public ResponseEntity<?> createComment(@RequestBody CourseCommentRequestDTO courseCommentRequestDTO) {
-        CourseCommentResponseDTO courseCommentResponseDTO = courseCommentService.createComment(courseCommentRequestDTO);
+    public ResponseEntity<?> createComment(@RequestBody CourseCommentRequestDTO courseCommentRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Long currentMemberId = principalDetails.getMemberId(); 
+    	CourseCommentResponseDTO courseCommentResponseDTO = courseCommentService.createComment(courseCommentRequestDTO, currentMemberId);
         return new ResponseEntity<>(courseCommentResponseDTO, HttpStatus.CREATED);
     }
 

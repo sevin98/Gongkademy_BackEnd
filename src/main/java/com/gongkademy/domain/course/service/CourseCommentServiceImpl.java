@@ -32,8 +32,9 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 	private final NoticeRepository noticeRepository;
 	
 	@Override
-	public CourseCommentResponseDTO createComment(CourseCommentRequestDTO courseCommentRequestDTO) {
-        CourseComment comment = convertToEntity(courseCommentRequestDTO);
+	public CourseCommentResponseDTO createComment(CourseCommentRequestDTO courseCommentRequestDTO, Long currentMemberId) {
+		CourseComment comment = convertToEntity(courseCommentRequestDTO);
+		comment.setMember(memberRepository.findById(currentMemberId).get()); //댓글 작성자 = 현재이용자
         CourseComment saveComment = courseCommentRepository.save(comment);
         return convertToDTO(saveComment);
 	}

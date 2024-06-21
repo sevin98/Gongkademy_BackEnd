@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gongkademy.domain.course.dto.request.CourseReviewRequestDTO;
 import com.gongkademy.domain.course.dto.response.CourseReviewResponseDTO;
 import com.gongkademy.domain.course.service.CourseReviewService;
+import com.gongkademy.domain.member.dto.PrincipalDetails;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,8 +29,9 @@ public class CourseReviewController {
 	private final CourseReviewService courseReviewService;
 
 	@PostMapping
-	public ResponseEntity<?> createComment(@RequestBody CourseReviewRequestDTO courseReviewRequestDTO) {
-		CourseReviewResponseDTO courseReviewResponseDTO = courseReviewService.createReview(courseReviewRequestDTO);
+	public ResponseEntity<?> createComment(@RequestBody CourseReviewRequestDTO courseReviewRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Long currentMemberId = principalDetails.getMemberId(); 
+		CourseReviewResponseDTO courseReviewResponseDTO = courseReviewService.createReview(courseReviewRequestDTO, currentMemberId);
 		return new ResponseEntity<>(courseReviewResponseDTO, HttpStatus.CREATED);
 	}
 

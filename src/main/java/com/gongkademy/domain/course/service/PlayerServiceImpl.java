@@ -74,7 +74,7 @@ public class PlayerServiceImpl implements PlayerService{
 	}
 
 	@Override
-	public PlayerResponseDTO getPlayerNextPrev(PlayerRequestDTO playerRequestDTO, int dir) {
+	public PlayerResponseDTO getPlayerNextPrev(PlayerRequestDTO playerRequestDTO,Long memberId, int dir) {
 		
 		Lecture lecture = lectureRepository.findById(playerRequestDTO.getLectureId())
 				.orElseThrow(() -> new IllegalArgumentException("강의 찾을 수 없음"));
@@ -93,7 +93,7 @@ public class PlayerServiceImpl implements PlayerService{
 					.orElseThrow(() -> new IllegalArgumentException("이전 강의 없음"));
 		}
 		
-		RegistLecture registNextLecture = registLectureRepository.findByLectureIdAndMemberId(targetLecture.getId(), playerRequestDTO.getMemberId())
+		RegistLecture registNextLecture = registLectureRepository.findByLectureIdAndMemberId(targetLecture.getId(), memberId)
 					.orElseThrow(() -> new IllegalArgumentException("수강 강의 찾을 수 없음"));
 
 		PlayerResponseDTO playerResponseDTO = this.convertToDTO(targetLecture, registNextLecture);

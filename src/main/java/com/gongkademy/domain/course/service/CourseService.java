@@ -22,13 +22,13 @@ public interface CourseService {
 	
 	List<CourseContentsResponseDTO> getCourseContents(CourseRequestDTO courseRequestDTO);
 	
-	CourseResponseDTO registCourse(CourseRequestDTO courseRequestDTO);
+	CourseResponseDTO registCourse(CourseRequestDTO courseRequestDTO, Long currentMemberId);
 	
-	CourseResponseDTO scrapCourse(CourseRequestDTO courseRequestDTO);
+	CourseResponseDTO scrapCourse(CourseRequestDTO courseRequestDTO, Long currentMemberId);
 
-	void deleteRegistCourse(Long registCourseId);
+	void deleteRegistCourse(Long courseId, Long currentMemberId);
 	
-	CourseResponseDTO getCourseDetail(Long courseId);
+	CourseResponseDTO getCourseDetail(Long courseId, Long currentMemberId);
 	
 	Page<NoticeResponseDTO> getCourseNotices(Long courseId, int pageNum, int pageSize);
 
@@ -36,9 +36,8 @@ public interface CourseService {
 	
 	List<CourseResponseDTO> getRegistCoursesComplete(Long memberId);
 
-	CourseLikeResponseDTO like(CourseLikeRequestDTO courseLikeRequestDTO);
+	CourseLikeResponseDTO like(CourseLikeRequestDTO courseLikeRequestDTO, Long currentMemberId);
 	
-	void deleteLike(Long id);
 	/*
 	 * TODO
 	 * - 강좌 소개 조회

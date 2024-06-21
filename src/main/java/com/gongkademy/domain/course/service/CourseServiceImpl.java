@@ -225,7 +225,7 @@ public class CourseServiceImpl implements CourseService {
 	        CourseReview review = courseReviewRepository.findById(courseLikeRequestDTO.getCourseReviewId())
 	                .orElseThrow(() -> new IllegalArgumentException("리뷰 찾을 수 없음"));
 			
-	        Optional<CourseLike> likeOptional = courseLikeRepository.findByMemberIdAndReviewId(member.getId(), courseLikeRequestDTO.getCourseReviewId());
+	        Optional<CourseLike> likeOptional = courseLikeRepository.findByMemberIdAndCourseReviewId(member.getId(), courseLikeRequestDTO.getCourseReviewId());
 
 	        if (likeOptional.isPresent()) {
 				CourseLike like = likeOptional.get();

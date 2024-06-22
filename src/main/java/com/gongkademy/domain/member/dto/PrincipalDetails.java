@@ -89,7 +89,7 @@ public class PrincipalDetails implements OAuth2User, UserDetails {
 
     //RoleList안에있는 Role 반환
     public List<String> getRoleNames() {
-        return Collections.singletonList(member.getMemberRoleList().toString());
+        return Arrays.stream(member.getMemberRoleList().toArray()).map(Object::toString).toList();
     }
 
     public String getUniversity(){

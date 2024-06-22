@@ -31,7 +31,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         PrincipalDetails oAuthUser = (PrincipalDetails) authentication.getPrincipal();
-        if (!oAuthUser.getRoleNames().contains(MemberRole.USER.getKey())) {
+        if (!oAuthUser.getRoleNames().contains(MemberRole.USER.toString())) {
             String accessToken = jwtUtil.createAccessToken(oAuthUser.getMemberId());
             jwtUtil.sendAccessToken(response, accessToken);
             response.sendRedirect(SIGNUP_URL);

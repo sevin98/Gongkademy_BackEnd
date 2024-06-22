@@ -17,7 +17,7 @@ public class CourseReviewResponseDTO {
 	private int rating;
 	private LocalDateTime createdTime;
 	private String content;
-	private int likeCount;
+	private Long likeCount;
 	private Long courseId;
 	private Long memberId;
 	private String nickname;

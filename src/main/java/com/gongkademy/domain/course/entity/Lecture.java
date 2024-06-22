@@ -3,6 +3,7 @@ package com.gongkademy.domain.course.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -35,7 +36,14 @@ public class Lecture {
 	@JoinColumn(name="course_id")
 	private Course course;
 	
-	@OneToMany(mappedBy = "lecture")
+	@OneToMany(mappedBy = "lecture",cascade = CascadeType.REMOVE, orphanRemoval = true)
 	private List<RegistLecture> registLectures = new ArrayList<>();
 	
+	//== 연관관계 메소드 == //
+	public void addRegistLecture(RegistLecture registLecture) {
+		registLectures.add(registLecture);
+		registLecture.setLecture(this);
+	}
+
+
 }

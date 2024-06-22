@@ -47,12 +47,6 @@ public class Course {
 	@JoinColumn(name="course_note_id")
 	private CourseFile courseNote; // 강좌 자료
 	
-	@OneToMany(mappedBy="preCourse" , cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<PreCourse> preCourses = new ArrayList<>();
-	
-	@OneToMany(mappedBy="nextCourse" , cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<PreCourse> nextCourses = new ArrayList<>();
-	
 	@OneToMany(mappedBy="course" , cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Lecture> lectures = new ArrayList<>();
 	
@@ -67,7 +61,70 @@ public class Course {
 	
 	@OneToMany(mappedBy="course" , cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CourseReview> courseReviews = new ArrayList<>();
+
+	// ==연관관계 메서드==//
+	//== add ==//
+	// 강의 add
+	public void addLecture(Lecture lecture) {
+		this.lectures.add(lecture);
+		lecture.setCourse(this);
+		this.updateLectureCount();
+	}
+	// 수강생 add
+	public void addRegist(RegistCourse registCourse) {
+		this.registCourses.add(registCourse);
+		registCourse.setCourse(this);
+		this.updateRegistCount();
+	}
+	// 스크랩 add
+	public void addScrap(Scrap scrap) {
+		this.scraps.add(scrap);
+		scrap.setCourse(this);
+	}
+	// 공지사항 add
+	public void addNotice(Notice notice) {
+		this.notices.add(notice);
+		notice.setCourse(this);
+	}
+	// 수강평 add
+	public void addReveiw(CourseReview courseReview) {
+		this.courseReviews.add(courseReview);
+		courseReview.setCourse(this);
+		
+		this.updateReviewCount();
+		this.updateAvgRating();
+	}
 	
+	
+	//== delete ==//
+	// 강의 delete
+	public void deleteLecture(Lecture lecture) {
+		this.lectures.remove(lecture);
+		this.updateLectureCount();
+	}
+	// 수강생 delete
+	public void deleteRegist(RegistCourse registCourse) {
+		this.registCourses.remove(registCourse);
+		this.updateRegistCount();
+	}
+	// 스트랩 delete
+	public void deleteScrap(Scrap scrap) {
+		this.scraps.remove(scrap);
+	}
+	// 공지사항 delete
+	public void deleteNotice(Notice notice) {
+		this.notices.remove(notice);
+	}
+	// 수강평 delete
+	public void deleteReveiw(CourseReview courseReview) {
+		this.courseReviews.remove(courseReview);
+		this.updateReviewCount();
+		this.updateAvgRating();
+	}
+	
+	
+	//== 비즈니스 로직== //
+	//== update ==//
 	// 수강평수 count
 	public void updateReviewCount() {
         this.reviewCount = (long) courseReviews.size();
@@ -96,7 +153,5 @@ public class Course {
 			
 			this.avgRating = avg / courseReviews.size();
 		}
-		
 	}
-	
 }

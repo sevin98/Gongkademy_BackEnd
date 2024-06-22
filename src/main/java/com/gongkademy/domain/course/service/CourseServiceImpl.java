@@ -138,36 +138,56 @@ public class CourseServiceImpl implements CourseService {
 	@Override
 	public CourseResponseDTO registCourse(CourseRequestDTO courseRequestDTO, Long currentMemberId) {
 		courseRequestDTO.setMemberId(currentMemberId);
+		Member member = memberRepository.findById(currentMemberId).get();
 		RegistCourse registCourse = this.converToEntityRegistCourse(courseRequestDTO);
-		registCourseRepository.save(registCourse);
+		member.addRegistCourse(registCourse);
 		
-		// 수강생 수 update
 		Optional<Course> course = courseRepository.findById(courseRequestDTO.getCourseId());
-		course.get().updateLectureCount();
-		
-		addRegistLectures(registCourse);
+		course.get().addRegist(registCourse);
 		
 		CourseResponseDTO courseResponseDTO = this.convertToDTO(course.get());
+		
+		this.addRegistLectures(registCourse);
 		return courseResponseDTO;
 	}
 
 	@Override
 	public CourseResponseDTO scrapCourse(CourseRequestDTO courseRequestDTO, Long currentMemberId) {
 		courseRequestDTO.setMemberId(currentMemberId);
+		Member member = memberRepository.findById(currentMemberId).get();
 		Scrap scrap = this.convertToEntityScrap(courseRequestDTO);
-		scrapRepository.save(scrap);
-		
+		member.addScrap(scrap);
+
 		Optional<Course> course = courseRepository.findById(courseRequestDTO.getCourseId());
-		CourseResponseDTO courseResponseDTO = this.convertToDTO(course.get());
-		return courseResponseDTO;
+		Boolean isSaved = scrapRepository.existsByMemberIdAndCourseId(currentMemberId, course.get().getId());
+		
+		CourseResponseDTO dto = this.convertToDTO(course.get());
+		// 저장 -> 저장 삭제
+		if(isSaved) {
+			course.get().addScrap(scrap);
+			dto.setIsSaved(false);
+		}
+		else {
+			course.get().deleteScrap(scrap);
+			dto.setIsSaved(true);
+		}
+		
+		//수강여부 확인
+		Boolean isRegistered = registCourseRepository.existsByMemberIdAndCourseId(currentMemberId, course.get().getId());
+		if(isRegistered) dto.setIsRegistered(true);
+		else dto.setIsRegistered(false);
+		
+		return dto;
 	}
 
 	@Override
+	@Transactional
 	public void deleteRegistCourse(Long courseId, Long currentMemberId) {
 		RegistCourse registCourse = registCourseRepository.findByCourseIdAndMemberId(courseId, currentMemberId)
 				.orElseThrow(() -> new IllegalArgumentException("수강 강좌 찾을 수 없음"));
 		
-		registCourseRepository.delete(registCourse);
+		Optional<Course> course = courseRepository.findById(courseId);
+		course.get().deleteRegist(registCourse);
 	}
 
 	@Override
@@ -212,7 +232,6 @@ public class CourseServiceImpl implements CourseService {
             
             registCourse.addRegistLecture(registLecture);
         }
-        registLectureRepository.saveAll(registCourse.getRegistLectures());
     }
 	
 	@Override
@@ -229,15 +248,14 @@ public class CourseServiceImpl implements CourseService {
 
 	        if (likeOptional.isPresent()) {
 				CourseLike like = likeOptional.get();
-				courseLikeRepository.deleteById(like.getId());
-				review.decreaseLikeCount();
-		        courseReviewRepository.save(review);
+				review.deleteCourseLike(like);
+//		        courseReviewRepository.save(review);
 			} else {
 		        CourseLike like = convertToEntityCourseLike(courseLikeRequestDTO);
-		        CourseLike saveLike = courseLikeRepository.save(like);
-		        review.increaseLikeCount();
-		        courseReviewRepository.save(review);
-		        return convertToDTOCourseLike(saveLike);
+		        review.addCourseLike(like);
+//		        courseReviewRepository.save(review);
+		        member.addCourseLike(like);
+		        return convertToDTOCourseLike(like);
 			}
 		} 
 	
@@ -250,15 +268,13 @@ public class CourseServiceImpl implements CourseService {
 
 			if (likeOptional.isPresent()) {
 				CourseLike like = likeOptional.get();
-				courseLikeRepository.deleteById(like.getId());
-				comment.decreaseLikeCount();
-				courseCommentRepository.save(comment);
+				comment.deleteCourseLike(like);
+//				courseCommentRepository.save(comment);
 			} else {
 		        CourseLike like = convertToEntityCourseLike(courseLikeRequestDTO);
-		        CourseLike saveLike = courseLikeRepository.save(like);
-		        comment.increaseLikeCount();
-		        courseCommentRepository.save(comment);
-		        return convertToDTOCourseLike(saveLike);
+		        comment.addCourseLike(like);
+//		        courseCommentRepository.save(comment);
+		        return convertToDTOCourseLike(like);
 			}
 		}
 		return null;

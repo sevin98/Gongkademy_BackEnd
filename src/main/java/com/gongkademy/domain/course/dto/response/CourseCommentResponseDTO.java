@@ -20,5 +20,5 @@ public class CourseCommentResponseDTO {
 	private Long memberId;
 	private String nickname;
 	private String content;
-	private int likeCount;
+	private Long likeCount;
 }

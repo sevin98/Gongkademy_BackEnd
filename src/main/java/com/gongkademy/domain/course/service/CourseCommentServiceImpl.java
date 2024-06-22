@@ -34,9 +34,23 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 	@Override
 	public CourseCommentResponseDTO createComment(CourseCommentRequestDTO courseCommentRequestDTO, Long currentMemberId) {
 		CourseComment comment = convertToEntity(courseCommentRequestDTO);
-		comment.setMember(memberRepository.findById(currentMemberId).get()); //댓글 작성자 = 현재이용자
-        CourseComment saveComment = courseCommentRepository.save(comment);
-        return convertToDTO(saveComment);
+		
+		Member member = memberRepository.findById(currentMemberId).get();
+		comment.setMember(member); //댓글 작성자 = 현재이용자
+		member.addCourseComment(comment);
+		
+        if(comment.getCommentCateg()==CommentCateg.REVIEW) {
+        	CourseReview review = comment.getCourseReview();
+        	review.addCourseComment(comment);
+        }
+        
+        else if(comment.getCommentCateg()==CommentCateg.NOTICE) {
+        	Notice notice = comment.getNotice();
+        	notice.addCourseComment(comment);
+        }
+        
+        
+        return convertToDTO(comment);
 	}
 
 	@Override
@@ -65,8 +79,19 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 	}
 
 	@Override
+	@Transactional
 	public void deleteComment(Long id) {
-		courseCommentRepository.deleteById(id);
+		Optional<CourseComment> comment = courseCommentRepository.findById(id);
+
+		if (comment.get().getCommentCateg() == CommentCateg.REVIEW) {
+			CourseReview review = comment.get().getCourseReview();
+			review.deleteCourseComment(comment.get());
+		}
+
+		else if (comment.get().getCommentCateg() == CommentCateg.NOTICE) {
+			Notice notice = comment.get().getNotice();
+			notice.deleteCourseComment(comment.get());
+		}
 	}
 	
     private CourseComment convertToEntity(CourseCommentRequestDTO courseCommentRequestDTO) {

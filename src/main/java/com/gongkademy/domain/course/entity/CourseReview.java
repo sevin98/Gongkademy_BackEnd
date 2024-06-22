@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.gongkademy.domain.member.entity.Member;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -33,7 +34,9 @@ public class CourseReview {
 
 	private String content;
 
-	private int likeCount;
+	private Long likeCount;
+	
+	private Long courseCommentCount;
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "regist_course_id")
@@ -49,36 +52,43 @@ public class CourseReview {
 
 	private String nickname;
 
-	@OneToMany(mappedBy = "courseReview")
+	@OneToMany(mappedBy = "courseReview", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CourseComment> courseComments = new ArrayList<>();
 
-	@OneToMany(mappedBy = "courseReview")
+	@OneToMany(mappedBy = "courseReview", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CourseLike> courseLikes = new ArrayList<>();
 
 	// ==연관관계 메서드==//
 	public void addCourseComment(CourseComment courseComment) {
 		courseComments.add(courseComment);
 		courseComment.setCourseReview(this);
+		this.updateCourseCommentCount();
 	}
 
 	public void addCourseLike(CourseLike courseLike) {
 		courseLikes.add(courseLike);
 		courseLike.setCourseReview(this);
+		this.updateCourseLike();
+	}
+	
+	public void deleteCourseComment(CourseComment courseComment) {
+		courseComments.remove(courseComment);
+		this.updateCourseCommentCount();
 	}
 
+	public void deleteCourseLike(CourseLike courseLike) {
+		courseLikes.remove(courseLike);
+		this.updateCourseLike();
+	}
+	
 	// ==비즈니스 로직==//
-	/*
-	 * 좋아요 증가
-	 */
-	public void increaseLikeCount() {
-		this.likeCount++;
+	// 댓글 수 업데이트
+	public void updateCourseCommentCount() {
+		this.courseCommentCount = (long) courseComments.size();
 	}
-
-	/*
-	 * 좋아요 감소
-	 */
-	public void decreaseLikeCount() {
-		this.likeCount--;
+	// 좋아요 업데이트
+	public void updateCourseLike() {
+		this.likeCount = (long) this.courseLikes.size();
 	}
-
+	
 }

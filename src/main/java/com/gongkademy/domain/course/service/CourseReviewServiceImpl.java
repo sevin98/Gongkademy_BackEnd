@@ -36,9 +36,13 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 	@Override
 	public CourseReviewResponseDTO createReview(CourseReviewRequestDTO courseReviewRequestDTO, Long currentMemberId) {
 		CourseReview review = convertToEntity(courseReviewRequestDTO);
-		review.setMember(memberRepository.findById(currentMemberId).get());
-		CourseReview saveReview = courseReviewRepository.save(review);
-		return convertToDTO(saveReview);
+		Member member = memberRepository.findById(currentMemberId).get();
+		review.setMember(member);
+		member.addCourseReview(review);
+		Optional<Course> course = courseRepository.findById(courseReviewRequestDTO.getCourseId());
+		course.get().addReveiw(review);
+		
+		return convertToDTO(review);
 	}
 
 	@Override
@@ -52,6 +56,10 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 			review.setRating(courseReviewRequestDTO.getRating());
 			review.setContent(courseReviewRequestDTO.getContent());
 			saveReview = courseReviewRepository.save(review);
+			
+			Optional<Course> course = courseRepository.findById(courseReviewRequestDTO.getCourseId());
+			course.get().updateAvgRating();
+
 		} else {
 			throw new IllegalStateException("리뷰 찾을 수 없음");
 		}
@@ -72,8 +80,12 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 	}
 
 	@Override
+	@Transactional
 	public void deleteReview(Long id) {
-		courseReviewRepository.deleteById(id);
+		Optional<CourseReview> review = courseReviewRepository.findById(id);
+		Course course = review.get().getCourse();
+		
+		course.deleteReveiw(review.get());
 	}
 
 	private CourseReview convertToEntity(CourseReviewRequestDTO courseReviewRequestDTO) {
@@ -111,5 +123,4 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 		courseReviewResponseDTO.setNickname(review.getNickname());
 		return courseReviewResponseDTO;
 	}
-
 }

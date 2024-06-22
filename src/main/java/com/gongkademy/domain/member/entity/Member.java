@@ -103,19 +103,19 @@ public class Member {
     @Builder.Default
 	private List<CourseReview> courseReviews = new ArrayList<>();
 	
-	@OneToMany(mappedBy="member")
+	@OneToMany(mappedBy="member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
 	private List<RegistCourse> registCourses = new ArrayList<>();
 	
-	@OneToMany(mappedBy="member")
+	@OneToMany(mappedBy="member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
 	private List<RegistLecture> registLectures = new ArrayList<>();
 	
-	@OneToMany(mappedBy="member")
+	@OneToMany(mappedBy="member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
 	private List<Scrap> scraps = new ArrayList<>();
 	
-	@OneToMany(mappedBy="member")
+	@OneToMany(mappedBy="member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
 	private List<CourseLike> courseLikes = new ArrayList<>();
 

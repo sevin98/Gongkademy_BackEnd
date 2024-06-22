@@ -72,7 +72,6 @@ public class MemberServiceImpl implements MemberService{
         if (optMember.isEmpty()) return null;
 
         Member member = optMember.get();
-        member.addRole(MemberRole.USER);
         member.update(memberUpdateDTO);
 
         return member.getId();

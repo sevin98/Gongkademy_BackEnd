@@ -39,9 +39,7 @@ public class Member {
     private String name;
     @NotEmpty
     private String email;
-    @NotEmpty
     private String nickname;
-    @NotEmpty
     private LocalDate birthday;
 
     private String university;

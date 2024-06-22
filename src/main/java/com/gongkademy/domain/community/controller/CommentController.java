@@ -27,9 +27,8 @@ public class CommentController {
 
     // Authentication 필요
     @GetMapping("/comment/{boardId}")
-    public ResponseEntity<List<CommentResponseDTO>> getComments(@PathVariable Long boardId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        Long currentMemberId = principalDetails.getMemberId();  // 사용자 아이디를 가져오는 방법은 프로젝트 방향성에 따라 다르다
-        List<CommentResponseDTO> commentResponseDTOS = commentService.getComments(boardId, currentMemberId);
+    public ResponseEntity<List<CommentResponseDTO>> getComments(@PathVariable Long boardId) {
+        List<CommentResponseDTO> commentResponseDTOS = commentService.getComments(boardId);
         return ResponseEntity.ok(commentResponseDTOS);
     }
 

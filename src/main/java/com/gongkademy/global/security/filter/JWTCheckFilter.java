@@ -59,7 +59,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         log.info("JWTCheckFilter doFilterInternal 메소드 ===================");
 
         //accessToken 처리
-        String accessToken = jwtUtil.extractToken(request).toString();
+        String accessToken = jwtUtil.extractToken(request).get();
 
             //access 토큰검증
             if (jwtUtil.isTokenValid(accessToken)) {

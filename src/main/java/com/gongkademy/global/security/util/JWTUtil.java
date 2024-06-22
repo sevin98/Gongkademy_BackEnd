@@ -32,7 +32,7 @@ public class JWTUtil {
     private static final String PK_CLAIM = "pk";
     private static final String BEARER = "Bearer ";
 
-    private static RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
     @Value("${JWT_KEY}")
     public void setJwtKey(String jwtKey) {
@@ -73,14 +73,12 @@ public class JWTUtil {
             throw new RuntimeException(e.getMessage());
         }
 
-        String refreshToken = Jwts.builder()
+        return Jwts.builder()
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_EXPIRATION_PERIOD))
                 .claim(PK_CLAIM, id)
                 .signWith(key)
                 .compact();
-
-        return refreshToken;
     }
 
     /**
@@ -119,11 +117,11 @@ public class JWTUtil {
                 .map(refreshToken -> refreshToken.replace(BEARER, ""));
     }
 
-    public Optional<Long> extractMemberId(String accessToken) {
+    public Optional<Integer> extractMemberId(String accessToken) {
         SecretKey key = null;
         try {
             key = Keys.hmacShaKeyFor(JWT_KEY.getBytes("UTF-8"));
-            return Optional.ofNullable((Long) Jwts.parserBuilder()
+            return Optional.ofNullable((Integer) Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
                     .parseClaimsJws(accessToken)

@@ -25,11 +25,13 @@ public class ConsultingController {
     private final String BASE_CRITERIA = "createTime";
     private final String REQUEST_PARAM_PAGE = "page";
     private final String REQUEST_PARAM_CRITERIA = "criteria";
+    private final String KEY_WORD = "keyword";
     // Consulting 전체 리스트 반환
     @GetMapping("")
     public ResponseEntity<?> getAllConsulitng(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
-                                       @RequestParam(defaultValue = BASE_CRITERIA, value = REQUEST_PARAM_CRITERIA) String criteria){
-        List<BoardResponseDTO> result = consultingBoardService.findAllConsultingBoards(pageNo, criteria);
+                                       @RequestParam(defaultValue = BASE_CRITERIA, value = REQUEST_PARAM_CRITERIA) String criteria,
+                                              @RequestParam(value = KEY_WORD) String keyword){
+        List<BoardResponseDTO> result = consultingBoardService.findAllConsultingBoards(pageNo, criteria, keyword);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
@@ -52,7 +54,7 @@ public class ConsultingController {
     public ResponseEntity<?> updateConsulting(@PathVariable Long articleNo, @RequestBody BoardRequestDTO consultingBoardRequestDTO) {
         Long updatedArticleNo = consultingBoardService.updateConsultingBoard(articleNo, consultingBoardRequestDTO);
 
-        // 해당 Qna 게시글이 없는 경우
+        // 해당 Consulting 게시글이 없는 경우
         if (updatedArticleNo == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } else {
@@ -85,16 +87,16 @@ public class ConsultingController {
     }
 
     // Consulting 좋아요한 게시글 가져오기
-    @GetMapping("/{articleId}/liked")
-    public ResponseEntity<List<BoardResponseDTO>> getLikeBoards(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam String boardType) {
+    @GetMapping("/liked")
+    public ResponseEntity<List<BoardResponseDTO>> getLikeBoards(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId();
         List<BoardResponseDTO> likeBoards = consultingBoardService.getLikeBoards(currentMemberId);
         return ResponseEntity.ok(likeBoards);
     }
 
     // Consulting 스크랩한 게시글 가져오기
-    @GetMapping("/{articleId}/scrapped")
-    public ResponseEntity<List<BoardResponseDTO>> getScrapBoards(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestParam String boardType) {
+    @GetMapping("/scrapped")
+    public ResponseEntity<List<BoardResponseDTO>> getScrapBoards(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId();
         List<BoardResponseDTO> scrapBoards = consultingBoardService.getScrapBoards(currentMemberId);
         return ResponseEntity.ok(scrapBoards);

@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ConsultingBoardService {
     // 모든 Consulting 게시글 조회하기
-    List<BoardResponseDTO> findAllConsultingBoards(int pageNo, String criteria);
+    List<BoardResponseDTO> findAllConsultingBoards(int pageNo, String criteria, String keyword);
 
     // Consulting 게시글 작성하기
     BoardResponseDTO createConsultingBoard(BoardRequestDTO ConsultingBoardRequestDTO);

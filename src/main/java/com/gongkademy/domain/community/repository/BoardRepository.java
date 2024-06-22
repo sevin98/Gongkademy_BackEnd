@@ -15,6 +15,8 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 
     List<QnaBoard> findAllQnAByBoardType(BoardType boardType);
 
+    Page<QnaBoard> findQnaBoardByTitleContainingOrContentContaining(String title, String content, Pageable pageable);
+
     // 최신순 조회
     Page<Board> findByOrderByCreateTimeDesc(Pageable pageable);
 

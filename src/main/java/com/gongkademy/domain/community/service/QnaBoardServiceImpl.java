@@ -12,6 +12,7 @@ import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
 import com.gongkademy.infra.s3.service.S3FileService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class QnaBoardServiceImpl implements QnaBoardService {
 
@@ -34,10 +36,16 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
     // 전체 QnaBoard 조회
     @Override
-    public List<QnaBoardResponseDTO> findAllQnaBoards(int pageNo, String criteria) {
+    public List<QnaBoardResponseDTO> findAllQnaBoards(int pageNo, String criteria, String keyword) {
         // 정렬 기준 내림차순 정렬
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
-        Page<QnaBoardResponseDTO> page = qnaBoardRepository.findAll(pageable).map(this::convertToDTO);
+        Page<QnaBoardResponseDTO> page;
+        if (keyword == null) {
+            page = qnaBoardRepository.findAll(pageable).map(this::convertToDTO);
+        } else {
+            page = qnaBoardRepository.findQnaBoardByTitleContainingOrContentContaining(keyword, keyword, pageable).map(this::convertToDTO);
+        }
+
         return page.getContent();
     }
 

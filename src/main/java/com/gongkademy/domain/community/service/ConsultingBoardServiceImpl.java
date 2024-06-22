@@ -12,6 +12,7 @@ import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ConsultingBoardServiceImpl implements ConsultingBoardService{
 
@@ -33,10 +35,16 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
 
     private final int PAGE_SIZE = 10;
     @Override
-    public List<BoardResponseDTO> findAllConsultingBoards(int pageNo, String criteria) {
+    public List<BoardResponseDTO> findAllConsultingBoards(int pageNo, String criteria, String keyword) {
         // 정렬 기준 내림차순 정렬
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
-        Page<BoardResponseDTO> page = boardRepository.findAll(pageable).map(this::convertToDTO);
+        Page<BoardResponseDTO> page;
+        if (keyword == null) {
+            page = boardRepository.findAll(pageable).map(this::convertToDTO);
+        } else {
+            page = boardRepository.findQnaBoardByTitleContainingOrContentContaining(keyword, keyword, pageable).map(this::convertToDTO);
+        }
+
         return page.getContent();
     }
 

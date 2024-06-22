@@ -1,6 +1,7 @@
 package com.gongkademy.domain.community.dto.response;
 
 import com.gongkademy.domain.community.entity.board.BoardType;
+import com.gongkademy.domain.community.entity.comment.Comment;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -24,5 +25,6 @@ public class BoardResponseDTO {
     private Long scrapCount;
     private Long hit;
     private Long commentCount;
-    private List<CommentResponseDTO> comments;
+    private List<Comment> comments;
+
 }

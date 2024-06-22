@@ -63,7 +63,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JWTCheckFilter(memberRepository, jwtUtil, redisUtil), UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login")
                         //로그인 성공하면 redirection될 기본 url
                         .defaultSuccessUrl("/", true)
                         //로그인에 성공하면 가져온 user의 정보를 oAuth2MemberService가 처리한다(loadUser 호출)

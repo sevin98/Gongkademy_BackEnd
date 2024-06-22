@@ -25,12 +25,6 @@ public class CommentController {
         return new ResponseEntity<>(commentResponseDTO, HttpStatus.CREATED);
     }
 
-    // Authentication 필요
-    @GetMapping("/comment/{boardId}")
-    public ResponseEntity<List<CommentResponseDTO>> getComments(@PathVariable Long boardId) {
-        List<CommentResponseDTO> commentResponseDTOS = commentService.getComments(boardId);
-        return ResponseEntity.ok(commentResponseDTOS);
-    }
 
     // 댓글 삭제 - Authentication
     @DeleteMapping("/comment/{commentId}")

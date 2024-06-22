@@ -1,5 +1,6 @@
 package com.gongkademy.domain.community.entity.board;
 
+import com.gongkademy.domain.community.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.entity.comment.Comment;
 import com.gongkademy.domain.member.entity.Member;
 import jakarta.persistence.*;
@@ -51,7 +52,7 @@ public class Board {
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<Comment> comments = new ArrayList<>();
+    private List<CommentResponseDTO> comments = new ArrayList<>();
 
     // 연관관계 편의 메서드
     public void setMember(Member member) {

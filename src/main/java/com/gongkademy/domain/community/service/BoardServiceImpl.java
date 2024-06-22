@@ -7,6 +7,7 @@ import com.gongkademy.domain.community.entity.board.Board;
 import com.gongkademy.domain.community.entity.pick.Pick;
 import com.gongkademy.domain.community.entity.pick.PickType;
 import com.gongkademy.domain.community.repository.BoardRepository;
+import com.gongkademy.domain.community.repository.CommentRepository;
 import com.gongkademy.domain.community.repository.PickRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
@@ -32,6 +33,7 @@ public class BoardServiceImpl implements BoardService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
     private final PickRepository pickRepository;
+    private final CommentRepository commentRepository;
 
     // 최신 순 매직넘버 시작
     private final int DEFAULT_TOP = 0;
@@ -179,53 +181,10 @@ public class BoardServiceImpl implements BoardService {
                 .scrapCount(board.getScrapCount())
                 .hit(board.getHit())
                 .commentCount(board.getCommentCount())
+                .comments(board.getComments())
                 .build();
 
     }
-
-
-
-//    관리자 전용
-//    @Override
-//    public BoardResponseDTO createBoard(BoardRequestDTO boardRequestDTO) {
-//        Board board = convertToEntity(boardRequestDTO);
-//        Board saveBoard = boardRepository.save(board);
-//        return convertToDTO(saveBoard);
-//    }
-//
-//    @Override
-//    public BoardResponseDTO updateBoard(Long id, BoardRequestDTO boardRequestDTO) {
-//        Optional<Board> boardOptional = boardRepository.findById(id);
-//
-//        if (boardOptional.isPresent()) {
-//            Board board = boardOptional.get();
-//            board.setTitle(boardRequestDTO.getTitle());
-//            board.setContent(boardRequestDTO.getContent());
-//            board.setBoardType(boardRequestDTO.getBoardType());
-//            boardRepository.save(board);
-//            return convertToDTO(board);
-//        }
-//
-//        throw new CustomException(ErrorCode.INVALID_BOARD_ID);
-//    }
-//
-//
-//
-//    @Override
-//    public List<BoardResponseDTO> getAllBoards() {
-//
-//        List<Board> boards = boardRepository.findAll();
-//        List<BoardResponseDTO> boardResponseDTOS = new ArrayList<>();
-//        for (Board board : boards) {
-//            boardResponseDTOS.add(convertToDTO(board));
-//        }
-//        return boardResponseDTOS;
-//    }
-//
-//    @Override
-//    public void deleteBoard(Long id) {
-//        boardRepository.deleteById(id);
-//    }
 
 
 }

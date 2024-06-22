@@ -3,7 +3,9 @@ package com.gongkademy.domain.community.controller;
 import com.amazonaws.Response;
 import com.gongkademy.domain.community.dto.request.BoardRequestDTO;
 import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
+import com.gongkademy.domain.community.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.service.BoardService;
+import com.gongkademy.domain.community.service.CommentService;
 import com.gongkademy.domain.member.dto.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,7 @@ import java.util.List;
 public class BoardController {
 
     private final BoardService boardService;
+    private final CommentService commentService;
 
     private final int LIMIT = 3;
 
@@ -26,13 +29,12 @@ public class BoardController {
     @GetMapping("/notice/{articleId}")
     public ResponseEntity<?> getBoard(@PathVariable Long articleId) {
         BoardResponseDTO boardResponseDTO = boardService.getBoard(articleId);
-        boardService.incrementHit(articleId);
         return ResponseEntity.ok(boardResponseDTO);
     }
 
     // 최신 순 3개 가져오기
     @GetMapping("/notice/top_latest")
-    public ResponseEntity<List<BoardResponseDTO>> getLimitLatestBoards(int LIMIT) {
+    public ResponseEntity<List<BoardResponseDTO>> getLimitLatestBoards() {
         List<BoardResponseDTO> boardResponseDTOS = boardService.getLatestBoards(LIMIT);
         return ResponseEntity.ok(boardResponseDTOS);
     }
@@ -69,31 +71,4 @@ public class BoardController {
         List<BoardResponseDTO> scrapBoards = boardService.getScrapBoards(currentMemberId);
         return ResponseEntity.ok(scrapBoards);
     }
-    /*
-    관리자 전용
-    @PostMapping
-    public ResponseEntity<?> createBoard(@RequestBody BoardRequestDTO boardRequestDTO) {
-        BoardResponseDTO boardResponseDTO = boardService.createBoard(boardRequestDTO);
-        return new ResponseEntity<>(boardResponseDTO, HttpStatus.CREATED);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<BoardResponseDTO>> getAllBoards() {
-        List<BoardResponseDTO> boardResponseDTOS = boardService.getAllBoards();
-        return ResponseEntity.ok(boardResponseDTOS);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateBoard(@PathVariable Long id, @RequestBody BoardRequestDTO boardRequestDTO) {
-        BoardResponseDTO boardResponseDTO = boardService.updateBoard(id, boardRequestDTO);
-        return ResponseEntity.ok(boardResponseDTO);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteBoard(@PathVariable Long id) {
-        boardService.deleteBoard(id);
-        return ResponseEntity.noContent().build();
-    }
-
-     */
 }

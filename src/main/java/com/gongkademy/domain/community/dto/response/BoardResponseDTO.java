@@ -4,6 +4,7 @@ import com.gongkademy.domain.community.entity.board.BoardType;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,4 +24,5 @@ public class BoardResponseDTO {
     private Long scrapCount;
     private Long hit;
     private Long commentCount;
+    private List<CommentResponseDTO> comments;
 }

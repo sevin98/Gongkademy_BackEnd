@@ -1,11 +1,26 @@
 package com.gongkademy.domain.notification.entity;
 
 import com.gongkademy.domain.member.entity.Member;
+import com.gongkademy.domain.member.entity.MemberRole;
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@SuperBuilder
 public class Notification {
 
     @Id
@@ -14,17 +29,26 @@ public class Notification {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Member receiver;
 
-    private String type;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private NotificationType type;
 
+    @Column(nullable = false)
     private Long articleId;
 
+    @Column(nullable = false)
     private String message;
 
-    private boolean isRead;
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean isRead = false;
 
-    private LocalDateTime createDate;
+    @Column(nullable = false)
+    @Builder.Default
+    private LocalDateTime createDate = LocalDateTime.now();
 
 
 

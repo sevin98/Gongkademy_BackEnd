@@ -4,6 +4,7 @@ package com.gongkademy.domain.community.service;
 import com.gongkademy.domain.community.dto.request.BoardRequestDTO;
 import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
 import com.gongkademy.domain.community.entity.board.Board;
+import com.gongkademy.domain.community.entity.board.QnaBoard;
 import com.gongkademy.domain.community.entity.pick.Pick;
 import com.gongkademy.domain.community.entity.pick.PickType;
 import com.gongkademy.domain.community.repository.BoardRepository;
@@ -143,7 +144,8 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
         List<BoardResponseDTO> likeBoardDTOs = new ArrayList<>();
 
         for (Pick like : likes) {
-            likeBoardDTOs.add(convertToDTO(like.getBoard()));
+            Optional<Board> consultingBoard = boardRepository.findById(like.getBoard().getArticleId());
+            consultingBoard.ifPresent(board -> likeBoardDTOs.add(convertToDTO(board)));
         }
 
         return likeBoardDTOs;
@@ -158,7 +160,8 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
         List<BoardResponseDTO> scrapBoardDTOs = new ArrayList<>();
 
         for (Pick like : likes) {
-            scrapBoardDTOs.add(convertToDTO(like.getBoard()));
+            Optional<Board> consultingBoard = boardRepository.findById(like.getBoard().getArticleId());
+            consultingBoard.ifPresent(board -> scrapBoardDTOs.add(convertToDTO(board)));
         }
 
         return scrapBoardDTOs;

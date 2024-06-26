@@ -145,7 +145,8 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         List<QnaBoardResponseDTO> likeBoardDTOs = new ArrayList<>();
 
         for (Pick like : likes) {
-            likeBoardDTOs.add(convertToDTO((QnaBoard) like.getBoard()));
+            Optional<QnaBoard> qnaBoard = qnaBoardRepository.findById(like.getBoard().getArticleId());
+            qnaBoard.ifPresent(board -> likeBoardDTOs.add(convertToDTO(board)));
         }
 
         return likeBoardDTOs;
@@ -161,7 +162,9 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         List<QnaBoardResponseDTO> scrapBoardDTOs = new ArrayList<>();
 
         for (Pick like : likes) {
-            scrapBoardDTOs.add(convertToDTO((QnaBoard) like.getBoard()));
+            Optional<QnaBoard> qnaBoard = qnaBoardRepository.findById(like.getBoard().getArticleId());
+            qnaBoard.ifPresent(board -> scrapBoardDTOs.add(convertToDTO(board)));
+            ;
         }
 
         return scrapBoardDTOs;

@@ -35,9 +35,9 @@ public class QuestionController {
     }
 
     // Qna 상세 조회
-    @GetMapping("/{articleNo}")
-    public ResponseEntity<?> getQna(@PathVariable Long articleNo) {
-        QnaBoardResponseDTO result = qnaboardService.findQnaBoard(articleNo);
+    @GetMapping("/{articleId}")
+    public ResponseEntity<?> getQna(@PathVariable Long articleId) {
+        QnaBoardResponseDTO result = qnaboardService.findQnaBoard(articleId);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
@@ -49,9 +49,9 @@ public class QuestionController {
     }
 
     // Qna 수정
-    @PatchMapping("/{articleNo}")
-    public ResponseEntity<?> updateQna(@PathVariable Long articleNo, @RequestBody QnaBoardRequestDTO qnaBoardRequestDTO) {
-        Long updateArticleNo = qnaboardService.updateQnaBoard(articleNo, qnaBoardRequestDTO);
+    @PatchMapping("/{articleId}")
+    public ResponseEntity<?> updateQna(@PathVariable Long articleId, @RequestBody QnaBoardRequestDTO qnaBoardRequestDTO) {
+        Long updateArticleNo = qnaboardService.updateQnaBoard(articleId, qnaBoardRequestDTO);
 
         // 해당 Qna 게시글이 없는 경우
         if (updateArticleNo == null) {
@@ -62,9 +62,9 @@ public class QuestionController {
     }
 
     // Qna 삭제
-    @DeleteMapping("/{articleNo}")
-    public ResponseEntity<?> deleteQna(@PathVariable Long articleNo) {
-        qnaboardService.deleteQnaBoard(articleNo);
+    @DeleteMapping("/{articleId}")
+    public ResponseEntity<?> deleteQna(@PathVariable Long articleId) {
+        qnaboardService.deleteQnaBoard(articleId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

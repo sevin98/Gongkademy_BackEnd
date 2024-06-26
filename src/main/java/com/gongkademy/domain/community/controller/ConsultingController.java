@@ -36,9 +36,9 @@ public class ConsultingController {
     }
 
     // Consulting 상세 조회
-    @GetMapping("/{articleNo}")
-    public ResponseEntity<?> getConsulting(@PathVariable Long articleNo) {
-        BoardResponseDTO result = consultingBoardService.findConsultingBoard(articleNo);
+    @GetMapping("/{articleId}")
+    public ResponseEntity<?> getConsulting(@PathVariable Long articleId) {
+        BoardResponseDTO result = consultingBoardService.findConsultingBoard(articleId);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
@@ -50,9 +50,9 @@ public class ConsultingController {
     }
 
     // Consulting 수정
-    @PatchMapping("/{articleNo}")
-    public ResponseEntity<?> updateConsulting(@PathVariable Long articleNo, @RequestBody BoardRequestDTO consultingBoardRequestDTO) {
-        Long updatedArticleNo = consultingBoardService.updateConsultingBoard(articleNo, consultingBoardRequestDTO);
+    @PatchMapping("/{articleId}")
+    public ResponseEntity<?> updateConsulting(@PathVariable Long articleId, @RequestBody BoardRequestDTO consultingBoardRequestDTO) {
+        Long updatedArticleNo = consultingBoardService.updateConsultingBoard(articleId, consultingBoardRequestDTO);
 
         // 해당 Consulting 게시글이 없는 경우
         if (updatedArticleNo == null) {
@@ -63,9 +63,9 @@ public class ConsultingController {
     }
 
     // Consulting 삭제
-    @DeleteMapping("/{articleNo}")
-    public ResponseEntity<?> deleteConsulting(@PathVariable Long articleNo) {
-        consultingBoardService.deleteConsultingBoard(articleNo);
+    @DeleteMapping("/{articleId}")
+    public ResponseEntity<?> deleteConsulting(@PathVariable Long articleId) {
+        consultingBoardService.deleteConsultingBoard(articleId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

@@ -29,6 +29,7 @@ public interface MemberService {
                 .major(member.getMajor())
                 .minor(member.getMinor())
                 .member_role(member.getMemberRoleList().toString())
+                .createTime(member.getCreateTime())
                 .build();
     }
 

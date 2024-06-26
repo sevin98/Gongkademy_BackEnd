@@ -4,6 +4,7 @@ import lombok.*;
 import org.joda.time.DateTime;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -20,5 +21,5 @@ public class MemberInfoDTO {
     private String major;
     private String minor;
     private String member_role;
-    private DateTime create_date;
+    private LocalDateTime createTime;
 }

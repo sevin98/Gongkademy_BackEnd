@@ -18,7 +18,6 @@ import java.util.List;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 @SuperBuilder
 public class Notification {
@@ -48,8 +47,12 @@ public class Notification {
 
     @Column(nullable = false)
     @Builder.Default
-    private LocalDateTime createDate = LocalDateTime.now();
+    private LocalDateTime createTime = LocalDateTime.now();
 
-
+    public void changeReadStatus(){
+        if(!this.isRead){
+            this.isRead = true;
+        }
+    }
 
 }

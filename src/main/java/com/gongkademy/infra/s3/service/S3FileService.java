@@ -6,6 +6,10 @@ import com.amazonaws.util.IOUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,6 +17,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -100,5 +105,28 @@ public class S3FileService implements FileService {
         } catch (MalformedURLException | UnsupportedEncodingException e) {
             throw new AmazonS3Exception("에러");
         }
+    }
+    
+    public ResponseEntity<?> downloadFile(String savedfileName) {
+    	S3Object o = amazonS3.getObject(new GetObjectRequest(bucketName, savedfileName));
+    	S3ObjectInputStream objectInputStream = o.getObjectContent();
+        try {
+			byte[] bytes = IOUtils.toByteArray(objectInputStream);
+			
+			String fileName = URLEncoder.encode(savedfileName, "UTF-8").replaceAll("\\+", "%20");
+			HttpHeaders httpHeaders = new HttpHeaders();
+	        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+	        httpHeaders.setContentLength(bytes.length);
+	        httpHeaders.setContentDispositionFormData("attachment", fileName);
+	        
+	        return new ResponseEntity<>(bytes, httpHeaders, HttpStatus.OK);
+			
+		} catch (IOException e) {
+            throw new AmazonS3Exception("에러");
+		}
+    }
+    
+    public String getFileUrl(String path) {
+        return amazonS3.getUrl(bucketName, path).toString();
     }
 }

@@ -31,4 +31,9 @@ public class CourseFile {
 	
 	@Enumerated(EnumType.STRING)
 	private CourseFileCateg categ; // 강좌파일 카테고리 [COURSEIMG, COURSENOTE]
+
+    // 파일의 path를 반환하는 메소드
+    public String getFilePath() {
+        return save_folder + "/" + save_file;
+    }
 }

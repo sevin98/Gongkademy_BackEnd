@@ -35,6 +35,8 @@ public class Course {
 	
 	private Long lectureCount;
 	
+	private String summary;
+	
 	private String content;
 	
 	private String status;

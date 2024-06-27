@@ -1,9 +1,13 @@
 package com.gongkademy.domain.course.controller;
 
+import java.io.File;
 import java.util.List;
 
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gongkademy.domain.course.dto.request.CourseLikeRequestDTO;
 import com.gongkademy.domain.course.dto.request.CourseRequestDTO;
 import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
+import com.gongkademy.domain.course.dto.response.CourseInfoResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseLikeResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseResponseDTO;
 import com.gongkademy.domain.course.dto.response.NoticeResponseDTO;
@@ -75,7 +80,12 @@ public class CourseController {
         return ResponseEntity.noContent().build();
 	}
 	
-	// TODO : 강좌 대표 이미지 전송
+	//-강의자료 다운로드
+	@GetMapping("/detail/download")
+	public void downloadCourseNote(@RequestBody CourseRequestDTO courseRequestDTO){		
+		courseService.downloadCourseNote(courseRequestDTO.getCourseId());
+	}
+	
 	// - 강좌 조회
 	@GetMapping("/detail/{course_id}")
 	public ResponseEntity<?> getCourseDetail(@PathVariable("course_id") Long id, @AuthenticationPrincipal PrincipalDetails principalDetails) {
@@ -116,24 +126,12 @@ public class CourseController {
 		CourseLikeResponseDTO CourseLikeResponseDTO = courseService.like(courseLikeRequestDTO, currentMemberId);
 		return new ResponseEntity<>(CourseLikeResponseDTO, HttpStatus.CREATED);
 	}
-
-	/* TODO 
-	 * - 강좌 소개 조회, 강의 자료 다운로드
-	 * */
-
-	/*
+	
 	@GetMapping("/info/{course_id}")
-	public ResponseEntity<?> getCourseInfo(){
+	public ResponseEntity<?> getCourseInfo(@PathVariable("course_id") Long id){
 
 		 // 선수과목,강의 소개,강의 링크,사진
-
-		return null;
+		CourseInfoResponseDTO courseInfoResponseDTO = courseService.getCourseInfo(id);
+		return new ResponseEntity<>(courseInfoResponseDTO, HttpStatus.CREATED);
 	}
-
-	@GetMapping("/detail/{course_id}")
-	public ResponseEntity<?> downloadCourseFile(){
-
-		return null;
-	}
-	*/
 }

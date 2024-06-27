@@ -26,5 +26,6 @@ public class CourseResponseDTO {
 	private Boolean isSaved;
 	
 	
-	// TODO : 강의 대표이미지
+	// 강의 대표이미지
+	private String fileUrl;
 }

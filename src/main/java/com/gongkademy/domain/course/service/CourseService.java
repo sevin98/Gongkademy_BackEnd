@@ -2,6 +2,7 @@ package com.gongkademy.domain.course.service;
 
 import java.util.List;
 
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 
 import com.gongkademy.domain.course.dto.request.CourseCommentRequestDTO;
@@ -9,6 +10,7 @@ import com.gongkademy.domain.course.dto.request.CourseLikeRequestDTO;
 import com.gongkademy.domain.course.dto.request.CourseRequestDTO;
 import com.gongkademy.domain.course.dto.response.CourseCommentResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
+import com.gongkademy.domain.course.dto.response.CourseInfoResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseLikeResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseResponseDTO;
 import com.gongkademy.domain.course.dto.response.NoticeResponseDTO;
@@ -37,12 +39,9 @@ public interface CourseService {
 	List<CourseResponseDTO> getRegistCoursesComplete(Long memberId);
 
 	CourseLikeResponseDTO like(CourseLikeRequestDTO courseLikeRequestDTO, Long currentMemberId);
-	
-	/*
-	 * TODO
-	 * - 강좌 소개 조회
-	 * - 강좌 자료 다운로드
-	 * */
-	
+
+	void downloadCourseNote(Long courseId);
+
+	CourseInfoResponseDTO getCourseInfo(Long id);	
 	
 }

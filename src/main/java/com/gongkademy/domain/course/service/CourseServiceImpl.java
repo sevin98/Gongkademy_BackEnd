@@ -3,35 +3,44 @@ package com.gongkademy.domain.course.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.amazonaws.services.s3.model.S3Object;
 import com.gongkademy.domain.course.dto.request.CourseLikeRequestDTO;
 import com.gongkademy.domain.course.dto.request.CourseRequestDTO;
 import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
+import com.gongkademy.domain.course.dto.response.CourseInfoResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseLikeResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseResponseDTO;
 import com.gongkademy.domain.course.dto.response.NoticeResponseDTO;
 import com.gongkademy.domain.course.entity.Course;
 import com.gongkademy.domain.course.entity.CourseComment;
+import com.gongkademy.domain.course.entity.CourseFile;
+import com.gongkademy.domain.course.entity.CourseFileCateg;
 import com.gongkademy.domain.course.entity.CourseLike;
 import com.gongkademy.domain.course.entity.CourseLikeCateg;
 import com.gongkademy.domain.course.entity.CourseReview;
 import com.gongkademy.domain.course.entity.Lecture;
 import com.gongkademy.domain.course.entity.Notice;
+import com.gongkademy.domain.course.entity.PreCourse;
 import com.gongkademy.domain.course.entity.RegistCourse;
 import com.gongkademy.domain.course.entity.RegistLecture;
 import com.gongkademy.domain.course.entity.Scrap;
 import com.gongkademy.domain.course.repository.CourseCommentRepository;
+import com.gongkademy.domain.course.repository.CourseFileRepository;
 import com.gongkademy.domain.course.repository.CourseLikeRepository;
 import com.gongkademy.domain.course.repository.CourseRepository;
 import com.gongkademy.domain.course.repository.CourseReviewRepository;
 import com.gongkademy.domain.course.repository.LectureRepository;
 import com.gongkademy.domain.course.repository.NoticeRepository;
+import com.gongkademy.domain.course.repository.PreCourseRepository;
 import com.gongkademy.domain.course.repository.RegistCourseRepository;
 import com.gongkademy.domain.course.repository.RegistLectureRepository;
 import com.gongkademy.domain.course.repository.ScrapRepository;
@@ -39,11 +48,15 @@ import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
+import com.gongkademy.domain.member.service.UserDetailsServiceImpl;
+import com.gongkademy.infra.s3.service.S3FileService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Service
 @Transactional
+@Log4j2
 @RequiredArgsConstructor
 public class CourseServiceImpl implements CourseService {
 	
@@ -57,6 +70,9 @@ public class CourseServiceImpl implements CourseService {
 	private final CourseLikeRepository courseLikeRepository;
 	private final CourseReviewRepository courseReviewRepository;
 	private final CourseCommentRepository courseCommentRepository;
+	private final S3FileService fileService;
+	private final PreCourseRepository preCourseRepository;
+	private final CourseFileRepository courseFileRepository;
 
 	@Override
 	public List<CourseResponseDTO> getAllCourses(Long memberId) {
@@ -203,6 +219,15 @@ public class CourseServiceImpl implements CourseService {
         		.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
 		course.deleteRegist(registCourse);
 	}
+	
+	@Override
+	public void downloadCourseNote(Long courseId) {
+		Optional<Course> course = courseRepository.findById(courseId);
+		CourseFile courseNote = course.get().getCourseNote();
+		
+		fileService.downloadFile(courseNote.getSave_file());
+	}
+
 
 	@Override
 	public CourseResponseDTO getCourseDetail(Long courseId, Long currentMemberId) {
@@ -232,6 +257,42 @@ public class CourseServiceImpl implements CourseService {
                 .courseCommentCount(m.getCourseCommentCount())
                 .build());
 		return noticeResponseDtos;
+	}
+	
+	@Override
+	public CourseInfoResponseDTO getCourseInfo(Long courseId) {
+		Course course = courseRepository.findById(courseId)
+				.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
+		CourseInfoResponseDTO courseInfoResponseDTO = new CourseInfoResponseDTO();
+		
+		// 선수과목
+		List<PreCourse> precourses = new ArrayList<>();
+		precourses = preCourseRepository.findByNextId(courseId);
+		
+		if(!precourses.isEmpty()) {
+			List<CourseInfoResponseDTO.PreCourseDTO> preCourseDTOs = precourses.stream()
+	                .map(preCourse -> new CourseInfoResponseDTO.PreCourseDTO(
+	                    preCourse.getPreCourse().getId(),
+	                    preCourse.getPreCourse().getTitle() 
+	                ))
+	                .collect(Collectors.toList());
+			courseInfoResponseDTO.setPreCourses(preCourseDTOs);
+		}
+		
+		// 소개,요약
+		courseInfoResponseDTO.setContent(course.getContent());
+		courseInfoResponseDTO.setSummary(course.getSummary());
+
+		// 이미지 
+		Long thumbnailId = course.getCourseImg().getId();// 대표이미지 id
+		List<CourseFile> imgs = courseFileRepository.findByCourseIdAndCategAndIdNot(courseId, CourseFileCateg.COURSEIMG, thumbnailId);
+		
+		List<String> fileUrls = imgs.stream()
+	            .map(file -> fileService.getFileUrl(file.getFilePath()))
+	            .collect(Collectors.toList());
+		courseInfoResponseDTO.setFileUrls(fileUrls);
+		
+		return courseInfoResponseDTO;
 	}
 	
 	// 수강 강좌에 대한 수강 강의 생성
@@ -306,6 +367,10 @@ public class CourseServiceImpl implements CourseService {
 		courseResponseDTO.setAvgRating(course.getAvgRating());
 		courseResponseDTO.setReviewCount(course.getReviewCount());
 		courseResponseDTO.setCourseId(course.getId());
+		
+		// 강좌 대표 이미지 조회
+		String filePath = course.getCourseImg().getFilePath();
+		courseResponseDTO.setFileUrl(fileService.getFileUrl(filePath));
 
 		return courseResponseDTO;
 	}
@@ -387,5 +452,6 @@ public class CourseServiceImpl implements CourseService {
     	courseLikeResponseDTO.setMemberId(courseLike.getMember().getId());
         return courseLikeResponseDTO;
     }
+
 
 }

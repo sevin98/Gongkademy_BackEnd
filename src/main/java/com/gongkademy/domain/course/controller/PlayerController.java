@@ -26,7 +26,7 @@ public class PlayerController {
 	private final PlayerService playerService;
 	
 	// 강좌에 대한 최근 수강 구간 반환
-	@GetMapping("/{course_id}")
+	@GetMapping("/course/{course_id}")
 	public ResponseEntity<?> getPlayerLatestCourse(@PathVariable("course_id") Long courseId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId(); 
 		// 가장 최근 강의와 최근 수강 구간 반환
@@ -35,7 +35,7 @@ public class PlayerController {
 	}
 	
 	// 강의에 대한 최근 수강 구간 반환
-	@GetMapping("/{lecture_id}")
+	@GetMapping("/lecture/{lecture_id}")
 	public ResponseEntity<?> getPlayerLatestLecture(@PathVariable("lecture_id") Long lectureId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId(); 
 		// 가장 최근 강의와 최근 수강 구간 반환
@@ -47,12 +47,12 @@ public class PlayerController {
 	@PatchMapping("")
 	public ResponseEntity<?> updatePlayerLatest(@RequestBody PlayerRequestDTO playerRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId(); 
-        playerRequestDTO.setMemberId(currentMemberId);
-		playerService.updatePlayerLatest(playerRequestDTO);
+		playerService.updatePlayerLatest(playerRequestDTO, currentMemberId);
 		
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
+	// 다음 강의 재생
 	@GetMapping("/next")
 	public ResponseEntity<?> getPlayerNext(@RequestBody PlayerRequestDTO playerRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId(); 	
@@ -62,6 +62,7 @@ public class PlayerController {
 		return ResponseEntity.ok(playerResponseDTO);
 	}
 	
+	// 이전 강의 재생
 	@GetMapping("/prev")
 	public ResponseEntity<?> getPlayerPrev(@RequestBody PlayerRequestDTO playerRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId(); 

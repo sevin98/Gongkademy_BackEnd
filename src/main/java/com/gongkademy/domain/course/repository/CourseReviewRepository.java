@@ -18,5 +18,5 @@ public interface CourseReviewRepository extends JpaRepository<CourseReview, Long
 	List<CourseReview> findByCourseId(Long id);
 	
 	// 강의평 페이지네이션
-	Page<CourseReview> findAllByCourseId(Long id, Pageable pageable);
+	Page<CourseReview> findAllByCourseId(Long courseId, Pageable pageable);
 }

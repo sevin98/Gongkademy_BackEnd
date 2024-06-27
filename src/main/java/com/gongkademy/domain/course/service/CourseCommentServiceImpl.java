@@ -18,6 +18,8 @@ import com.gongkademy.domain.course.repository.CourseReviewRepository;
 import com.gongkademy.domain.course.repository.NoticeRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
+import com.gongkademy.global.exception.CustomException;
+import com.gongkademy.global.exception.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,6 +37,11 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 	public CourseCommentResponseDTO createComment(CourseCommentRequestDTO courseCommentRequestDTO, Long currentMemberId) {
 		CourseComment comment = convertToEntity(courseCommentRequestDTO);
 		
+		// 요청 사용자 == 로그인 사용자 확인
+        if (!comment.getMember().getId().equals(currentMemberId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+		
 		Member member = memberRepository.findById(currentMemberId).get();
 		comment.setMember(member); //댓글 작성자 = 현재이용자
 		member.addCourseComment(comment);
@@ -49,16 +56,20 @@ public class CourseCommentServiceImpl implements CourseCommentService {
         	notice.addCourseComment(comment);
         }
         
-        
         return convertToDTO(comment);
 	}
 
 	@Override
-	public CourseCommentResponseDTO updateComment(Long id, CourseCommentRequestDTO courseCommentRequestDTO) {
+	public CourseCommentResponseDTO updateComment(Long id, CourseCommentRequestDTO courseCommentRequestDTO, Long currentMemberId) {
         Optional<CourseComment> commentOptional = courseCommentRepository.findById(id);
-
+        
         if (commentOptional.isPresent()) {
-            CourseComment comment = commentOptional.get();
+        	CourseComment comment = commentOptional.get();
+    		// 요청 사용자 == 로그인 사용자 확인
+            if (!comment.getMember().getId().equals(currentMemberId)) {
+                throw new CustomException(ErrorCode.FORBIDDEN);
+            }
+        	
             comment.setContent(courseCommentRequestDTO.getContent());
             courseCommentRepository.save(comment);
             return convertToDTO(comment);
@@ -80,8 +91,12 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 
 	@Override
 	@Transactional
-	public void deleteComment(Long id) {
+	public void deleteComment(Long id, Long currentMemberId) {
 		Optional<CourseComment> comment = courseCommentRepository.findById(id);
+		// 요청 사용자 == 로그인 사용자 확인
+        if (!comment.get().getMember().getId().equals(currentMemberId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
 
 		if (comment.get().getCommentCateg() == CommentCateg.REVIEW) {
 			CourseReview review = comment.get().getCourseReview();

@@ -87,14 +87,13 @@ public class Course {
 		notice.setCourse(this);
 	}
 	// 수강평 add
-	public void addReveiw(CourseReview courseReview) {
+	public void addReview(CourseReview courseReview) {
 		this.courseReviews.add(courseReview);
 		courseReview.setCourse(this);
 		
 		this.updateReviewCount();
 		this.updateAvgRating();
 	}
-	
 	
 	//== delete ==//
 	// 강의 delete
@@ -116,7 +115,7 @@ public class Course {
 		this.notices.remove(notice);
 	}
 	// 수강평 delete
-	public void deleteReveiw(CourseReview courseReview) {
+	public void deleteReview(CourseReview courseReview) {
 		this.courseReviews.remove(courseReview);
 		this.updateReviewCount();
 		this.updateAvgRating();

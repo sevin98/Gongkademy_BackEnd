@@ -10,10 +10,10 @@ public interface CourseCommentService {
 
 	public CourseCommentResponseDTO createComment(CourseCommentRequestDTO courseCommentRequestDTO, Long currentMemberId);
 
-	public CourseCommentResponseDTO updateComment(Long id, CourseCommentRequestDTO courseCommentRequestDTO);
+	public CourseCommentResponseDTO updateComment(Long id, CourseCommentRequestDTO courseCommentRequestDTO, Long currentMemberId);
 
 	public List<CourseCommentResponseDTO> getAllComments(CommentCateg categ, Long id);
 
-	public void deleteComment(Long id);
+	public void deleteComment(Long id, Long currentMemberId);
 
 }

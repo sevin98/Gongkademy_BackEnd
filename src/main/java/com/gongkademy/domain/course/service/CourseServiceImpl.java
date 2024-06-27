@@ -37,6 +37,8 @@ import com.gongkademy.domain.course.repository.RegistLectureRepository;
 import com.gongkademy.domain.course.repository.ScrapRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
+import com.gongkademy.global.exception.CustomException;
+import com.gongkademy.global.exception.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -134,46 +136,57 @@ public class CourseServiceImpl implements CourseService {
 		return courseContentsDTOs;
 	}
 
-
-	@Override
-	public CourseResponseDTO registCourse(CourseRequestDTO courseRequestDTO, Long currentMemberId) {
-		courseRequestDTO.setMemberId(currentMemberId);
-		Member member = memberRepository.findById(currentMemberId).get();
-		RegistCourse registCourse = this.converToEntityRegistCourse(courseRequestDTO);
-		member.addRegistCourse(registCourse);
-		
-		Optional<Course> course = courseRepository.findById(courseRequestDTO.getCourseId());
-		course.get().addRegist(registCourse);
-		
-		CourseResponseDTO courseResponseDTO = this.convertToDTO(course.get());
-		
-		this.addRegistLectures(registCourse);
-		return courseResponseDTO;
-	}
+    @Override
+    public CourseResponseDTO registCourse(CourseRequestDTO courseRequestDTO, Long currentMemberId) {        
+        // 요청 사용자 == 로그인 사용자 확인
+        if (!courseRequestDTO.getMemberId().equals(currentMemberId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+        
+        Member member = memberRepository.findById(currentMemberId)
+        		.orElseThrow(() -> new IllegalArgumentException("사용자 찾을 수 없음"));
+        RegistCourse registCourse = this.converToEntityRegistCourse(courseRequestDTO);
+        member.addRegistCourse(registCourse);
+        
+        Course course = courseRepository.findById(courseRequestDTO.getCourseId())
+        		.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
+        course.addRegist(registCourse);
+        
+        CourseResponseDTO courseResponseDTO = this.convertToDTO(course);
+        
+        this.addRegistLectures(registCourse);
+        return courseResponseDTO;
+    }
 
 	@Override
 	public CourseResponseDTO scrapCourse(CourseRequestDTO courseRequestDTO, Long currentMemberId) {
-		courseRequestDTO.setMemberId(currentMemberId);
-		Member member = memberRepository.findById(currentMemberId).get();
+        // 요청 사용자 == 로그인 사용자 확인
+        if (!courseRequestDTO.getMemberId().equals(currentMemberId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+        
+        Member member = memberRepository.findById(currentMemberId)
+        		.orElseThrow(() -> new IllegalArgumentException("사용자 찾을 수 없음"));
 		Scrap scrap = this.convertToEntityScrap(courseRequestDTO);
 		member.addScrap(scrap);
 
-		Optional<Course> course = courseRepository.findById(courseRequestDTO.getCourseId());
-		Boolean isSaved = scrapRepository.existsByMemberIdAndCourseId(currentMemberId, course.get().getId());
+        Course course = courseRepository.findById(courseRequestDTO.getCourseId())
+        		.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
+		Boolean isSaved = scrapRepository.existsByMemberIdAndCourseId(currentMemberId, course.getId());
 		
-		CourseResponseDTO dto = this.convertToDTO(course.get());
+		CourseResponseDTO dto = this.convertToDTO(course);
 		// 저장 -> 저장 삭제
 		if(isSaved) {
-			course.get().addScrap(scrap);
+			course.addScrap(scrap);
 			dto.setIsSaved(false);
 		}
 		else {
-			course.get().deleteScrap(scrap);
+			course.deleteScrap(scrap);
 			dto.setIsSaved(true);
 		}
 		
 		//수강여부 확인
-		Boolean isRegistered = registCourseRepository.existsByMemberIdAndCourseId(currentMemberId, course.get().getId());
+		Boolean isRegistered = registCourseRepository.existsByMemberIdAndCourseId(currentMemberId, course.getId());
 		if(isRegistered) dto.setIsRegistered(true);
 		else dto.setIsRegistered(false);
 		
@@ -182,12 +195,13 @@ public class CourseServiceImpl implements CourseService {
 
 	@Override
 	@Transactional
-	public void deleteRegistCourse(Long courseId, Long currentMemberId) {
+	public void deleteRegistCourse(Long courseId, Long currentMemberId) {		
 		RegistCourse registCourse = registCourseRepository.findByCourseIdAndMemberId(courseId, currentMemberId)
 				.orElseThrow(() -> new IllegalArgumentException("수강 강좌 찾을 수 없음"));
 		
-		Optional<Course> course = courseRepository.findById(courseId);
-		course.get().deleteRegist(registCourse);
+        Course course = courseRepository.findById(courseId)
+        		.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
+		course.deleteRegist(registCourse);
 	}
 
 	@Override
@@ -236,6 +250,11 @@ public class CourseServiceImpl implements CourseService {
 	
 	@Override
 	public CourseLikeResponseDTO like(CourseLikeRequestDTO courseLikeRequestDTO, Long currentMemberId) {
+        // 요청 사용자 == 로그인 사용자 확인
+        if (!courseLikeRequestDTO.getMemberId().equals(currentMemberId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+        
         Member member = memberRepository.findById(currentMemberId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자 찾을 수 없음"));
 		

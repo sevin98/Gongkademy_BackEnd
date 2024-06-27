@@ -28,29 +28,35 @@ import lombok.RequiredArgsConstructor;
 public class CourseCommentController {
 	
     private final CourseCommentService courseCommentService;
-
+    
+    // 댓글 저장
     @PostMapping
     public ResponseEntity<?> createComment(@RequestBody CourseCommentRequestDTO courseCommentRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId(); 
     	CourseCommentResponseDTO courseCommentResponseDTO = courseCommentService.createComment(courseCommentRequestDTO, currentMemberId);
         return new ResponseEntity<>(courseCommentResponseDTO, HttpStatus.CREATED);
     }
-
+    
+    // 댓글 수정
     @PatchMapping("/{id}")
-    public ResponseEntity<?> updateComment(@PathVariable Long id, @RequestBody CourseCommentRequestDTO courseCommentRequestDTO) {
-    	CourseCommentResponseDTO courseCommentResponseDTO = courseCommentService.updateComment(id, courseCommentRequestDTO);
+    public ResponseEntity<?> updateComment(@PathVariable Long id, @RequestBody CourseCommentRequestDTO courseCommentRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+    	Long currentMemberId = principalDetails.getMemberId();
+    	CourseCommentResponseDTO courseCommentResponseDTO = courseCommentService.updateComment(id, courseCommentRequestDTO, currentMemberId);
         return ResponseEntity.ok(courseCommentResponseDTO);
     }
 
+    // 카테고리(리뷰, 공지사항)의 글 ID에 해당하는 댓글 모두 반환
     @GetMapping("/{categ}/{id}")
     public ResponseEntity<List<CourseCommentResponseDTO>> getAllComments(@PathVariable("categ") CommentCateg categ, @PathVariable("id") Long id) {
         List<CourseCommentResponseDTO> courseCommentResponseDTOs = courseCommentService.getAllComments(categ, id);
         return ResponseEntity.ok(courseCommentResponseDTOs);
     }
-
+    
+    // 댓글 삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteComment(@PathVariable Long id) {
-    	courseCommentService.deleteComment(id);
+    public ResponseEntity<?> deleteComment(@PathVariable Long id, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+    	Long currentMemberId = principalDetails.getMemberId(); 
+    	courseCommentService.deleteComment(id, currentMemberId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -267,7 +267,7 @@ public class CourseServiceImpl implements CourseService {
 		
 		// 선수과목
 		List<PreCourse> precourses = new ArrayList<>();
-		precourses = preCourseRepository.findByNextId(courseId);
+		precourses = preCourseRepository.findByNextCourseId(courseId);
 		
 		if(!precourses.isEmpty()) {
 			List<CourseInfoResponseDTO.PreCourseDTO> preCourseDTOs = precourses.stream()

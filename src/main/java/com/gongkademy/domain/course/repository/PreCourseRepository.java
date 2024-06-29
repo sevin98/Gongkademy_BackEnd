@@ -9,6 +9,6 @@ import com.gongkademy.domain.course.entity.PreCourse;
 
 public interface PreCourseRepository extends JpaRepository<PreCourse, Long> {
 	
-	List<PreCourse> findByNextId(Long nextId);
+	List<PreCourse> findByNextCourseId(Long nextCourseId);
 
 }

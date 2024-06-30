@@ -27,15 +27,17 @@ public class BoardController {
 
     // 공지사항 상세보기
     @GetMapping("/notice/{articleId}")
-    public ResponseEntity<?> getBoard(@PathVariable Long articleId) {
-        BoardResponseDTO boardResponseDTO = boardService.getBoard(articleId);
+    public ResponseEntity<?> getBoard(@PathVariable Long articleId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Long currentMemberId = (principalDetails != null) ? principalDetails.getMemberId() : null;
+        BoardResponseDTO boardResponseDTO = boardService.getBoard(articleId, currentMemberId);
         return ResponseEntity.ok(boardResponseDTO);
     }
 
     // 최신 순 3개 가져오기
     @GetMapping("/notice/top_latest")
-    public ResponseEntity<List<BoardResponseDTO>> getLimitLatestBoards() {
-        List<BoardResponseDTO> boardResponseDTOS = boardService.getLatestBoards(LIMIT);
+    public ResponseEntity<List<BoardResponseDTO>> getLimitLatestBoards(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Long currentMemberId = (principalDetails != null) ? principalDetails.getMemberId() : null;
+        List<BoardResponseDTO> boardResponseDTOS = boardService.getLatestBoards(LIMIT, currentMemberId);
         return ResponseEntity.ok(boardResponseDTOS);
     }
 

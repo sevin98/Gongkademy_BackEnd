@@ -39,40 +39,29 @@ public class BoardServiceImpl implements BoardService {
     private final int DEFAULT_TOP = 0;
 
     @Override
-    public BoardResponseDTO getBoard(Long id) {
-        Optional<Board> boardOptional = boardRepository.findById(id);
-        if (boardOptional.isPresent()) {
-            Board board = boardOptional.get();
-            // 조회 수 추가
-            incrementHit(board.getArticleId());
-            return convertToDTO(boardOptional.get());
-        }
-        throw new CustomException(ErrorCode.INVALID_BOARD_ID);
+    public BoardResponseDTO getBoard(Long id, Long memberId) {
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_BOARD_ID));
+
+        boolean isLiked = (memberId != null) && isLikedByMember(board, memberId);
+        boolean isScrapped = (memberId != null) && isScrappedByMember(board, memberId);
+
+        board.setHit(board.getHit() + 1);
+
+        return convertToDTO(board, isLiked, isScrapped);
     }
 
     @Override
-    @Transactional
-    public void incrementHit(Long id) {
-        Optional<Board> boardOptional = boardRepository.findById(id);
-
-        if (boardOptional.isPresent()) {
-            Board board = boardOptional.get();
-            board.setHit(board.getHit() + 1);
-            boardRepository.save(board);
-        } else {
-            throw new CustomException(ErrorCode.INVALID_BOARD_ID);
-        }
-    }
-
-    @Override
-    public List<BoardResponseDTO> getLatestBoards(int LIMIT) {
+    public List<BoardResponseDTO> getLatestBoards(int LIMIT, Long memberId) {
         Pageable pageable = PageRequest.of(DEFAULT_TOP, LIMIT);
         List<Board> boards = boardRepository.findByOrderByCreateTimeDesc(pageable).getContent();
 
         List<BoardResponseDTO> boardResponseDTOS = new ArrayList<>();
 
         for (Board board : boards) {
-            boardResponseDTOS.add(convertToDTO(board));
+            boolean isLiked = (memberId != null) && isLikedByMember(board, memberId);
+            boolean isScrapped = (memberId != null) && isScrappedByMember(board, memberId);
+            boardResponseDTOS.add(convertToDTO(board, isLiked, isScrapped));
         }
         return boardResponseDTOS;
     }
@@ -152,20 +141,18 @@ public class BoardServiceImpl implements BoardService {
 
     }
 
-    private Board convertToEntity(BoardRequestDTO boardRequestDTO) {
-        Member member = memberRepository.findById(boardRequestDTO.getMemberId())
+    private boolean isLikedByMember(Board board, Long memberId) {
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+        Optional<Pick> pickOptional = pickRepository.findByBoardAndMemberAndPickType(board, member, PickType.LIKE);
+        return pickOptional.isPresent();
+    }
 
-        return Board.builder()
-                .boardType(boardRequestDTO.getBoardType())
-                .member(member)
-                .title(boardRequestDTO.getTitle())
-                .content(boardRequestDTO.getContent())
-                .hit(0L)
-                .likeCount(0L)
-                .scrapCount(0L)
-                .commentCount(0L)
-                .build();
+    private boolean isScrappedByMember(Board board, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+        Optional<Pick> pickOptional = pickRepository.findByBoardAndMemberAndPickType(board, member, PickType.SCRAP);
+        return pickOptional.isPresent();
     }
 
     private BoardResponseDTO convertToDTO(Board board) {
@@ -186,5 +173,23 @@ public class BoardServiceImpl implements BoardService {
 
     }
 
+    private BoardResponseDTO convertToDTO(Board board, boolean isLiked, boolean isScrapped) {
 
+        return BoardResponseDTO.builder().
+                articleId(board.getArticleId())
+                .boardType(board.getBoardType())
+                .memberId(board.getMember().getId())
+                .nickname(board.getMember().getNickname())
+                .title(board.getTitle())
+                .content(board.getContent())
+                .createTime(board.getCreateTime())
+                .likeCount(board.getLikeCount())
+                .scrapCount(board.getScrapCount())
+                .hit(board.getHit())
+                .commentCount(board.getCommentCount())
+                .comments(board.getComments())
+                .isLiked(isLiked)
+                .isScrapped(isScrapped)
+                .build();
+    }
 }

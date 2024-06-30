@@ -9,20 +9,19 @@ import java.util.List;
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class QnaBoardResponseDTO {
-    private Long articleId;
+@Builder
+public class ConsultingBoardResponseDTO {
 
+    private Long articleId;
     private BoardType boardType;
     private Long memberId;
     private String nickname;
-
     private String title;
     private String content;
-
     private LocalDateTime createTime;
+
     private Long likeCount;
     private Long scrapCount;
     private Long hit;
@@ -33,8 +32,6 @@ public class QnaBoardResponseDTO {
     @Builder.Default
     private Boolean isScrapped = false;
 
-    private String lectureTitle;
-    private String courseTitle;
-
     private List<Comment> comments;
+
 }

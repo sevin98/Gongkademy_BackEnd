@@ -1,7 +1,9 @@
 package com.gongkademy.domain.community.controller;
 
 import com.gongkademy.domain.community.dto.request.BoardRequestDTO;
+import com.gongkademy.domain.community.dto.request.ConsultingBoardRequestDTO;
 import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
+import com.gongkademy.domain.community.dto.response.ConsultingBoardResponseDTO;
 import com.gongkademy.domain.community.service.ConsultingBoardService;
 import com.gongkademy.domain.member.dto.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
@@ -30,28 +32,31 @@ public class ConsultingController {
     @GetMapping("")
     public ResponseEntity<?> getAllConsulitng(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
                                        @RequestParam(defaultValue = BASE_CRITERIA, value = REQUEST_PARAM_CRITERIA) String criteria,
-                                              @RequestParam(value = KEY_WORD) String keyword){
-        List<BoardResponseDTO> result = consultingBoardService.findAllConsultingBoards(pageNo, criteria, keyword);
+                                              @RequestParam(value = KEY_WORD) String keyword,
+                                              @AuthenticationPrincipal PrincipalDetails principalDetails){
+        Long currentMemberId = principalDetails.getMemberId();
+        List<ConsultingBoardResponseDTO> result = consultingBoardService.findAllConsultingBoards(pageNo, criteria, keyword, currentMemberId);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     // Consulting 상세 조회
     @GetMapping("/{articleId}")
-    public ResponseEntity<?> getConsulting(@PathVariable Long articleId) {
-        BoardResponseDTO result = consultingBoardService.findConsultingBoard(articleId);
+    public ResponseEntity<?> getConsulting(@AuthenticationPrincipal PrincipalDetails principalDetails, @PathVariable Long articleId) {
+        Long currentMemberId = principalDetails.getMemberId();
+        ConsultingBoardResponseDTO result = consultingBoardService.findConsultingBoard(articleId, currentMemberId);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     // Consulting 작성
     @PostMapping("")
-    public ResponseEntity<?> createConsulting(@RequestBody BoardRequestDTO consultingBoardRequestDTO) {
-        BoardResponseDTO result = consultingBoardService.createConsultingBoard(consultingBoardRequestDTO);
+    public ResponseEntity<?> createConsulting(@RequestBody ConsultingBoardRequestDTO consultingBoardRequestDTO) {
+        ConsultingBoardResponseDTO result = consultingBoardService.createConsultingBoard(consultingBoardRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     // Consulting 수정
     @PatchMapping("/{articleId}")
-    public ResponseEntity<?> updateConsulting(@PathVariable Long articleId, @RequestBody BoardRequestDTO consultingBoardRequestDTO) {
+    public ResponseEntity<?> updateConsulting(@PathVariable Long articleId, @RequestBody ConsultingBoardRequestDTO consultingBoardRequestDTO) {
         Long updatedArticleNo = consultingBoardService.updateConsultingBoard(articleId, consultingBoardRequestDTO);
 
         // 해당 Consulting 게시글이 없는 경우
@@ -88,17 +93,17 @@ public class ConsultingController {
 
     // Consulting 좋아요한 게시글 가져오기
     @GetMapping("/liked")
-    public ResponseEntity<List<BoardResponseDTO>> getLikeBoards(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public ResponseEntity<List<ConsultingBoardResponseDTO>> getLikeBoards(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId();
-        List<BoardResponseDTO> likeBoards = consultingBoardService.getLikeBoards(currentMemberId);
+        List<ConsultingBoardResponseDTO> likeBoards = consultingBoardService.getLikeBoards(currentMemberId);
         return ResponseEntity.ok(likeBoards);
     }
 
     // Consulting 스크랩한 게시글 가져오기
     @GetMapping("/scrapped")
-    public ResponseEntity<List<BoardResponseDTO>> getScrapBoards(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public ResponseEntity<List<ConsultingBoardResponseDTO>> getScrapBoards(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId();
-        List<BoardResponseDTO> scrapBoards = consultingBoardService.getScrapBoards(currentMemberId);
+        List<ConsultingBoardResponseDTO> scrapBoards = consultingBoardService.getScrapBoards(currentMemberId);
         return ResponseEntity.ok(scrapBoards);
     }
 }

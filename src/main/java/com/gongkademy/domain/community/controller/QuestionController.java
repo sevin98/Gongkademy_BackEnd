@@ -29,15 +29,18 @@ public class QuestionController {
     @GetMapping("")
     public ResponseEntity<?> getAllQna(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
                                            @RequestParam(defaultValue = BASE_CRITERIA, value = REQUEST_PARAM_CRITERIA) String criteria,
-                                       @RequestParam(value = KEY_WORD) String keyword){
-        List<QnaBoardResponseDTO> result = qnaboardService.findAllQnaBoards(pageNo, criteria, keyword);
+                                       @RequestParam(value = KEY_WORD) String keyword,
+                                       @AuthenticationPrincipal PrincipalDetails principalDetails){
+        Long currentMemberId = principalDetails.getMemberId();
+        List<QnaBoardResponseDTO> result = qnaboardService.findAllQnaBoards(pageNo, criteria, keyword, currentMemberId);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     // Qna 상세 조회
     @GetMapping("/{articleId}")
-    public ResponseEntity<?> getQna(@PathVariable Long articleId) {
-        QnaBoardResponseDTO result = qnaboardService.findQnaBoard(articleId);
+    public ResponseEntity<?> getQna(@AuthenticationPrincipal PrincipalDetails principalDetails, @PathVariable Long articleId) {
+        Long currentMemberId = principalDetails.getMemberId();
+        QnaBoardResponseDTO result = qnaboardService.findQnaBoard(articleId, currentMemberId);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 

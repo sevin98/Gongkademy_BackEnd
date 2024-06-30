@@ -19,4 +19,6 @@ public interface PickRepository extends JpaRepository<Pick, Long> {
     Optional<Pick> findByBoardAndMemberAndPickType(Board board, Member member, PickType pickType);
 
     List<Pick> findAllByMemberAndPickType(Member member, PickType pickType);
+
+    Optional<Pick> findByBoardArticleIdAndMemberIdAndPickType(Long articleId, Long memberId, PickType pickType);
 }

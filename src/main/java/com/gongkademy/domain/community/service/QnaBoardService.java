@@ -7,13 +7,13 @@ import java.util.List;
 
 public interface QnaBoardService {
     // 모든 Qna 게시글 조회하기
-    List<QnaBoardResponseDTO> findAllQnaBoards(int pageNo, String criteria, String keyword);
+    List<QnaBoardResponseDTO> findAllQnaBoards(int pageNo, String criteria, String keyword, Long memberId);
 
     // Qna 게시글 작성하기
     QnaBoardResponseDTO createQnaBoard(QnaBoardRequestDTO qnaBoardRequestDTO);
 
     // Qna 게시글 조회하기
-    QnaBoardResponseDTO findQnaBoard(Long articleId);
+    QnaBoardResponseDTO findQnaBoard(Long articleId, Long memberId);
 
     // Qna 게시글 수정하기
     Long updateQnaBoard(Long articleId, QnaBoardRequestDTO qnaBoardRequestDTO);

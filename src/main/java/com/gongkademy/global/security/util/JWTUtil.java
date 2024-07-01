@@ -94,6 +94,7 @@ public class JWTUtil {
      * 없다면 null 반환
      */
     public Optional<String> getRefreshToken(long id) {
+        log.info("== getRefershToken() 메서드 == ");
         return Optional.ofNullable(redisUtil.getData(String.valueOf(id)));
     }
 
@@ -126,6 +127,8 @@ public class JWTUtil {
                     .build()
                     .parseClaimsJws(accessToken)
                     .getBody().get(PK_CLAIM));
+        } catch (ExpiredJwtException e) {
+            return Optional.ofNullable((Integer) e.getClaims().get(PK_CLAIM));
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         } catch (Exception e) {
@@ -143,12 +146,17 @@ public class JWTUtil {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
-        Date now = new Date();
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody().getExpiration().before(now);
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getExpiration();
+        } catch (ExpiredJwtException e) {
+            return true; // 토큰이 만료된 경우 true 반환
+        }
+        return false;
     }
 
     /**
@@ -163,6 +171,8 @@ public class JWTUtil {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
+        } catch (ExpiredJwtException expiredJwtException) {
+            return true;
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         } catch (InvalidClaimException invalidClaimException) {

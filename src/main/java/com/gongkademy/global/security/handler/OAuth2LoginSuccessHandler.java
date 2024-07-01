@@ -1,9 +1,11 @@
 package com.gongkademy.global.security.handler;
 
 import com.gongkademy.domain.member.dto.PrincipalDetails;
+import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.entity.MemberRole;
 import com.gongkademy.global.security.util.JWTUtil;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +21,7 @@ import java.io.IOException;
 @Log4j2
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private static final String SIGNUP_URL = "/members";
+    private static final String SIGNUP_URL = "http://localhost:3000/signup";
     private static final String MAIN_URL = "/";
     private final JWTUtil jwtUtil;
 
@@ -31,14 +33,26 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         PrincipalDetails oAuthUser = (PrincipalDetails) authentication.getPrincipal();
-        if (!oAuthUser.getRoleNames().contains(MemberRole.USER.toString())) {
-            String accessToken = jwtUtil.createAccessToken(oAuthUser.getMemberId());
-            jwtUtil.sendAccessToken(response, accessToken);
-            response.sendRedirect(SIGNUP_URL);
-        } else {
+        String accessToken = jwtUtil.createAccessToken(oAuthUser.getMemberId());
+
+        jwtUtil.sendAccessToken(response, accessToken);
+        addAccessTokenCookie(response, accessToken);
+
+        String redirectUrl = oAuthUser.getRoleNames().contains(MemberRole.USER.toString()) ? MAIN_URL : SIGNUP_URL;
+
+        if(redirectUrl.equals(MAIN_URL)){
             loginSuccess(response, oAuthUser);
-            response.sendRedirect(MAIN_URL);
         }
+        response.sendRedirect(redirectUrl);
+    }
+
+    private void addAccessTokenCookie(HttpServletResponse response, String accessToken) {
+        Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setSecure(true); // HTTPS를 사용하는 경우
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setMaxAge(60 * 60); // 1시간 동안 유효
+        response.addCookie(accessTokenCookie);
     }
 
     private void loginSuccess(HttpServletResponse response, PrincipalDetails oAuthUser) {

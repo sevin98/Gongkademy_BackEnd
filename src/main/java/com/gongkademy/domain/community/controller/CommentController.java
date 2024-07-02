@@ -33,12 +33,11 @@ public class CommentController {
         long articleId = commentRequestDTO.getArticleId();
         BoardType boardType = boardRepository.findBoardTypeByBoardId(articleId);
         //게시글 주인 아이디 찾기
-        long articleOwnerId = boardRepository.findMemberIdByBoardId(articleId);
+        // receiverId가 = 댓글의 부모아이디가 없다면, 게시글의 Id가 receiverId가 됨, 대댓글이라면, 부모아이디가 receiverId가 됨
+        long receiverId = (commentRequestDTO.getParentId() == null) ? boardRepository.findMemberIdByBoardId(articleId) : commentRequestDTO.getParentId();
 
-        //Todo : 이렇게하면 일단 대댓글의 주인한테는 알림이 안가고 게시글의 주인한테만 감
-        // 대댓글은 필요 시 다시 작업
         NotificationRequestDTO notificationRequestDTO = NotificationRequestDTO.builder()
-                .receiver(articleOwnerId)
+                .receiver(receiverId)
                 .type(mapToNotificationType(boardType))
                 .articleId(commentRequestDTO.getArticleId())
                 .message(commentRequestDTO.getContent())

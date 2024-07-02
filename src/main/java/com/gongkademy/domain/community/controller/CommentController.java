@@ -4,6 +4,7 @@ import com.gongkademy.domain.community.dto.request.CommentRequestDTO;
 import com.gongkademy.domain.community.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.entity.board.BoardType;
 import com.gongkademy.domain.community.repository.BoardRepository;
+import com.gongkademy.domain.community.repository.CommentRepository;
 import com.gongkademy.domain.community.service.CommentService;
 import com.gongkademy.domain.member.dto.PrincipalDetails;
 import com.gongkademy.domain.member.repository.MemberRepository;
@@ -25,6 +26,7 @@ public class CommentController {
     private final NotificationServiceImpl notificationService;
     private final MemberRepository memberRepository;
     private final BoardRepository boardRepository;
+    private final CommentRepository commentRepository;
 
     @PostMapping
     public ResponseEntity<?> createComment(@RequestBody CommentRequestDTO commentRequestDTO) {
@@ -33,8 +35,10 @@ public class CommentController {
         long articleId = commentRequestDTO.getArticleId();
         BoardType boardType = boardRepository.findBoardTypeByBoardId(articleId);
         //게시글 주인 아이디 찾기
-        // receiverId가 = 댓글의 부모아이디가 없다면, 게시글의 Id가 receiverId가 됨, 대댓글이라면, 부모아이디가 receiverId가 됨
-        long receiverId = (commentRequestDTO.getParentId() == null) ? boardRepository.findMemberIdByBoardId(articleId) : commentRequestDTO.getParentId();
+        // receiverId가 = 댓글의 부모아이디가 없다면, 게시글의 Id가 receiverId가 됨, 대댓글이라면, 부모아이디의 memberId가 receiverId가 됨
+        long receiverId = (commentRequestDTO.getParentId() == null)
+                ? boardRepository.findMemberIdByBoardId(articleId)
+                : commentRepository.findMemberIdByCommentId(commentRequestDTO.getParentId());
 
         NotificationRequestDTO notificationRequestDTO = NotificationRequestDTO.builder()
                 .receiver(receiverId)

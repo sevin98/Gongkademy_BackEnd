@@ -1,8 +1,11 @@
 package com.gongkademy.domain.course.controller;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
@@ -82,8 +85,18 @@ public class CourseController {
 	
 	//-강의자료 다운로드
 	@GetMapping("/detail/download")
-	public void downloadCourseNote(@RequestBody CourseRequestDTO courseRequestDTO){		
-		courseService.downloadCourseNote(courseRequestDTO.getCourseId());
+	public ResponseEntity<?> downloadCourseNote(@RequestBody CourseRequestDTO courseRequestDTO){
+		Map<String, byte[]> file = courseService.downloadCourseNote(courseRequestDTO.getCourseId());
+		String fileName = file.keySet().iterator().next();
+		byte[] bytes = file.get(fileName);
+		ByteArrayResource resource = new ByteArrayResource(bytes);
+
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+		httpHeaders.setContentLength(bytes.length);
+		httpHeaders.setContentDispositionFormData("attachment", fileName);
+
+		return new ResponseEntity<>(resource, httpHeaders, HttpStatus.OK);
 	}
 	
 	// - 강좌 조회

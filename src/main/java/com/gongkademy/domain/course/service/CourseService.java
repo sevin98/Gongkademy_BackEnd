@@ -1,6 +1,7 @@
 package com.gongkademy.domain.course.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -40,7 +41,7 @@ public interface CourseService {
 
 	CourseLikeResponseDTO like(CourseLikeRequestDTO courseLikeRequestDTO, Long currentMemberId);
 
-	void downloadCourseNote(Long courseId);
+	Map<String, byte[]> downloadCourseNote(Long courseId);
 
 	CourseInfoResponseDTO getCourseInfo(Long id);	
 	

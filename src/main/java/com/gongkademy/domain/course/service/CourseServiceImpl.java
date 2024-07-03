@@ -1,10 +1,11 @@
 package com.gongkademy.domain.course.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.net.MalformedURLException;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import org.springdoc.core.providers.HateoasHalProvider;
+import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -221,11 +222,16 @@ public class CourseServiceImpl implements CourseService {
 	}
 	
 	@Override
-	public void downloadCourseNote(Long courseId) {
-		Optional<Course> course = courseRepository.findById(courseId);
-		CourseFile courseNote = course.get().getCourseNote();
-		
-		fileService.downloadFile(courseNote.getSave_file());
+	public Map<String, byte[]> downloadCourseNote(Long courseId) {
+		Course course = courseRepository.findById(courseId)
+				.orElseThrow(() -> new IllegalArgumentException("수강 강좌 찾을 수 없음"));
+		CourseFile courseNote = course.getCourseNote();
+
+		Map<String, byte[]> file = new HashMap<>();
+		String fileName = fileService.getdownloadFileName(courseNote.getSave_file());
+		byte[] bytes = fileService.downloadFile(courseNote.getSave_file());
+		file.put(fileName, bytes);
+		return file;
 	}
 
 
@@ -288,7 +294,7 @@ public class CourseServiceImpl implements CourseService {
 		List<CourseFile> imgs = courseFileRepository.findByCourseIdAndCategAndIdNot(courseId, CourseFileCateg.COURSEIMG, thumbnailId);
 		
 		List<String> fileUrls = imgs.stream()
-	            .map(file -> fileService.getFileUrl(file.getFilePath()))
+	            .map(file -> fileService.getFileUrl(file.getSave_file()))
 	            .collect(Collectors.toList());
 		courseInfoResponseDTO.setFileUrls(fileUrls);
 		
@@ -369,8 +375,8 @@ public class CourseServiceImpl implements CourseService {
 		courseResponseDTO.setCourseId(course.getId());
 		
 		// 강좌 대표 이미지 조회
-		String filePath = course.getCourseImg().getFilePath();
-		courseResponseDTO.setFileUrl(fileService.getFileUrl(filePath));
+		String filename = course.getCourseImg().getSave_file();
+		courseResponseDTO.setFileUrl(fileService.getFileUrl(filename));
 
 		return courseResponseDTO;
 	}

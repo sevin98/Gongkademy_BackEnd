@@ -6,6 +6,7 @@ import com.amazonaws.util.IOUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -107,26 +108,30 @@ public class S3FileService implements FileService {
         }
     }
     
-    public ResponseEntity<?> downloadFile(String savedfileName) {
-    	S3Object o = amazonS3.getObject(new GetObjectRequest(bucketName, savedfileName));
-    	S3ObjectInputStream objectInputStream = o.getObjectContent();
+    public byte[] downloadFile(String fileAddress) {
+        String key = getKeyFromImageAddress(fileAddress);
+        S3Object o = amazonS3.getObject(new GetObjectRequest(bucketName, key));
+        S3ObjectInputStream objectInputStream = o.getObjectContent();
         try {
 			byte[] bytes = IOUtils.toByteArray(objectInputStream);
-			
-			String fileName = URLEncoder.encode(savedfileName, "UTF-8").replaceAll("\\+", "%20");
-			HttpHeaders httpHeaders = new HttpHeaders();
-	        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-	        httpHeaders.setContentLength(bytes.length);
-	        httpHeaders.setContentDispositionFormData("attachment", fileName);
-	        
-	        return new ResponseEntity<>(bytes, httpHeaders, HttpStatus.OK);
-			
+            return bytes;
 		} catch (IOException e) {
+            log.error("download 도중 에러: " + e.getMessage(), e);
             throw new AmazonS3Exception("에러");
 		}
     }
-    
-    public String getFileUrl(String path) {
-        return amazonS3.getUrl(bucketName, path).toString();
+    public String getdownloadFileName(String fileAddress){
+        String key = getKeyFromImageAddress(fileAddress);
+        String fileName = "file";
+        try {
+            fileName = URLEncoder.encode(key, "UTF-8").replaceAll("\\+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            log.error("파일명 에러: " + e.getMessage(), e);
+            throw new AmazonS3Exception("에러");
+        }
+        return fileName;
+    }
+    public String getFileUrl(String filename) {
+        return amazonS3.getUrl(bucketName, filename).toString();
     }
 }

@@ -1,0 +1,1317 @@
+@startuml
+class com.gongkademy.domain.member.dto.PrincipalDetails {
+- Member member
+- Map<String,Object> attributes
++ Collection<? extends GrantedAuthority> getAuthorities()
++ String getPassword()
++ Map<String,Object> getAttributes()
++ String getEmail()
++ String getNickname()
++ String getUsername()
++ boolean isAccountNonExpired()
++ boolean isAccountNonLocked()
++ boolean isCredentialsNonExpired()
++ boolean isEnabled()
++ LocalDate getBirthday()
++ List<String> getRoleNames()
++ String getUniversity()
++ String getMajor()
++ String getMinor()
++ Map<String,Object> getClaims()
++ String getName()
++ long getMemberId()
+}
+
+
+class com.gongkademy.domain.community.dto.response.CommentResponseDTO {
+- Long commentId
+- Long articleId
+- Long memberId
+- String nickname
+- String content
+- Long likeCount
+- Long parentId
+- List<CommentResponseDTO> children
+}
+
+class com.gongkademy.domain.community.controller.ConsultingController {
+- ConsultingBoardService consultingBoardService
+- String START_PAGE_NO
+- String BASE_CRITERIA
+- String REQUEST_PARAM_PAGE
+- String REQUEST_PARAM_CRITERIA
+- String KEY_WORD
++ ResponseEntity<?> getAllConsulitng(int,String,String,PrincipalDetails)
++ ResponseEntity<?> getConsulting(PrincipalDetails,Long)
++ ResponseEntity<?> createConsulting(ConsultingBoardRequestDTO)
++ ResponseEntity<?> updateConsulting(Long,ConsultingBoardRequestDTO)
++ ResponseEntity<?> deleteConsulting(Long)
++ ResponseEntity<?> toggleLikeCount(PrincipalDetails,Long)
++ ResponseEntity<?> toggleScrapCount(PrincipalDetails,Long)
++ ResponseEntity<List<ConsultingBoardResponseDTO>> getLikeBoards(PrincipalDetails)
++ ResponseEntity<List<ConsultingBoardResponseDTO>> getScrapBoards(PrincipalDetails)
+}
+
+
+class com.gongkademy.domain.course.controller.PlayerController {
+- PlayerService playerService
++ ResponseEntity<?> getPlayerLatestCourse(Long,PrincipalDetails)
++ ResponseEntity<?> getPlayerLatestLecture(Long,PrincipalDetails)
++ ResponseEntity<?> updatePlayerLatest(PlayerRequestDTO,PrincipalDetails)
++ ResponseEntity<?> getPlayerNext(PlayerRequestDTO,PrincipalDetails)
++ ResponseEntity<?> getPlayerPrev(PlayerRequestDTO,PrincipalDetails)
+}
+
+
+class com.gongkademy.domain.course.service.CourseServiceImpl {
+- RegistCourseRepository registCourseRepository
+- RegistLectureRepository registLectureRepository
+- ScrapRepository scrapRepository
+- MemberRepository memberRepository
+- CourseRepository courseRepository
+- NoticeRepository noticeRepository
+- LectureRepository lectureRepository
+- CourseLikeRepository courseLikeRepository
+- CourseReviewRepository courseReviewRepository
+- CourseCommentRepository courseCommentRepository
+- S3FileService fileService
+- PreCourseRepository preCourseRepository
+- CourseFileRepository courseFileRepository
++ List<CourseResponseDTO> getAllCourses(Long)
++ List<CourseResponseDTO> getRegistCoursesNoComplete(Long)
++ List<CourseResponseDTO> getRegistCoursesComplete(Long)
++ List<CourseContentsResponseDTO> getCourseContents(CourseRequestDTO)
++ CourseResponseDTO registCourse(CourseRequestDTO,Long)
++ CourseResponseDTO scrapCourse(CourseRequestDTO,Long)
++ void deleteRegistCourse(Long,Long)
++ Map<String,byte[]> downloadCourseNote(Long)
++ CourseResponseDTO getCourseDetail(Long,Long)
++ Page<NoticeResponseDTO> getCourseNotices(Long,int,int)
++ CourseInfoResponseDTO getCourseInfo(Long)
+- void addRegistLectures(RegistCourse)
++ CourseLikeResponseDTO like(CourseLikeRequestDTO,Long)
+- CourseResponseDTO convertToDTO(Course)
+- CourseContentsResponseDTO convertToDToContents(Lecture)
+- RegistCourse converToEntityRegistCourse(CourseRequestDTO)
+- Scrap convertToEntityScrap(CourseRequestDTO)
+- CourseLike convertToEntityCourseLike(CourseLikeRequestDTO)
+- CourseLikeResponseDTO convertToDTOCourseLike(CourseLike)
+}
+
+
+class com.gongkademy.domain.member.dto.MemberSignUpDTO {
+- String email
+- String name
+- String nickname
+- String birthday
+- String university
+- String major
+- String minor
+}
+
+class com.gongkademy.domain.course.dto.request.CourseCommentRequestDTO {
+- Long courseReviewId
+- Long noticeId
+- CommentCateg commentType
+- Long memberId
+- String nickname
+- String content
+- Long likeCount
+}
+
+class com.gongkademy.domain.course.service.PlayerServiceImpl {
+- LectureRepository lectureRepository
+- CourseRepository courseRepository
+- RegistCourseRepository registCourseRepository
+- RegistLectureRepository registLectureRepository
++ PlayerResponseDTO getPlayerLatestCourse(Long,Long)
++ PlayerResponseDTO getPlayerLatestLecture(Long,Long)
++ void updatePlayerLatest(PlayerRequestDTO,Long)
++ PlayerResponseDTO getPlayerNextPrev(PlayerRequestDTO,Long,int)
+- PlayerResponseDTO convertToDTO(Lecture,RegistLecture)
+}
+
+
+class com.gongkademy.domain.community.dto.request.CommentRequestDTO {
+- Long articleId
+- Long memberId
+- String content
+- Long parentId
+}
+
+class com.gongkademy.global.redis.RedisUtil {
+- StringRedisTemplate redisTemplate
++ String getData(String)
++ void setData(String,String)
++ void setDataExpire(String,String,long)
++ void deleteData(String)
+}
+
+
+class com.gongkademy.domain.member.entity.Member {
+- Long id
+- String name
+- String email
+- String nickname
+- LocalDate birthday
+- String university
+- String major
+- String minor
+- List<MemberRole> memberRoleList
+- LocalDateTime createTime
+- List<Pick> picks
+- List<Comment> comments
+- List<CommentLike> commentLikes
+- List<Board> boards
+- List<CourseComment> courseComments
+- List<CourseReview> courseReviews
+- List<RegistCourse> registCourses
+- List<RegistLecture> registLectures
+- List<Scrap> scraps
+- List<CourseLike> courseLikes
++ void updateName(String)
++ void addRole(MemberRole)
++ void clearRole()
++ void signup(MemberSignUpDTO)
++ void update(MemberUpdateDTO)
++ void addPick(Pick)
++ void addComment(Comment)
++ void addCommentLike(CommentLike)
++ void addBoard(Board)
++ void addCourseComment(CourseComment)
++ void addCourseReview(CourseReview)
++ void addRegistCourse(RegistCourse)
++ void addScrap(Scrap)
++ void addCourseLike(CourseLike)
+}
+
+
+class com.gongkademy.global.exception.CustomException {
+- ErrorCode errorCode
+}
+
+interface com.gongkademy.domain.notification.repository.NotificationRepository {
+~ List<Notification> findByReceiver_IdAndCreateTimeBetween(Long,LocalDateTime,LocalDateTime)
+}
+
+class com.gongkademy.domain.notification.entity.Notification {
+- Long notificationId
+- Member receiver
+- NotificationType type
+- Long articleId
+- String message
+- boolean isRead
+- LocalDateTime createTime
++ void changeReadStatus()
+}
+
+
+interface com.gongkademy.domain.course.repository.CourseRepository {
+~ Optional<Course> findById(Long)
+}
+
+interface com.gongkademy.domain.course.service.CourseReviewService {
++ CourseReviewResponseDTO createReview(CourseReviewRequestDTO,Long)
++ CourseReviewResponseDTO updateReview(Long,CourseReviewRequestDTO,Long)
++ List<CourseReviewResponseDTO> getReviewsPerPage(Long,int,String)
++ void deleteReview(Long,Long)
+}
+
+class com.gongkademy.domain.community.entity.pick.Pick {
+- Long id
+- Board board
+- Member member
+- PickType pickType
+}
+
+interface com.gongkademy.domain.member.service.MemberService {
+~ MemberInfoDTO getMemberInfo(long)
+~ Long joinMember(long,MemberSignUpDTO)
+~ Long modifyMember(long,MemberUpdateDTO)
+~ void deleteMember(long)
+~ MemberInfoDTO entityToMemberInfoDTO(Member)
+~ Member memberSignUpDTOtoEntity(MemberSignUpDTO)
+~ Member memberUpdateDTOtoEntity(MemberUpdateDTO)
+}
+
+class com.gongkademy.Application {
++ {static} void main(String[])
+}
+
+class com.gongkademy.domain.member.dto.MemberInfoDTO {
+- String email
+- String name
+- String nickname
+- String birthday
+- String university
+- String major
+- String minor
+- String member_role
+- LocalDateTime createTime
+}
+
+interface com.gongkademy.domain.community.service.ConsultingBoardService {
+~ List<ConsultingBoardResponseDTO> findAllConsultingBoards(int,String,String,Long)
+~ ConsultingBoardResponseDTO createConsultingBoard(ConsultingBoardRequestDTO)
+~ ConsultingBoardResponseDTO findConsultingBoard(Long,Long)
+~ Long updateConsultingBoard(Long,ConsultingBoardRequestDTO)
+~ void deleteConsultingBoard(Long)
+~ void toggleLikeBoard(Long,Long)
+~ void toggleScrapBoard(Long,Long)
+~ List<ConsultingBoardResponseDTO> getLikeBoards(Long)
+~ List<ConsultingBoardResponseDTO> getScrapBoards(Long)
+}
+
+interface com.gongkademy.domain.course.repository.LectureRepository {
+~ Optional<Lecture> findById(Long)
+~ List<Lecture> findByCourseId(Long)
+~ Long findCourseIdById(Long)
+~ Optional<Lecture> findByCourseIdAndLectureOrder(Long,int)
+}
+
+class com.gongkademy.domain.course.entity.RegistCourse {
+- Long id
+- Long progressTime
+- Double progressPercent
+- Boolean complete
+- Course course
+- Member member
+- List<RegistLecture> registLectures
++ void addRegistLecture(RegistLecture)
++ void deleteRegistLecture(RegistLecture)
++ void updateProgress()
+}
+
+
+enum com.gongkademy.domain.community.entity.pick.PickType {
++  LIKE
++  SCRAP
+}
+
+class com.gongkademy.domain.community.dto.response.CommentLikeResponseDTO {
+- Long id
+- Long memberId
+- Long commentId
+}
+
+class com.gongkademy.domain.course.dto.response.NoticeResponseDTO {
+- Long id
+- LocalDateTime createdTime
+- String content
+- Long courseCommentCount
+}
+
+enum com.gongkademy.domain.community.entity.board.BoardType {
++  NOTICE
++  CONSULT
++  QNA
+}
+
+interface com.gongkademy.domain.community.repository.CommentLikeRepository {
+~ Optional<CommentLike> findByCommentAndMember(Comment,Member)
+}
+
+class com.gongkademy.domain.course.dto.response.CourseCommentResponseDTO {
+- Long courseCommentId
+- Long courseReviewId
+- Long noticeId
+- CommentCateg commentCateg
+- Long memberId
+- String nickname
+- String content
+- Long likeCount
+}
+
+enum com.gongkademy.domain.member.entity.MemberRole {
++  USER
++  GUEST
++  ADMIN
+- String key
+}
+
+interface com.gongkademy.domain.course.repository.RegistLectureRepository {
+~ Optional<RegistLecture> findTopByRegistCourseIdOrderByRecentDateDescLectureLectureOrderAsc(Long)
+~ Optional<RegistLecture> findById(Long)
+~ Optional<RegistLecture> findByLectureIdAndMemberId(Long,Long)
+~ Boolean existsByMemberIdAndLectureIdAndComplete(Long,Long,boolean)
+}
+
+class com.gongkademy.domain.course.dto.response.PlayerResponseDTO {
+- Long memberId
+- Long savePoint
+- LocalDateTime recentDate
+- Long LectureId
+- Long time
+- String link
+- String title
+- Long progressTime
+- Double progressPercent
+- Long totalCourseTime
+}
+
+interface com.gongkademy.domain.community.repository.BoardRepository {
+~ List<QnaBoard> findAllQnAByBoardType(BoardType)
+~ Page<QnaBoard> findQnaBoardByTitleContainingOrContentContaining(String,String,Pageable)
+~ Page<Board> findByOrderByCreateTimeDesc(Pageable)
+~ Long findMemberIdByBoardId(Long)
+~ BoardType findBoardTypeByBoardId(Long)
+}
+
+class com.gongkademy.global.security.handler.OAuth2LoginSuccessHandler {
+- {static} String SIGNUP_URL
+- {static} String MAIN_URL
+- JWTUtil jwtUtil
++ void onAuthenticationSuccess(HttpServletRequest,HttpServletResponse,Authentication)
+- void addAccessTokenCookie(HttpServletResponse,String)
+- void loginSuccess(HttpServletResponse,PrincipalDetails)
+}
+
+
+class com.gongkademy.domain.course.dto.response.CourseLikeResponseDTO {
+- Long courseLikeId
+- CourseLikeCateg likeCateg
+- Long memberId
+- Long courseReviewId
+- Long courseCommentId
+}
+
+interface com.gongkademy.domain.member.repository.MemberRepository {
+~ Optional<Member> findByEmail(String)
+~ Optional<Member> findById(Long)
+}
+
+class com.gongkademy.domain.course.entity.RegistLecture {
+- Long id
+- Long savePoint
+- Long maxTime
+- Boolean complete
+- LocalDateTime recentDate
+- Lecture lecture
+- RegistCourse registCourse
+- Member member
++ void updateSavePoint(Long)
++ void updateComplete()
++ void updateRegistCourse()
+}
+
+
+class com.gongkademy.domain.community.service.BoardServiceImpl {
+- BoardRepository boardRepository
+- MemberRepository memberRepository
+- PickRepository pickRepository
+- CommentRepository commentRepository
+- int DEFAULT_TOP
++ BoardResponseDTO getBoard(Long,Long)
++ List<BoardResponseDTO> getLatestBoards(int,Long)
++ void toggleLikeBoard(Long,Long)
++ void toggleScrapBoard(Long,Long)
++ List<BoardResponseDTO> getLikeBoards(Long)
++ List<BoardResponseDTO> getScrapBoards(Long)
+- boolean isLikedByMember(Board,Long)
+- boolean isScrappedByMember(Board,Long)
+- BoardResponseDTO convertToDTO(Board)
+- BoardResponseDTO convertToDTO(Board,boolean,boolean)
+}
+
+
+class com.gongkademy.domain.notification.dto.response.NotificationResponseDTO {
+- long receiver
+- NotificationType type
+- long articleId
+- String message
+- boolean isRead
+- LocalDateTime createDate
+}
+
+class com.gongkademy.domain.community.controller.CommentController {
+- CommentService commentService
+- NotificationServiceImpl notificationService
+- MemberRepository memberRepository
+- BoardRepository boardRepository
+- CommentRepository commentRepository
++ ResponseEntity<?> createComment(CommentRequestDTO)
++ ResponseEntity<?> deleteComment(Long,PrincipalDetails)
++ ResponseEntity<?> updateComment(Long,CommentRequestDTO,PrincipalDetails)
++ ResponseEntity<?> toggleLikeCount(Long,PrincipalDetails)
+- NotificationType mapToNotificationType(BoardType)
+}
+
+
+class com.gongkademy.global.exception.GlobalExceptionHandler {
++ ResponseEntity<?> handleCustomException(CustomException)
+}
+
+enum com.gongkademy.domain.course.entity.CommentCateg {
++  NOTICE
++  REVIEW
+}
+
+interface com.gongkademy.domain.course.repository.NoticeRepository {
+~ Optional<Notice> findById(Long)
+~ Page<Notice> findAllByCourseId(Long,Pageable)
+}
+
+class com.gongkademy.global.config.SecurityConfig {
+- MemberRepository memberRepository
+- RedisUtil redisUtil
+- JWTUtil jwtUtil
+- OAuth2MemberService oAuth2MemberService
++ SecurityFilterChain securityFilterChain(HttpSecurity)
++ CorsConfigurationSource corsConfigurationSource()
+}
+
+
+class com.gongkademy.domain.community.dto.response.BoardResponseDTO {
+- Long articleId
+- BoardType boardType
+- Long memberId
+- String nickname
+- String title
+- String content
+- LocalDateTime createTime
+- Long likeCount
+- Long scrapCount
+- Long hit
+- Long commentCount
+- List<Comment> comments
+- boolean isLiked
+- boolean isScrapped
+}
+
+interface com.gongkademy.domain.course.repository.RegistCourseRepository {
+~ Optional<RegistCourse> findByCourseIdAndMemberId(Long,Long)
+~ Boolean existsByMemberIdAndCourseId(Long,Long)
+~ List<RegistCourse> findAllByMemberIdAndComplete(Long,Boolean)
+}
+
+class com.gongkademy.domain.course.controller.CourseCommentController {
+- CourseCommentService courseCommentService
++ ResponseEntity<?> createComment(CourseCommentRequestDTO,PrincipalDetails)
++ ResponseEntity<?> updateComment(Long,CourseCommentRequestDTO,PrincipalDetails)
++ ResponseEntity<List<CourseCommentResponseDTO>> getAllComments(CommentCateg,Long)
++ ResponseEntity<?> deleteComment(Long,PrincipalDetails)
+}
+
+
+class com.gongkademy.domain.course.entity.CourseReview {
+- Long id
+- int rating
+- LocalDateTime createdTime
+- String content
+- Long likeCount
+- Long courseCommentCount
+- RegistCourse registCourse
+- Course course
+- Member member
+- String nickname
+- List<CourseComment> courseComments
+- List<CourseLike> courseLikes
++ void addCourseComment(CourseComment)
++ void addCourseLike(CourseLike)
++ void deleteCourseComment(CourseComment)
++ void deleteCourseLike(CourseLike)
++ void updateCourseCommentCount()
++ void updateCourseLike()
+}
+
+
+class com.gongkademy.domain.course.entity.PreCourse {
+- Long id
+- Course preCourse
+- Course nextCourse
+}
+
+class com.gongkademy.domain.community.dto.response.ConsultingBoardResponseDTO {
+- Long articleId
+- BoardType boardType
+- Long memberId
+- String nickname
+- String title
+- String content
+- LocalDateTime createTime
+- Long likeCount
+- Long scrapCount
+- Long hit
+- Long commentCount
+- Boolean isLiked
+- Boolean isScrapped
+- List<Comment> comments
+}
+
+class com.gongkademy.domain.community.dto.request.CommentLikeRequestDTO {
+- Long memberId
+- Long commentId
+}
+
+class com.gongkademy.domain.community.entity.board.QnaBoard {
+- String lectureTitle
+- String courseTitle
++ void update(QnaBoardRequestDTO)
+}
+
+
+interface com.gongkademy.domain.course.service.PlayerService {
+~ PlayerResponseDTO getPlayerLatestCourse(Long,Long)
+~ PlayerResponseDTO getPlayerLatestLecture(Long,Long)
+~ void updatePlayerLatest(PlayerRequestDTO,Long)
+~ PlayerResponseDTO getPlayerNextPrev(PlayerRequestDTO,Long,int)
+}
+
+class com.gongkademy.global.security.handler.OAuth2LoginFailureHandler {
++ void onAuthenticationFailure(HttpServletRequest,HttpServletResponse,AuthenticationException)
+}
+
+class com.gongkademy.domain.course.service.CourseCommentServiceImpl {
+- CourseCommentRepository courseCommentRepository
+- MemberRepository memberRepository
+- CourseReviewRepository courseReviewRepository
+- NoticeRepository noticeRepository
++ CourseCommentResponseDTO createComment(CourseCommentRequestDTO,Long)
++ CourseCommentResponseDTO updateComment(Long,CourseCommentRequestDTO,Long)
++ List<CourseCommentResponseDTO> getAllComments(CommentCateg,Long)
++ void deleteComment(Long,Long)
+- CourseComment convertToEntity(CourseCommentRequestDTO)
+- CourseCommentResponseDTO convertToDTO(CourseComment)
+}
+
+
+class com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO {
+- Long lectureId
+- Long memberId
+- int lectureOrder
+- Long time
+- String title
+- Boolean isCompleted
+}
+
+class com.gongkademy.domain.member.controller.MemberController {
+- MemberServiceImpl memberService
++ ResponseEntity<?> signup(MemberSignUpDTO,PrincipalDetails)
++ ResponseEntity<MemberInfoDTO> getMemberInfo(PrincipalDetails)
++ ResponseEntity<?> updateMember(MemberUpdateDTO,PrincipalDetails)
++ ResponseEntity<?> deleteMember(PrincipalDetails)
+}
+
+
+class com.gongkademy.global.security.util.JWTUtil {
+- {static} String JWT_KEY
+- {static} String HEADER
+- {static} Long ACCESS_TOKEN_EXPIRATION_PERIOD
+- {static} Long REFRESH_TOKEN_EXPIRATION_PERIOD
+- {static} String PK_CLAIM
+- {static} String BEARER
+- RedisUtil redisUtil
++ void setJwtKey(String)
++ String createAccessToken(long)
++ String createRefreshToken(long)
++ void setRefreshToken(long,String)
++ Optional<String> getRefreshToken(long)
++ void sendAccessToken(HttpServletResponse,String)
+- void setAccessTokenHeader(HttpServletResponse,String)
++ Optional<String> extractToken(HttpServletRequest)
++ Optional<Integer> extractMemberId(String)
++ boolean isExpired(String)
++ boolean isTokenValid(String)
++ Map<String,Object> validateToken(String)
+}
+
+
+class com.gongkademy.domain.notification.controller.NotificationController {
+- NotificationServiceImpl notificationService
+- EmitterService emitterService
++ ResponseEntity<SseEmitter> connect(String,PrincipalDetails)
+}
+
+
+interface com.gongkademy.domain.course.repository.CourseReviewRepository {
+~ Optional<CourseReview> findById(Long)
+~ List<CourseReview> findByCourseId(Long)
+~ Page<CourseReview> findAllByCourseId(Long,Pageable)
+}
+
+class com.gongkademy.domain.member.service.OAuth2MemberService {
+- MemberRepository memberRepository
++ OAuth2User loadUser(OAuth2UserRequest)
+- Member getMember(String,String)
+}
+
+
+class com.gongkademy.global.security.util.PasswordUtil {
++ {static} String generateRandomPassword()
+}
+
+class com.gongkademy.domain.community.service.CommentServiceImpl {
+- CommentRepository commentRepository
+- MemberRepository memberRepository
+- BoardRepository boardRepository
+- CommentLikeRepository commentLikeRepository
++ CommentResponseDTO createComment(CommentRequestDTO)
++ CommentResponseDTO updateComment(Long,Long,CommentRequestDTO)
++ List<CommentResponseDTO> getComments(Long)
++ void deleteComment(Long,Long)
++ void toggleLikeComment(Long,Long)
+- Comment convertToEntity(CommentRequestDTO)
+- CommentResponseDTO convertToDTO(Comment)
+}
+
+
+enum com.gongkademy.domain.course.entity.CourseLikeCateg {
++  COMMENT
++  REVIEW
+}
+
+interface com.gongkademy.domain.course.repository.ScrapRepository {
+~ Boolean existsByMemberIdAndCourseId(Long,Long)
+}
+
+enum com.gongkademy.domain.notification.entity.NotificationType {
++  CONSULTING
++  QUESTION
++  NOTICE
+- String key
+}
+
+class com.gongkademy.domain.course.entity.Notice {
+- Long id
+- LocalDateTime createdTime
+- String content
+- Long courseCommentCount
+- Course course
+- List<CourseComment> courseComments
++ void addCourseComment(CourseComment)
++ void deleteCourseComment(CourseComment)
++ void updateCourseCommentCount()
+}
+
+
+interface com.gongkademy.domain.notification.service.EmitterService {
+~ SseEmitter connect(long,String)
+~ void deleteEmitter(String)
+~ void sendNotification(NotificationRequestDTO)
+}
+
+class com.gongkademy.domain.community.dto.request.QnaBoardRequestDTO {
+- BoardType boardType
+- Long memberId
+- String title
+- String content
+- String lectureTitle
+- String courseTitle
+}
+
+class com.gongkademy.domain.community.controller.QuestionController {
+- QnaBoardService qnaboardService
+- String START_PAGE_NO
+- String BASE_CRITERIA
+- String REQUEST_PARAM_PAGE
+- String REQUEST_PARAM_CRITERIA
+- String KEY_WORD
++ ResponseEntity<?> getAllQna(int,String,String,PrincipalDetails)
++ ResponseEntity<?> getQna(PrincipalDetails,Long)
++ ResponseEntity<?> createQna(QnaBoardRequestDTO)
++ ResponseEntity<?> updateQna(Long,QnaBoardRequestDTO)
++ ResponseEntity<?> deleteQna(Long)
++ ResponseEntity<?> toggleLikeCount(PrincipalDetails,Long)
++ ResponseEntity<?> toggleScrapCount(PrincipalDetails,Long)
++ ResponseEntity<List<QnaBoardResponseDTO>> getLikeBoards(PrincipalDetails)
++ ResponseEntity<List<QnaBoardResponseDTO>> getScrapBoards(PrincipalDetails)
+}
+
+
+class com.gongkademy.domain.community.service.QnaBoardServiceImpl {
+- QnaBoardRepository qnaBoardRepository
+- MemberRepository memberRepository
+- PickRepository pickRepository
+- S3FileService s3FileService
+- int PAGE_SIZE
++ List<QnaBoardResponseDTO> findAllQnaBoards(int,String,String,Long)
++ QnaBoardResponseDTO createQnaBoard(QnaBoardRequestDTO)
++ QnaBoardResponseDTO findQnaBoard(Long,Long)
++ Long updateQnaBoard(Long,QnaBoardRequestDTO)
++ void deleteQnaBoard(Long)
++ void toggleLikeBoard(Long,Long)
++ void toggleScrapBoard(Long,Long)
++ List<QnaBoardResponseDTO> getLikeBoards(Long)
++ List<QnaBoardResponseDTO> getScrapBoards(Long)
+- QnaBoard convertToEntity(QnaBoardRequestDTO)
+- QnaBoardResponseDTO convertToDTO(QnaBoard)
+- QnaBoardResponseDTO convertToDTO(QnaBoard,boolean,boolean)
+}
+
+
+class com.gongkademy.domain.community.entity.comment.Comment {
+- Long commentId
+- Board board
+- Member member
+- String content
+- String nickname
+- Long likeCount
+- LocalDateTime createTime
+- Comment parent
+- List<Comment> children
++ void addChildComment(Comment)
++ boolean isParent()
+}
+
+
+enum com.gongkademy.domain.course.entity.CourseFileCateg {
++  COURSEIMG
++  COURSENOTE
+}
+
+class com.gongkademy.domain.notification.dto.request.NotificationRequestDTO {
+- long receiver
+- NotificationType type
+- long articleId
+- String message
+}
+
+class com.gongkademy.domain.community.service.ConsultingBoardServiceImpl {
+- BoardRepository boardRepository
+- MemberRepository memberRepository
+- PickRepository pickRepository
+- int PAGE_SIZE
++ List<ConsultingBoardResponseDTO> findAllConsultingBoards(int,String,String,Long)
++ ConsultingBoardResponseDTO createConsultingBoard(ConsultingBoardRequestDTO)
++ ConsultingBoardResponseDTO findConsultingBoard(Long,Long)
++ Long updateConsultingBoard(Long,ConsultingBoardRequestDTO)
++ void deleteConsultingBoard(Long)
++ void toggleLikeBoard(Long,Long)
++ void toggleScrapBoard(Long,Long)
++ List<ConsultingBoardResponseDTO> getLikeBoards(Long)
++ List<ConsultingBoardResponseDTO> getScrapBoards(Long)
+- Board convertToEntity(ConsultingBoardRequestDTO)
+- ConsultingBoardResponseDTO convertToDTO(Board)
+- ConsultingBoardResponseDTO convertToDTO(Board,boolean,boolean)
+}
+
+
+class com.gongkademy.domain.community.dto.response.QnaBoardResponseDTO {
+- Long articleId
+- BoardType boardType
+- Long memberId
+- String nickname
+- String title
+- String content
+- LocalDateTime createTime
+- Long likeCount
+- Long scrapCount
+- Long hit
+- Long commentCount
+- Boolean isLiked
+- Boolean isScrapped
+- String lectureTitle
+- String courseTitle
+- List<Comment> comments
+}
+
+interface com.gongkademy.domain.course.repository.CourseFileRepository {
+~ List<CourseFile> findByCourseIdAndCategAndIdNot(Long,CourseFileCateg,Long)
+}
+
+class com.gongkademy.domain.community.dto.request.BoardRequestDTO {
+- BoardType boardType
+- Long memberId
+- String title
+- String content
+}
+
+class com.gongkademy.domain.course.entity.Scrap {
+- Long id
+- Course course
+- Member member
+}
+
+class com.gongkademy.domain.course.entity.Lecture {
+- Long id
+- int lectureOrder
+- Long time
+- String link
+- String title
+- Course course
+- List<RegistLecture> registLectures
++ void addRegistLecture(RegistLecture)
+}
+
+
+class com.gongkademy.domain.course.dto.request.CourseRequestDTO {
+- Long memberId
+- Long courseId
+}
+
+interface com.gongkademy.domain.community.repository.CommentRepository {
+~ List<Comment> findByBoardArticleIdAndParentIsNullOrderByCreateTimeAsc(Long)
+~ Long findMemberIdByCommentId(Long)
+}
+
+interface com.gongkademy.domain.notification.repository.EmitterRepository {
+~ SseEmitter save(String,SseEmitter)
+~ void deleteById(String)
+~ void saveEventCache(String,Object)
+~ Map<String,SseEmitter> findAllEmitterStartWithByMemberId(String)
+~ Map<String,Object> findAllEventCacheStartWithByMemberId(String)
+}
+
+class com.gongkademy.domain.course.entity.CourseFile {
+- Long id
+- String save_folder
+- String original_file
+- String save_file
+- Course course
+- CourseFileCateg categ
+}
+
+interface com.gongkademy.domain.notification.service.NotificationService {
+~ Notification createNotification(NotificationRequestDTO)
+~ List<Notification> getNotifications(Long)
+~ void changeReadStatus(Long)
+}
+
+interface com.gongkademy.domain.course.service.CourseService {
+~ List<CourseResponseDTO> getAllCourses(Long)
+~ List<CourseContentsResponseDTO> getCourseContents(CourseRequestDTO)
+~ CourseResponseDTO registCourse(CourseRequestDTO,Long)
+~ CourseResponseDTO scrapCourse(CourseRequestDTO,Long)
+~ void deleteRegistCourse(Long,Long)
+~ CourseResponseDTO getCourseDetail(Long,Long)
+~ Page<NoticeResponseDTO> getCourseNotices(Long,int,int)
+~ List<CourseResponseDTO> getRegistCoursesNoComplete(Long)
+~ List<CourseResponseDTO> getRegistCoursesComplete(Long)
+~ CourseLikeResponseDTO like(CourseLikeRequestDTO,Long)
+~ Map<String,byte[]> downloadCourseNote(Long)
+~ CourseInfoResponseDTO getCourseInfo(Long)
+}
+
+class com.gongkademy.domain.course.entity.CourseLike {
+- Long id
+- CourseLikeCateg likeCateg
+- CourseReview courseReview
+- CourseComment courseComment
+- Member member
+}
+
+class com.gongkademy.domain.course.entity.Course {
+- Long id
+- Long totalCourseTime
+- String title
+- double avgRating
+- Long reviewCount
+- Long registCount
+- Long lectureCount
+- String summary
+- String content
+- String status
+- CourseFile courseImg
+- CourseFile courseNote
+- List<Lecture> lectures
+- List<RegistCourse> registCourses
+- List<Scrap> scraps
+- List<Notice> notices
+- List<CourseReview> courseReviews
++ void addLecture(Lecture)
++ void addRegist(RegistCourse)
++ void addScrap(Scrap)
++ void addNotice(Notice)
++ void addReview(CourseReview)
++ void deleteLecture(Lecture)
++ void deleteRegist(RegistCourse)
++ void deleteScrap(Scrap)
++ void deleteNotice(Notice)
++ void deleteReview(CourseReview)
++ void updateReviewCount()
++ void updateRegistCount()
++ void updateLectureCount()
++ void updateAvgRating()
+}
+
+
+class com.gongkademy.domain.member.dto.MemberUpdateDTO {
+- String email
+- String newNickname
+- String university
+- String major
+- String minor
+}
+
+class com.gongkademy.domain.course.dto.request.CourseReviewRequestDTO {
+- int rating
+- String content
+- Long courseId
+- Long memberId
+- String nickname
+}
+
+class com.gongkademy.domain.notification.service.NotificationServiceImpl {
+- NotificationRepository notificationRepository
+- MemberRepository memberRepository
+- EmitterServiceImpl emitterService
++ Notification createNotification(NotificationRequestDTO)
++ List<Notification> getNotifications(Long)
++ void changeReadStatus(Long)
+}
+
+
+class com.gongkademy.domain.community.controller.BoardController {
+- BoardService boardService
+- CommentService commentService
+- int LIMIT
++ ResponseEntity<?> getBoard(Long,PrincipalDetails)
++ ResponseEntity<List<BoardResponseDTO>> getLimitLatestBoards(PrincipalDetails)
++ ResponseEntity<?> toggleLikeCount(Long,PrincipalDetails)
++ ResponseEntity<?> toggleScrapCount(Long,PrincipalDetails)
++ ResponseEntity<List<BoardResponseDTO>> getLikeBoards(PrincipalDetails)
++ ResponseEntity<List<BoardResponseDTO>> getScrapBoards(PrincipalDetails)
+}
+
+
+class com.gongkademy.domain.notification.service.EmitterServiceImpl {
+- EmitterRepository emitterRepository
+- {static} long DEFAULT_TIMEOUT
+- String generateEmitterId(Long)
++ SseEmitter connect(long,String)
++ void deleteEmitter(String)
++ void sendNotification(NotificationRequestDTO)
+- String createNotificationMessage(NotificationRequestDTO)
+- void sendToClient(String,SseEmitter,String)
+}
+
+
+interface com.gongkademy.domain.community.repository.QnaBoardRepository {
+~ Page<QnaBoard> findQnaBoardByTitleContainingOrContentContaining(String,String,Pageable)
+~ Page<QnaBoard> findAll(Pageable)
+}
+
+class com.gongkademy.domain.notification.repository.EmitterRepositoryImpl {
+- Map<String,SseEmitter> emitterMap
+- Map<String,Object> eventCache
++ SseEmitter save(String,SseEmitter)
++ void deleteById(String)
++ void saveEventCache(String,Object)
++ Map<String,SseEmitter> findAllEmitterStartWithByMemberId(String)
++ Map<String,Object> findAllEventCacheStartWithByMemberId(String)
+}
+
+
+interface com.gongkademy.domain.community.service.BoardService {
+~ BoardResponseDTO getBoard(Long,Long)
+~ List<BoardResponseDTO> getLatestBoards(int,Long)
+~ void toggleLikeBoard(Long,Long)
+~ void toggleScrapBoard(Long,Long)
+~ List<BoardResponseDTO> getLikeBoards(Long)
+~ List<BoardResponseDTO> getScrapBoards(Long)
+}
+
+class com.gongkademy.domain.course.dto.response.CourseReviewResponseDTO {
+- Long courseReviewId
+- int rating
+- LocalDateTime createdTime
+- String content
+- Long likeCount
+- Long courseId
+- Long memberId
+- String nickname
+}
+
+class com.gongkademy.domain.course.controller.CourseController {
+- CourseService courseService
+- int pageSize
++ ResponseEntity<?> getAllCourses(PrincipalDetails)
++ ResponseEntity<?> getCourseContents(CourseRequestDTO)
++ ResponseEntity<?> registCourse(CourseRequestDTO,PrincipalDetails)
++ ResponseEntity<?> scrapCourse(CourseRequestDTO,PrincipalDetails)
++ ResponseEntity<?> deleteRegistCourse(Long,PrincipalDetails)
++ ResponseEntity<?> downloadCourseNote(CourseRequestDTO)
++ ResponseEntity<?> getCourseDetail(Long,PrincipalDetails)
++ ResponseEntity<?> getCourseNoticesPerPage(Long,int)
++ ResponseEntity<?> getRegistCoursesNoComplete(PrincipalDetails)
++ ResponseEntity<?> getRegistCoursesComplete(PrincipalDetails)
++ ResponseEntity<?> Like(CourseLikeRequestDTO,PrincipalDetails)
++ ResponseEntity<?> getCourseInfo(Long)
+}
+
+
+enum com.gongkademy.global.exception.ErrorCode {
++  COMMON_ERROR
++  DUPLICATE_NICKNAME
++  DUPLICATE_EMAIL
++  INVALID_MEMBER_ID
++  JWT_MALFORMED
++  JWT_HEADER_STRING
++  JWT_NULL_REFRESH
++  JWT_EXPIRED
++  JWT_INVALID
++  JWT_ERROR
++  INVALID_BOARD_ID
++  EMPTY_IMAGE
++  INVALID_COMMENT_ID
++  INVALID_PARENT_COMMENT_ID
++  ALREADY_LIKED
++  NOT_YET_LIKED
++  INVALID_PICK_ID
++  FORBIDDEN
+- HttpStatus httpStatus
+- String message
+}
+
+interface com.gongkademy.infra.s3.service.FileService {
++ String uploadFile(MultipartFile)
++ void deleteFile(String)
+}
+
+class com.gongkademy.domain.course.dto.response.CourseInfoResponseDTO {
+- List<PreCourseDTO> preCourses
+- String content
+- String summary
+- List<String> fileUrls
+}
+
+class com.gongkademy.domain.course.dto.response.CourseInfoResponseDTO$PreCourseDTO {
+- Long id
+- String title
+}
+
+class com.gongkademy.domain.community.entity.comment.CommentLike {
+- Long id
+- Member member
+- Comment comment
+}
+
+class com.gongkademy.domain.course.entity.CourseComment {
+- Long id
+- CourseReview courseReview
+- Notice notice
+- CommentCateg commentCateg
+- Member member
+- String nickname
+- String content
+- Long likeCount
+- List<CourseLike> courseLikes
++ void addCourseLike(CourseLike)
++ void deleteCourseLike(CourseLike)
++ void updateCourseLike()
+}
+
+
+interface com.gongkademy.domain.course.repository.CourseCommentRepository {
+~ Optional<CourseComment> findById(Long)
+~ List<CourseComment> findAllByCommentCategAndId(CommentCateg,Long)
+}
+
+class com.gongkademy.infra.s3.config.S3Config {
+- String accessKey
+- String secretKey
+- String region
++ AmazonS3 amazonS3()
+}
+
+
+interface com.gongkademy.domain.course.repository.PreCourseRepository {
+~ List<PreCourse> findByNextCourseId(Long)
+}
+
+interface com.gongkademy.domain.community.service.CommentService {
+~ CommentResponseDTO createComment(CommentRequestDTO)
+~ CommentResponseDTO updateComment(Long,Long,CommentRequestDTO)
+~ List<CommentResponseDTO> getComments(Long)
+~ void deleteComment(Long,Long)
+~ void toggleLikeComment(Long,Long)
+}
+
+class com.gongkademy.domain.course.dto.request.PlayerRequestDTO {
+- Long LectureId
+- Long memberId
+- Long savePoint
+}
+
+class com.gongkademy.domain.course.service.CourseReviewServiceImpl {
+- CourseReviewRepository courseReviewRepository
+- CourseRepository courseRepository
+- MemberRepository memberRepository
+- int pageSize
++ CourseReviewResponseDTO createReview(CourseReviewRequestDTO,Long)
++ CourseReviewResponseDTO updateReview(Long,CourseReviewRequestDTO,Long)
++ List<CourseReviewResponseDTO> getReviewsPerPage(Long,int,String)
++ void deleteReview(Long,Long)
+- CourseReview convertToEntity(CourseReviewRequestDTO)
+- CourseReviewResponseDTO convertToDTO(CourseReview)
+}
+
+
+interface com.gongkademy.domain.community.repository.PickRepository {
+~ Optional<Pick> findByBoardAndMemberAndPickType(Board,Member,PickType)
+~ List<Pick> findAllByMemberAndPickType(Member,PickType)
+~ Optional<Pick> findByBoardArticleIdAndMemberIdAndPickType(Long,Long,PickType)
+}
+
+interface com.gongkademy.domain.community.service.QnaBoardService {
+~ List<QnaBoardResponseDTO> findAllQnaBoards(int,String,String,Long)
+~ QnaBoardResponseDTO createQnaBoard(QnaBoardRequestDTO)
+~ QnaBoardResponseDTO findQnaBoard(Long,Long)
+~ Long updateQnaBoard(Long,QnaBoardRequestDTO)
+~ void deleteQnaBoard(Long)
+~ void toggleLikeBoard(Long,Long)
+~ void toggleScrapBoard(Long,Long)
+~ List<QnaBoardResponseDTO> getLikeBoards(Long)
+~ List<QnaBoardResponseDTO> getScrapBoards(Long)
+}
+
+class com.gongkademy.domain.community.dto.request.ConsultingBoardRequestDTO {
+- BoardType boardType
+- Long memberId
+- String title
+- String content
+}
+
+interface com.gongkademy.domain.course.repository.CourseLikeRepository {
+~ Boolean existsByMemberIdAndCourseReviewId(Long,Long)
+~ Boolean existsByMemberIdAndCourseCommentId(Long,Long)
+~ Optional<CourseLike> findByMemberIdAndCourseReviewId(Long,Long)
+~ Optional<CourseLike> findByMemberIdAndCourseCommentId(Long,Long)
+}
+
+class com.gongkademy.domain.course.controller.CourseReviewController {
+- CourseReviewService courseReviewService
++ ResponseEntity<?> createReview(CourseReviewRequestDTO,PrincipalDetails)
++ ResponseEntity<?> updateReview(Long,CourseReviewRequestDTO,PrincipalDetails)
++ ResponseEntity<List<CourseReviewResponseDTO>> getAllReviews(Long,int,String)
++ ResponseEntity<?> deleteReview(Long,PrincipalDetails)
+}
+
+
+class com.gongkademy.domain.community.entity.board.Board {
+- Long articleId
+- Member member
+- String title
+- String content
+- LocalDateTime createTime
+- Long likeCount
+- Long scrapCount
+- Long hit
+- Long commentCount
+- BoardType boardType
+- List<Comment> comments
++ void setMember(Member)
++ void updateCommentCount()
+}
+
+
+class com.gongkademy.global.security.filter.JWTCheckFilter {
+- MemberRepository memberRepository
+- JWTUtil jwtUtil
+- RedisUtil redisUtil
+- GrantedAuthoritiesMapper authoritiesMapper
+# void doFilterInternal(HttpServletRequest,HttpServletResponse,FilterChain)
+- void saveAuthentication(Long)
+}
+
+
+class com.gongkademy.domain.member.service.MemberServiceImpl {
+- MemberRepository memberRepository
+- JWTUtil jwtUtil
++ MemberInfoDTO getMemberInfo(long)
++ Long joinMember(long,MemberSignUpDTO)
++ Long modifyMember(long,MemberUpdateDTO)
++ void deleteMember(long)
+}
+
+
+class com.gongkademy.domain.course.dto.response.CourseResponseDTO {
+- Long courseId
+- Long totalCourseTime
+- String title
+- double avgRating
+- Long reviewCount
+- Long registCount
+- Long lectureCount
+- String content
+- Boolean isRegistered
+- Boolean isSaved
+- String fileUrl
+}
+
+class com.gongkademy.infra.s3.S3TestController {
+~ S3FileService s3ImageService
++ ResponseEntity<?> s3Upload(MultipartFile)
++ ResponseEntity<?> s3delete(String)
++ ResponseEntity<?> s3download(String)
+}
+
+
+class com.gongkademy.domain.course.dto.request.CourseLikeRequestDTO {
+- CourseLikeCateg likeCateg
+- Long memberId
+- Long courseReviewId
+- Long courseCommentId
+}
+
+interface com.gongkademy.domain.course.service.CourseCommentService {
++ CourseCommentResponseDTO createComment(CourseCommentRequestDTO,Long)
++ CourseCommentResponseDTO updateComment(Long,CourseCommentRequestDTO,Long)
++ List<CourseCommentResponseDTO> getAllComments(CommentCateg,Long)
++ void deleteComment(Long,Long)
+}
+
+class com.gongkademy.domain.member.service.UserDetailsServiceImpl {
+- MemberRepository memberRepository
++ UserDetails loadUserByUsername(String)
+}
+
+
+class com.gongkademy.infra.s3.service.S3FileService {
+- AmazonS3 amazonS3
+- String bucketName
++ String uploadFile(MultipartFile)
+- void validateExtension(String)
+- String uploadFileToS3(MultipartFile)
++ void deleteFile(String)
+- String getKeyFromImageAddress(String)
++ byte[] downloadFile(String)
++ String getdownloadFileName(String)
++ String getFileUrl(String)
+}
+
+
+
+
+org.springframework.security.oauth2.core.user.OAuth2User <|.. com.gongkademy.domain.member.dto.PrincipalDetails
+org.springframework.security.core.userdetails.UserDetails <|.. com.gongkademy.domain.member.dto.PrincipalDetails
+com.gongkademy.domain.course.service.CourseService <|.. com.gongkademy.domain.course.service.CourseServiceImpl
+com.gongkademy.domain.course.service.PlayerService <|.. com.gongkademy.domain.course.service.PlayerServiceImpl
+com.gongkademy.global.exception.RuntimeException <|-- com.gongkademy.global.exception.CustomException
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.notification.repository.NotificationRepository
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.course.repository.CourseRepository
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.course.repository.LectureRepository
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.community.repository.CommentLikeRepository
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.course.repository.RegistLectureRepository
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.community.repository.BoardRepository
+org.springframework.security.web.authentication.AuthenticationSuccessHandler <|.. com.gongkademy.global.security.handler.OAuth2LoginSuccessHandler
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.member.repository.MemberRepository
+com.gongkademy.domain.community.service.BoardService <|.. com.gongkademy.domain.community.service.BoardServiceImpl
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.course.repository.NoticeRepository
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.course.repository.RegistCourseRepository
+com.gongkademy.domain.community.entity.board.Board <|-- com.gongkademy.domain.community.entity.board.QnaBoard
+org.springframework.security.web.authentication.AuthenticationFailureHandler <|.. com.gongkademy.global.security.handler.OAuth2LoginFailureHandler
+com.gongkademy.domain.course.service.CourseCommentService <|.. com.gongkademy.domain.course.service.CourseCommentServiceImpl
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.course.repository.CourseReviewRepository
+org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService <|-- com.gongkademy.domain.member.service.OAuth2MemberService
+com.gongkademy.domain.community.service.CommentService <|.. com.gongkademy.domain.community.service.CommentServiceImpl
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.course.repository.ScrapRepository
+com.gongkademy.domain.community.service.QnaBoardService <|.. com.gongkademy.domain.community.service.QnaBoardServiceImpl
+com.gongkademy.domain.community.service.ConsultingBoardService <|.. com.gongkademy.domain.community.service.ConsultingBoardServiceImpl
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.course.repository.CourseFileRepository
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.community.repository.CommentRepository
+com.gongkademy.domain.notification.service.NotificationService <|.. com.gongkademy.domain.notification.service.NotificationServiceImpl
+com.gongkademy.domain.notification.service.EmitterService <|.. com.gongkademy.domain.notification.service.EmitterServiceImpl
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.community.repository.QnaBoardRepository
+com.gongkademy.domain.notification.repository.EmitterRepository <|.. com.gongkademy.domain.notification.repository.EmitterRepositoryImpl
+com.gongkademy.domain.course.dto.response.CourseInfoResponseDTO +.. com.gongkademy.domain.course.dto.response.CourseInfoResponseDTO$PreCourseDTO
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.course.repository.CourseCommentRepository
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.course.repository.PreCourseRepository
+com.gongkademy.domain.course.service.CourseReviewService <|.. com.gongkademy.domain.course.service.CourseReviewServiceImpl
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.community.repository.PickRepository
+org.springframework.data.jpa.repository.JpaRepository <|-- com.gongkademy.domain.course.repository.CourseLikeRepository
+org.springframework.web.filter.OncePerRequestFilter <|-- com.gongkademy.global.security.filter.JWTCheckFilter
+com.gongkademy.domain.member.service.MemberService <|.. com.gongkademy.domain.member.service.MemberServiceImpl
+org.springframework.security.core.userdetails.UserDetailsService <|.. com.gongkademy.domain.member.service.UserDetailsServiceImpl
+com.gongkademy.infra.s3.service.FileService <|.. com.gongkademy.infra.s3.service.S3FileService
+@enduml

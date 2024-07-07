@@ -1,9 +1,7 @@
 package com.gongkademy.global.config;
 
-import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.domain.member.service.OAuth2MemberService;
-import com.gongkademy.domain.member.service.UserDetailsServiceImpl;
 import com.gongkademy.global.redis.RedisUtil;
 import com.gongkademy.global.security.filter.JWTCheckFilter;
 import com.gongkademy.global.security.handler.OAuth2LoginFailureHandler;
@@ -11,16 +9,12 @@ import com.gongkademy.global.security.handler.OAuth2LoginSuccessHandler;
 import com.gongkademy.global.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;

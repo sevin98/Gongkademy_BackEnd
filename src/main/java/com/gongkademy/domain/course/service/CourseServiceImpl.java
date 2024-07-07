@@ -1,19 +1,14 @@
 package com.gongkademy.domain.course.service;
 
-import java.net.MalformedURLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.springdoc.core.providers.HateoasHalProvider;
-import org.springframework.beans.factory.support.ManagedMap;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.amazonaws.services.s3.model.S3Object;
 import com.gongkademy.domain.course.dto.request.CourseLikeRequestDTO;
 import com.gongkademy.domain.course.dto.request.CourseRequestDTO;
 import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
@@ -49,7 +44,6 @@ import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
-import com.gongkademy.domain.member.service.UserDetailsServiceImpl;
 import com.gongkademy.infra.s3.service.S3FileService;
 
 import lombok.RequiredArgsConstructor;

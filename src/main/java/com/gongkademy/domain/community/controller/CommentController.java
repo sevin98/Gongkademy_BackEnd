@@ -40,15 +40,18 @@ public class CommentController {
                 ? boardRepository.findMemberIdByBoardId(articleId)
                 : commentRepository.findMemberIdByCommentId(commentRequestDTO.getParentId());
 
-        NotificationRequestDTO notificationRequestDTO = NotificationRequestDTO.builder()
-                .receiver(receiverId)
-                .type(mapToNotificationType(boardType))
-                .articleId(commentRequestDTO.getArticleId())
-                .message(commentRequestDTO.getContent())
-                .build();
+        // 회원의 알람 기능 on일 경우에만 전송
+        if (memberRepository.findIsNotificationEnabledById(receiverId)) {
+            NotificationRequestDTO notificationRequestDTO = NotificationRequestDTO.builder()
+                    .receiver(receiverId)
+                    .type(mapToNotificationType(boardType))
+                    .articleId(commentRequestDTO.getArticleId())
+                    .message(commentRequestDTO.getContent())
+                    .build();
 
-        //Todo: 알림 전송 기능
-        notificationService.createNotification(notificationRequestDTO);
+            //Todo: 알림 전송 기능
+            notificationService.createNotification(notificationRequestDTO);
+        }
 
         return new ResponseEntity<>(commentResponseDTO, HttpStatus.CREATED);
     }

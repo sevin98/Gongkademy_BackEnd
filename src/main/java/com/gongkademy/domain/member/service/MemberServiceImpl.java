@@ -82,4 +82,16 @@ public class MemberServiceImpl implements MemberService{
      */
     @Override
     public void deleteMember(long id) { memberRepository.deleteById(id); }
+
+    @Override
+    public Long changeNotificationEnabledStatus(long id) {
+        Optional<Member> memberOptional = memberRepository.findById(id);
+        if (memberOptional.isEmpty()) return null;
+
+        Member member = memberOptional.get();
+        member.changeIsNotificationEnabled();
+        return member.getId();
+    }
+
+
 }

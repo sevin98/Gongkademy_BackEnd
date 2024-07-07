@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class NotificationResponseDTO {
 
     //알람 목록조회
+    private long notificationId;
     private long receiver;
     private NotificationType type;
     private long articleId;

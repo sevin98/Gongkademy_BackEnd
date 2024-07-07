@@ -13,6 +13,7 @@ public interface MemberService {
     Long joinMember(long id, MemberSignUpDTO dto);
     Long modifyMember(long id, MemberUpdateDTO dto);
     void deleteMember(long id);
+    Long changeNotificationEnabledStatus(long id);
 
     /**
      * 회원 엔티티를 회원 정보 DTO로 변환.
@@ -28,6 +29,7 @@ public interface MemberService {
                 .agreeMarketing(member.getAgreeMarketing())
                 .member_role(member.getMemberRoleList().toString())
                 .createTime(member.getCreateTime())
+                .isNotificationEnabled(member.isNotificationEnabled())
                 .build();
     }
 

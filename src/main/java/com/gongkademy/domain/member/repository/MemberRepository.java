@@ -13,4 +13,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Override
     @EntityGraph(attributePaths = {"memberRoleList"})
     Optional<Member> findById(Long id);
+
+    boolean findIsNotificationEnabledById(Long id);
 }

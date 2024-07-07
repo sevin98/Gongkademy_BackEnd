@@ -51,4 +51,12 @@ public class MemberController {
         memberService.deleteMember(loginMemberId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("회원탈퇴 성공");
     }
+
+    // TODO: URL 경로에 대해 회의 필요
+    @PatchMapping("/notification")
+    public ResponseEntity<?> changeNotificationEnabledStatus(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        if (memberService.changeNotificationEnabledStatus(principalDetails.getMemberId()) == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("알림 on/off 상태 변경 실패");
+        } else return ResponseEntity.status(HttpStatus.CREATED).body("알림 on/off 상태 변경 성공");
+    }
 }

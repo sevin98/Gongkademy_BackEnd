@@ -51,6 +51,7 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
                     .nickname("")
                     .birthday(null)
                     .agreeMarketing(false)
+                    .isNotificationEnabled(true)
                     .build();
             member.addRole(MemberRole.GUEST); // 이후 회원가입을 위해 최초 로그인은 GUEST로 설정
         } else {

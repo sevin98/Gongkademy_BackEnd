@@ -20,4 +20,5 @@ public class MemberInfoDTO {
     private String member_role;
     private Boolean agreeMarketing;
     private LocalDateTime createTime;
+    private boolean isNotificationEnabled;
 }

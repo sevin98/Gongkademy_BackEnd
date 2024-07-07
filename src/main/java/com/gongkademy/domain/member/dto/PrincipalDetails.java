@@ -115,4 +115,6 @@ public class PrincipalDetails implements OAuth2User, UserDetails {
     }
 
     public long getMemberId() { return member.getId(); }
+
+    public boolean getIsNotificationEnabled() { return member.isNotificationEnabled(); }
 }

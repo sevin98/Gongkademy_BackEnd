@@ -51,12 +51,19 @@ public class Member {
     @Builder.Default
     private LocalDateTime createTime = LocalDateTime.now();
 
+    @Builder.Default
+    private boolean isNotificationEnabled = true;
+
     public void updateName(String name) {
         this.name = name;
     }
 
     public void addRole(MemberRole memberRole) {
         memberRoleList.add(memberRole);
+    }
+
+    public void changeIsNotificationEnabled() {
+        this.isNotificationEnabled = !isNotificationEnabled;
     }
 
     public void clearRole() {

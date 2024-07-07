@@ -25,9 +25,7 @@ public interface MemberService {
                 .nickname(member.getNickname())
                 .email(member.getEmail())
                 .birthday(member.getBirthday() != null ? member.getBirthday().toString() : null)
-                .university(member.getUniversity())
-                .major(member.getMajor())
-                .minor(member.getMinor())
+                .agreeMarketing(member.getAgreeMarketing())
                 .member_role(member.getMemberRoleList().toString())
                 .createTime(member.getCreateTime())
                 .build();
@@ -44,9 +42,7 @@ public interface MemberService {
                 .email(dto.getEmail())
 //                .password(dto.getPassword())
                 .birthday(LocalDate.parse(dto.getBirthday(), DateTimeFormatter.ofPattern("yyyyMMdd")))
-                .university(dto.getUniversity())
-                .major(dto.getMajor())
-                .minor(dto.getMinor())
+                .agreeMarketing(dto.getAgreeMarketing())
                 .build();
     }
 
@@ -58,9 +54,7 @@ public interface MemberService {
     default Member memberUpdateDTOtoEntity(MemberUpdateDTO dto) {
         return Member.builder()
                 .nickname(dto.getNewNickname())
-                .university(dto.getUniversity())
-                .major(dto.getMajor())
-                .minor(dto.getMinor())
+                .agreeMarketing(dto.getAgreeMarketing())
                 .build();
     }
 }

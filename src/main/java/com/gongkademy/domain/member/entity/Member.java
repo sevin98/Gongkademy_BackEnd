@@ -42,10 +42,7 @@ public class Member {
     private String email;
     private String nickname;
     private LocalDate birthday;
-
-    private String university;
-    private String major;
-    private String minor;
+    private Boolean agreeMarketing;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default
@@ -54,31 +51,27 @@ public class Member {
     @Builder.Default
     private LocalDateTime createTime = LocalDateTime.now();
 
-    public void updateName(String name){
+    public void updateName(String name) {
         this.name = name;
     }
 
-    public void addRole(MemberRole memberRole){
+    public void addRole(MemberRole memberRole) {
         memberRoleList.add(memberRole);
     }
 
-    public void clearRole(){
+    public void clearRole() {
         memberRoleList.clear();
     }
 
     public void signup(MemberSignUpDTO memberSignUpDTO) {
         this.nickname = memberSignUpDTO.getNickname();
         this.birthday = LocalDate.parse(memberSignUpDTO.getBirthday(), DateTimeFormatter.ofPattern("yyyyMMdd"));
-        this.university = memberSignUpDTO.getUniversity();
-        this.major = memberSignUpDTO.getMajor();
-        this.minor = memberSignUpDTO.getMinor();
+        this.agreeMarketing = memberSignUpDTO.getAgreeMarketing();
     }
 
     public void update(MemberUpdateDTO memberUpdateDTO) {
         this.nickname = memberUpdateDTO.getNewNickname();
-        this.university = memberUpdateDTO.getUniversity();
-        this.major = memberUpdateDTO.getMajor();
-        this.minor = memberUpdateDTO.getMinor();
+        this.agreeMarketing = memberUpdateDTO.getAgreeMarketing();
     }
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -96,30 +89,30 @@ public class Member {
     @OneToMany(mappedBy = "member")
     @Builder.Default
     private List<Board> boards = new ArrayList<>();
-    
-	@OneToMany(mappedBy="member")
+
+    @OneToMany(mappedBy = "member")
     @Builder.Default
-	private List<CourseComment> courseComments = new ArrayList<>();
-	
-	@OneToMany(mappedBy="member")
+    private List<CourseComment> courseComments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member")
     @Builder.Default
-	private List<CourseReview> courseReviews = new ArrayList<>();
-	
-	@OneToMany(mappedBy="member", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<CourseReview> courseReviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
-	private List<RegistCourse> registCourses = new ArrayList<>();
-	
-	@OneToMany(mappedBy="member", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<RegistCourse> registCourses = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
-	private List<RegistLecture> registLectures = new ArrayList<>();
-	
-	@OneToMany(mappedBy="member", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<RegistLecture> registLectures = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
-	private List<Scrap> scraps = new ArrayList<>();
-	
-	@OneToMany(mappedBy="member", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Scrap> scraps = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
-	private List<CourseLike> courseLikes = new ArrayList<>();
+    private List<CourseLike> courseLikes = new ArrayList<>();
 
     // 연관관계 편의 메서드
     public void addPick(Pick pick) {
@@ -141,27 +134,27 @@ public class Member {
         boards.add(board);
         board.setMember(this);
     }
-    
+
     public void addCourseComment(CourseComment courseComment) {
         courseComments.add(courseComment);
         courseComment.setMember(this);
     }
-    
+
     public void addCourseReview(CourseReview courseReview) {
         courseReviews.add(courseReview);
         courseReview.setMember(this);
     }
-    
+
     public void addRegistCourse(RegistCourse registCourse) {
         registCourses.add(registCourse);
         registCourse.setMember(this);
     }
-    
+
     public void addScrap(Scrap scrap) {
         scraps.add(scrap);
         scrap.setMember(this);
     }
-    
+
     public void addCourseLike(CourseLike courseLike) {
         courseLikes.add(courseLike);
         courseLike.setMember(this);

@@ -46,6 +46,10 @@ public class PrincipalDetails implements OAuth2User, UserDetails {
         return member.getNickname();
     }
 
+    public Boolean getAgreeMarketing(){
+        return member.getAgreeMarketing();
+    }
+
     //password 반환
     //공카데미서비스는 기본적으로 유저의 password가 따로 피룡하지 않음.
     //imple하고있는 UserDetails에서 기본적으로 password를 포함하고있기떄ㅓ문에ㅐ
@@ -92,17 +96,6 @@ public class PrincipalDetails implements OAuth2User, UserDetails {
         return Arrays.stream(member.getMemberRoleList().toArray()).map(Object::toString).toList();
     }
 
-    public String getUniversity(){
-        return member.getUniversity();
-    }
-
-    public String getMajor(){
-        return member.getMajor();
-    }
-
-    public String getMinor(){
-        return member.getMinor();
-    }
 
     // JWT 클레임 : 이메일과 닉네임이 포함되어있는 claim반환
     public Map<String, Object> getClaims() {

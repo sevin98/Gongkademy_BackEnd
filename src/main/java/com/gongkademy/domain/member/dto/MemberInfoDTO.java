@@ -17,9 +17,7 @@ public class MemberInfoDTO {
     private String name;
     private String nickname;
     private String birthday;
-    private String university;
-    private String major;
-    private String minor;
     private String member_role;
+    private Boolean agreeMarketing;
     private LocalDateTime createTime;
 }

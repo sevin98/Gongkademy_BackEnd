@@ -14,7 +14,10 @@ public class MemberSignUpDTO {
     private String name;
     private String nickname;
     private String birthday;
-    private String university;
-    private String major;
-    private String minor;
+    private Boolean agreeMarketing;
+
+    // agreeService, agreePrivacy는 로직 검사용, DB 저장 X
+    private Boolean agreeService;
+    private Boolean agreePrivacy;
+
 }

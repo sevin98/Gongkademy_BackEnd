@@ -9,8 +9,5 @@ import lombok.*;
 public class MemberUpdateDTO {
     private String email;
     private String newNickname;
-    private String university;
-    private String major;
-    private String minor;
-
+    private Boolean agreeMarketing;
 }

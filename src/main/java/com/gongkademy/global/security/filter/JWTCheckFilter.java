@@ -74,7 +74,6 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                     if (refreshToken.isPresent()) {
                         if (jwtUtil.isTokenValid(refreshToken.get())) {
                             String newAccessToken = jwtUtil.createAccessToken(memberId);
-                            jwtUtil.sendAccessToken(response, newAccessToken);
                             saveAuthentication(memberId);
                         }
                     } else log.info("refresh token is empty");

@@ -35,7 +35,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         PrincipalDetails oAuthUser = (PrincipalDetails) authentication.getPrincipal();
         String accessToken = jwtUtil.createAccessToken(oAuthUser.getMemberId());
 
-        jwtUtil.sendAccessToken(response, accessToken);
         addAccessTokenCookie(response, accessToken);
 
         String redirectUrl = oAuthUser.getRoleNames().contains(MemberRole.USER.toString()) ? MAIN_URL : SIGNUP_URL;
@@ -59,6 +58,5 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtUtil.createAccessToken(oAuthUser.getMemberId());
         String refreshToken = jwtUtil.createRefreshToken(oAuthUser.getMemberId());
         jwtUtil.setRefreshToken(oAuthUser.getMemberId(), refreshToken);
-        jwtUtil.sendAccessToken(response, accessToken);
     }
 }

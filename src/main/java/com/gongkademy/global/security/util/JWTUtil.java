@@ -2,6 +2,7 @@ package com.gongkademy.global.security.util;
 
 import javax.crypto.SecretKey;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Map;
 
 import com.gongkademy.global.exception.ErrorCode;
@@ -9,6 +10,7 @@ import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.redis.RedisUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,11 +28,10 @@ public class JWTUtil {
 
     private static String JWT_KEY;
 
-    private static final String HEADER = "Authorization";
+    private static final String ACCESS_TOKEN = "accessToken";
     private static final Long ACCESS_TOKEN_EXPIRATION_PERIOD = 1800000L; // 30분(임의 설정)
     private static final Long REFRESH_TOKEN_EXPIRATION_PERIOD = 604800000L; // 7일(임의 설정)
     private static final String PK_CLAIM = "pk";
-    private static final String BEARER = "Bearer ";
 
     private final RedisUtil redisUtil;
 
@@ -98,24 +99,15 @@ public class JWTUtil {
         return Optional.ofNullable(redisUtil.getData(String.valueOf(id)));
     }
 
-    public void sendAccessToken(HttpServletResponse response, String accessToken) {
-        response.setStatus(HttpServletResponse.SC_OK);
-
-        setAccessTokenHeader(response, accessToken);
-        log.info("Access Token : {}", accessToken);
-    }
-
-    private void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
-        response.setHeader(HEADER, accessToken);
-    }
-
     /**
      * 헤더에서 Token 추출
      */
     public Optional<String> extractToken(HttpServletRequest request) {
-        return Optional.ofNullable(request.getHeader(HEADER))
-                .filter(refreshToken -> refreshToken.startsWith(BEARER))
-                .map(refreshToken -> refreshToken.replace(BEARER, ""));
+        //TODO: 예외상황 고민 필요
+        return  Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
+                .filter(cookie -> ACCESS_TOKEN.equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst();
     }
 
     public Optional<Integer> extractMemberId(String accessToken) {

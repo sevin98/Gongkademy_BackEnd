@@ -33,7 +33,7 @@ public interface CourseService {
 	
 	CourseResponseDTO getCourseDetail(Long courseId, Long currentMemberId);
 	
-	Page<NoticeResponseDTO> getCourseNotices(Long courseId, int pageNum, int pageSize);
+	Page<NoticeResponseDTO> getCourseNotices(Long courseId, int pageNo);
 
 	List<CourseResponseDTO> getRegistCoursesNoComplete(Long memberId);
 	

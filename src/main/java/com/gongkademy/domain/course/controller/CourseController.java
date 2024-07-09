@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gongkademy.domain.course.dto.request.CourseLikeRequestDTO;
@@ -40,8 +41,9 @@ public class CourseController {
 
 	private final CourseService courseService;
 	
-    private final int pageSize = 3;
-	
+    private final String START_PAGE_NO = "0";
+    private final String REQUEST_PARAM_PAGE = "page";
+    
 	// 1. 전체 강좌 관련
 	// - 전체 강좌 목록 조회
 	@GetMapping("")
@@ -84,7 +86,7 @@ public class CourseController {
 	}
 	
 	//-강의자료 다운로드
-	@GetMapping("/detail/download")
+	@GetMapping("/download")
 	public ResponseEntity<?> downloadCourseNote(@RequestBody CourseRequestDTO courseRequestDTO){
 		Map<String, byte[]> file = courseService.downloadCourseNote(courseRequestDTO.getCourseId());
 		String fileName = file.keySet().iterator().next();
@@ -100,7 +102,7 @@ public class CourseController {
 	}
 	
 	// - 강좌 조회
-	@GetMapping("/detail/{course_id}")
+	@GetMapping("/{course_id}")
 	public ResponseEntity<?> getCourseDetail(@PathVariable("course_id") Long id, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId();
 		CourseResponseDTO courseResponseDTO = courseService.getCourseDetail(id, currentMemberId);
@@ -108,13 +110,13 @@ public class CourseController {
 	}
 	
 	// - 공지사항 조회
-	@GetMapping("/notice/{course_id}/{page_num}")
-	public ResponseEntity<?> getCourseNoticesPerPage(@PathVariable("course_id") Long courseId, 
-			@PathVariable("page_num") int pageNum){
-		Page<NoticeResponseDTO> notices = courseService.getCourseNotices(courseId, pageNum, pageSize);
+	@GetMapping("/notice/{course_id}")
+	public ResponseEntity<?> getCourseNoticesPerPage(@PathVariable("course_id") Long courseId,
+			@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo) {
+		Page<NoticeResponseDTO> notices = courseService.getCourseNotices(courseId, pageNo);
 		return new ResponseEntity<>(notices, HttpStatus.OK);
 	}
-	
+
 	// 3. 마이페이지
 	//	- 수강 중인 강좌
 	@GetMapping("/nocomplete")

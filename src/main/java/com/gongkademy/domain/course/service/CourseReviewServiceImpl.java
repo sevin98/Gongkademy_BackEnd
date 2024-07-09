@@ -78,13 +78,12 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 	}
 
 	@Override
-	public List<CourseReviewResponseDTO> getReviewsPerPage(Long courseId, int pageNum, String orderKey) {
-		Pageable pageable;
-		if(orderKey.equals("ratingASC")) {
-			pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Direction.ASC, "rating"));
-		} else {
-			pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Direction.DESC, orderKey));
-		}
+	public List<CourseReviewResponseDTO> getReviewsPerPage(Long courseId, int pageNo, String criteria, String direction) {
+		
+		Sort.Direction  dir = (direction.equalsIgnoreCase("ASC"))? Sort.Direction.ASC : Sort.Direction.DESC;
+		
+		Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(dir, criteria));
+
 		Page<CourseReviewResponseDTO> page = courseReviewRepository.findAllByCourseId(courseId, pageable).map(this::convertToDTO);
 		return page.getContent();
 	}

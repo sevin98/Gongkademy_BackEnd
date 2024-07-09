@@ -69,6 +69,9 @@ public class CourseServiceImpl implements CourseService {
 	private final PreCourseRepository preCourseRepository;
 	private final CourseFileRepository courseFileRepository;
 
+	private final int PAGE_SIZE = 10;
+
+	
 	@Override
 	public List<CourseResponseDTO> getAllCourses(Long memberId) {
 		List<CourseResponseDTO> courseResponseDTOs = new ArrayList<>();
@@ -246,8 +249,8 @@ public class CourseServiceImpl implements CourseService {
 	}
 	
 	@Override
-	public Page<NoticeResponseDTO> getCourseNotices(Long courseId, int pageNum, int pageSize) {
-		Pageable pageable = PageRequest.of(pageNum, pageSize);
+	public Page<NoticeResponseDTO> getCourseNotices(Long courseId, int pageNo) {
+		Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE);
 		
 		Page<Notice> notices = noticeRepository.findAllByCourseId(courseId, pageable);
 		Page<NoticeResponseDTO> noticeResponseDtos = notices.map(m -> NoticeResponseDTO.builder()

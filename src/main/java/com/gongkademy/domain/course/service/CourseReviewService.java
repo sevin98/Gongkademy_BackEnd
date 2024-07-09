@@ -10,7 +10,7 @@ public interface CourseReviewService {
 
 	public CourseReviewResponseDTO updateReview(Long id, CourseReviewRequestDTO courseReviewRequestDTO, Long currentMemberId);
 
-	public List<CourseReviewResponseDTO> getReviewsPerPage(Long courseId, int pageNum, String orderKey);
+	public List<CourseReviewResponseDTO> getReviewsPerPage(Long courseId, int pageNo, String criteria, String direction);
 
 	public void deleteReview(Long id, Long currentMemberId);
 }

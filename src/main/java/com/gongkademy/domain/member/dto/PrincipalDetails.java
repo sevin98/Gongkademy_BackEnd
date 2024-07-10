@@ -8,6 +8,7 @@ import com.gongkademy.domain.member.entity.Member;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PrincipalDetails implements OAuth2User, UserDetails {
 
@@ -22,7 +23,9 @@ public class PrincipalDetails implements OAuth2User, UserDetails {
     //ROLE 기반 GrantedAuthority 목록 반환
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Arrays.asList(new SimpleGrantedAuthority("ROLE_" + member.getMemberRoleList().toString()));
+    	return member.getMemberRoleList().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getKey()))
+                .collect(Collectors.toList());
     }
 
     @Override

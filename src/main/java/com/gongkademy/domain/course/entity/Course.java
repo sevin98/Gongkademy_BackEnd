@@ -34,20 +34,16 @@ public class Course {
 	private Long registCount;
 	
 	private Long lectureCount;
-	
-	private String summary;
-	
+
 	private String content;
 	
-	private String status;
-	
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="course_img_id")
-	private CourseFile courseImg; // 강좌 대표 이미지
-	
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="course_note_id")
-	private CourseFile courseNote; // 강좌 자료
+	private CourseStatus status;
+
+	@OneToOne(mappedBy="course" , cascade = CascadeType.ALL, orphanRemoval = true)
+	private CourseFile courseImg;
+
+	@OneToOne(mappedBy="course" , cascade = CascadeType.ALL, orphanRemoval = true)
+	private CourseFile courseNote;
 	
 	@OneToMany(mappedBy="course" , cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Lecture> lectures = new ArrayList<>();

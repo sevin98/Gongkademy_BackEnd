@@ -24,6 +24,5 @@ public class CourseInfoResponseDTO {
 	 // 선수과목,강의 소개,사진
 	private List<PreCourseDTO> preCourses;
 	private String content;
-	private String summary;
 	private List<String> fileUrls;
 }

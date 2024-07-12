@@ -284,7 +284,6 @@ public class CourseServiceImpl implements CourseService {
 		
 		// 소개,요약
 		courseInfoResponseDTO.setContent(course.getContent());
-		courseInfoResponseDTO.setSummary(course.getSummary());
 
 		// 이미지 
 		Long thumbnailId = course.getCourseImg().getId();// 대표이미지 id

@@ -24,7 +24,7 @@ public class CourseFile {
 	private String original_file; // 원본 파일 이름
 	
 	private String save_file; // 저장 파일 이름
-	
+
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="course_id")
 	private Course course;

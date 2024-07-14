@@ -7,6 +7,7 @@ import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
 import com.gongkademy.domain.community.dto.response.ConsultingBoardResponseDTO;
 import com.gongkademy.domain.community.dto.response.QnaBoardResponseDTO;
 import com.gongkademy.domain.community.entity.board.Board;
+import com.gongkademy.domain.community.entity.board.BoardType;
 import com.gongkademy.domain.community.entity.board.QnaBoard;
 import com.gongkademy.domain.community.entity.pick.Pick;
 import com.gongkademy.domain.community.entity.pick.PickType;
@@ -44,9 +45,9 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
         Page<ConsultingBoardResponseDTO> page;
         if (keyword == null) {
-            page = boardRepository.findAll(pageable).map(this::convertToDTO);
+            page = boardRepository.findByBoardType(BoardType.CONSULT, pageable).map(this::convertToDTO);
         } else {
-            page = boardRepository.findQnaBoardByTitleContainingOrContentContaining(keyword, keyword, pageable).map(this::convertToDTO);
+            page = boardRepository.findByBoardTypeAndTitleContainingOrContentContaining(BoardType.CONSULT, keyword, keyword, pageable).map(this::convertToDTO);
         }
 
         List<ConsultingBoardResponseDTO> consultingBoards = page.getContent();

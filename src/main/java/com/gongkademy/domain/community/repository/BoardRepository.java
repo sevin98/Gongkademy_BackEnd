@@ -16,8 +16,10 @@ import java.util.Optional;
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long> {
 
-
-    Page<QnaBoard> findQnaBoardByTitleContainingOrContentContaining(String title, String content, Pageable pageable);
+    // CONSULT 전체 조회
+    Page<Board> findByBoardType(BoardType boardType, Pageable pageable);
+    // CONSULT keyword 기반 조회
+    Page<Board> findByBoardTypeAndTitleContainingOrContentContaining(BoardType boardType, String title, String content, Pageable pageable);
 
     // 최신순 조회
     Page<Board> findByBoardTypeOrderByCreateTimeDesc(BoardType boardtype, Pageable pageable);

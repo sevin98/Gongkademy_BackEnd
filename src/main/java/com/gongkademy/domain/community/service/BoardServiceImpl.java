@@ -4,6 +4,7 @@ import com.gongkademy.domain.community.dto.request.BoardRequestDTO;
 import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
 import com.gongkademy.domain.community.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.entity.board.Board;
+import com.gongkademy.domain.community.entity.board.BoardType;
 import com.gongkademy.domain.community.entity.pick.Pick;
 import com.gongkademy.domain.community.entity.pick.PickType;
 import com.gongkademy.domain.community.repository.BoardRepository;
@@ -54,7 +55,7 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public List<BoardResponseDTO> getLatestBoards(int LIMIT, Long memberId) {
         Pageable pageable = PageRequest.of(DEFAULT_TOP, LIMIT);
-        List<Board> boards = boardRepository.findByOrderByCreateTimeDesc(pageable).getContent();
+        List<Board> boards = boardRepository.findByBoardTypeOrderByCreateTimeDesc(BoardType.NOTICE,pageable).getContent();
 
         List<BoardResponseDTO> boardResponseDTOS = new ArrayList<>();
 

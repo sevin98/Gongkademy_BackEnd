@@ -12,6 +12,9 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @Service
@@ -42,22 +45,44 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
 
     private Member getMember(String email, String name) {
         Member member;
-        Optional<Member> existingMember = memberRepository.findByEmail(email);
-        // 멤버가 데이터베이스에 존재하지 않으면 새로운 멤버 생성
-        if (existingMember.isEmpty()) {
-            member = Member.builder()
-                    .email(email)
-                    .name(name)
-                    .nickname("")
-                    .birthday(null)
-                    .agreeMarketing(false)
-                    .isNotificationEnabled(true)
-                    .build();
-            member.addRole(MemberRole.GUEST); // 이후 회원가입을 위해 최초 로그인은 GUEST로 설정
-        } else {
-            member = existingMember.get();
-            member.updateName(name); // 멤버 정보 업데이트 되었다면 멤버 이름 업데이트
+        Optional<Member> existingMember = memberRepository.findRecentlyCreateMemberByEmail(email);
+        //UserDB에 Member가 있어
+        if (existingMember.isPresent()) {
+            //탈퇴여부 검사
+            if (existingMember.get().isDeleted()) { //탈퇴된사람이라면
+                LocalDateTime withdrawDate = existingMember.get().getDeletedTime();
+                LocalDateTime currentTime = LocalDateTime.now();
+                long monthsBetween = ChronoUnit.MONTHS.between(withdrawDate, currentTime);
+
+                //탈퇴시간 검사
+                if (monthsBetween < 1) {
+                    throw new IllegalStateException("탈퇴 후 1달이 지나야 재가입이 가능합니다.");
+                } else {
+                    //한 달 지났다면 재가입
+                    member = joinMember(email, name);
+                }
+            }else{
+                //탈퇴 안된 사람이라면 정보 업데이트 (로그인)
+                member = existingMember.get();
+                member.updateName(name);
+            }
+        }else{
+            //기존DB에 없으면 join
+            member = joinMember(email, name);
         }
         return memberRepository.save(member);
+    }
+
+    private Member joinMember(String email, String name){
+        Member member = Member.builder()
+                .email(email)
+                .name(name)
+                .nickname("")
+                .birthday(null)
+                .agreeMarketing(false)
+                .isNotificationEnabled(true)
+                .build();
+        member.addRole(MemberRole.GUEST); // 이후 회원가입을 위해 최초 로그인은 GUEST로 설정
+        return member;
     }
 }

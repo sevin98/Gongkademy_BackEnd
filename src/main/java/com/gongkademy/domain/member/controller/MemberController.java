@@ -48,7 +48,8 @@ public class MemberController {
     @DeleteMapping
     public ResponseEntity<?> deleteMember(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         long loginMemberId = principalDetails.getMemberId();
-        memberService.deleteMember(loginMemberId);
+        Long memberId = memberService.deleteMember(loginMemberId);
+        if (memberId == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("회원탈퇴 실패: 회원을 찾을 수 없음");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("회원탈퇴 성공");
     }
 

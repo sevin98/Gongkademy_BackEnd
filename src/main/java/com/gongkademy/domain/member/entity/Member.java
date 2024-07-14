@@ -54,6 +54,19 @@ public class Member {
     @Builder.Default
     private boolean isNotificationEnabled = true;
 
+    @Builder.Default
+    private boolean isDeleted = false;
+
+    private LocalDateTime deletedTime;
+
+    // 탈퇴 비즈니스 로직(soft-delete)
+    // 기존 DB에 유지하지만 탈퇴여부 필드와 탈퇴시간을 남김
+    public void deleteMember(String nickname) {
+        this.nickname = nickname;
+        this.isDeleted = true;
+        this.deletedTime = LocalDateTime.now();
+    }
+
     public void updateName(String name) {
         this.name = name;
     }

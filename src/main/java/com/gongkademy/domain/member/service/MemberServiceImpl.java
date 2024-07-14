@@ -6,16 +6,12 @@ import com.gongkademy.domain.member.dto.MemberUpdateDTO;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.entity.MemberRole;
 import com.gongkademy.domain.member.repository.MemberRepository;
-import com.gongkademy.global.exception.CustomException;
-import com.gongkademy.global.exception.ErrorCode;
 import com.gongkademy.global.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service
@@ -26,6 +22,7 @@ public class MemberServiceImpl implements MemberService{
 
     private final MemberRepository memberRepository;
     private final JWTUtil jwtUtil;
+    private final String DELETE_NICKNAME = "탈퇴회원";
 
     /**
      * 주어진 회원 ID로 회원 정보를 가져옵니다.
@@ -78,10 +75,24 @@ public class MemberServiceImpl implements MemberService{
     }
 
     /**
-     * @param id 회원 ID
+     * 실제 삭제가 아닌 soft-delete를 구현
+     * @param id memberId
+     * @return memberId
      */
     @Override
-    public void deleteMember(long id) { memberRepository.deleteById(id); }
+    public Long deleteMember(long id) {
+        Optional<Member> memberOptional = memberRepository.findById(id);
+        Member member;
+        if (memberOptional.isPresent()) member = memberOptional.get();
+        else return null;
+
+        // 닉네임 -> 탈퇴회원
+        // 탈퇴여부 -> true
+        // 탈퇴시간 -> now()
+        member.deleteMember(DELETE_NICKNAME + member.getId());
+
+        return member.getId();
+    }
 
     @Override
     public Long changeNotificationEnabledStatus(long id) {

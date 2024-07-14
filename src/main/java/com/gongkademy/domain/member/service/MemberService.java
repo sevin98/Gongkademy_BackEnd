@@ -12,7 +12,7 @@ public interface MemberService {
     MemberInfoDTO getMemberInfo(long id);
     Long joinMember(long id, MemberSignUpDTO dto);
     Long modifyMember(long id, MemberUpdateDTO dto);
-    void deleteMember(long id);
+    Long deleteMember(long id);
     Long changeNotificationEnabledStatus(long id);
 
     /**

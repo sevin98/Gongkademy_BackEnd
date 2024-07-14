@@ -8,4 +8,6 @@ public interface ScrapRepository extends JpaRepository<Scrap, Long>{
 	
 	Boolean existsByMemberIdAndCourseId(Long memberId, Long courseId);
 
+	Scrap findByCourseId(Long courseId);
+
 }

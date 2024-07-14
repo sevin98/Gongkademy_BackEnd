@@ -39,11 +39,8 @@ public class Course {
 	
 	private CourseStatus status;
 
-	@OneToOne(mappedBy="course" , cascade = CascadeType.ALL, orphanRemoval = true)
-	private CourseFile courseImg;
-
-	@OneToOne(mappedBy="course" , cascade = CascadeType.ALL, orphanRemoval = true)
-	private CourseFile courseNote;
+	@OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<CourseFile> courseFiles = new ArrayList<>();
 	
 	@OneToMany(mappedBy="course" , cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Lecture> lectures = new ArrayList<>();
@@ -91,6 +88,23 @@ public class Course {
 		
 		this.updateReviewCount();
 		this.updateAvgRating();
+	}
+	
+	//== get ==//
+	// 강의 이미지 가져오기
+	public CourseFile getCourseImg() {
+		return courseFiles.stream()
+				.filter(file -> file.getCateg() == CourseFileCateg.COURSEIMG)
+				.findFirst()
+				.orElse(null);
+	}
+
+	// 강의 자료 가져오기
+	public CourseFile getCourseNote() {
+		return courseFiles.stream()
+				.filter(file -> file.getCateg() == CourseFileCateg.COURSENOTE)
+				.findFirst()
+				.orElse(null);
 	}
 	
 	//== delete ==//

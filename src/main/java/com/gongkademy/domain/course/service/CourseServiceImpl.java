@@ -78,10 +78,7 @@ public class CourseServiceImpl implements CourseService {
 		
 		List<Course> courses = courseRepository.findAll();
 		for(Course course : courses) {
-            CourseResponseDTO dto = this.convertToDTO(course);
-
-            Boolean isRegistered = registCourseRepository.existsByMemberIdAndCourseId(memberId, course.getId());
-			dto.setIsRegistered(isRegistered);
+            CourseResponseDTO dto = this.convertToDTO(course, memberId);
             courseResponseDTOs.add(dto);
 		}
 		return courseResponseDTOs;
@@ -97,7 +94,7 @@ public class CourseServiceImpl implements CourseService {
 			Course course = courseRepository.findById(registCourse.getCourse().getId())
 					.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
 
-            CourseResponseDTO dto = this.convertToDTO(course);
+            CourseResponseDTO dto = this.convertToDTO(course, memberId);
 			dto.setIsRegistered(true);
             courseResponseDTOs.add(dto);
 		}
@@ -114,7 +111,7 @@ public class CourseServiceImpl implements CourseService {
 			Course course = courseRepository.findById(registCourse.getCourse().getId())
 					.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
 
-            CourseResponseDTO dto = this.convertToDTO(course);
+            CourseResponseDTO dto = this.convertToDTO(course, memberId);
 			dto.setIsRegistered(true);
             courseResponseDTOs.add(dto);
 		}
@@ -159,16 +156,22 @@ public class CourseServiceImpl implements CourseService {
         
         Member member = memberRepository.findById(currentMemberId)
         		.orElseThrow(() -> new IllegalArgumentException("사용자 찾을 수 없음"));
-        RegistCourse registCourse = this.converToEntityRegistCourse(courseRequestDTO);
-        member.addRegistCourse(registCourse);
-        
         Course course = courseRepository.findById(courseRequestDTO.getCourseId())
         		.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
-        course.addRegist(registCourse);
         
-        CourseResponseDTO courseResponseDTO = this.convertToDTO(course);
+        Optional<RegistCourse> check = registCourseRepository.findByCourseIdAndMemberId(courseRequestDTO.getCourseId(), currentMemberId);
         
-        this.addRegistLectures(registCourse);
+        if(!check.isPresent()) {
+        	RegistCourse registCourse = this.converToEntityRegistCourse(courseRequestDTO);
+            member.addRegistCourse(registCourse);
+        	course.addRegist(registCourse);
+        	this.addRegistLectures(registCourse);
+        	registCourseRepository.save(registCourse);
+        }
+
+        CourseResponseDTO courseResponseDTO = this.convertToDTO(course,currentMemberId);
+        courseResponseDTO.setIsRegistered(true);
+        
         return courseResponseDTO;
     }
 
@@ -181,28 +184,24 @@ public class CourseServiceImpl implements CourseService {
         
         Member member = memberRepository.findById(currentMemberId)
         		.orElseThrow(() -> new IllegalArgumentException("사용자 찾을 수 없음"));
-		Scrap scrap = this.convertToEntityScrap(courseRequestDTO);
-		member.addScrap(scrap);
 
         Course course = courseRepository.findById(courseRequestDTO.getCourseId())
         		.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
 		Boolean isSaved = scrapRepository.existsByMemberIdAndCourseId(currentMemberId, course.getId());
 		
-		CourseResponseDTO dto = this.convertToDTO(course);
+		CourseResponseDTO dto = this.convertToDTO(course,currentMemberId);
 		// 저장 -> 저장 삭제
-		if(isSaved) {
+		if(!isSaved) {
+			Scrap scrap = this.convertToEntityScrap(courseRequestDTO);
+			member.addScrap(scrap);
 			course.addScrap(scrap);
-			dto.setIsSaved(false);
-		}
-		else {
-			course.deleteScrap(scrap);
 			dto.setIsSaved(true);
 		}
-		
-		//수강여부 확인
-		Boolean isRegistered = registCourseRepository.existsByMemberIdAndCourseId(currentMemberId, course.getId());
-		if(isRegistered) dto.setIsRegistered(true);
-		else dto.setIsRegistered(false);
+		else {
+			Scrap scrap = scrapRepository.findByCourseId(courseRequestDTO.getCourseId());
+			course.deleteScrap(scrap);
+			dto.setIsSaved(false);
+		}
 		
 		return dto;
 	}
@@ -237,14 +236,7 @@ public class CourseServiceImpl implements CourseService {
 		Course course = courseRepository.findById(courseId)
 				.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
 		
-		CourseResponseDTO courseResponseDTO = this.convertToDTO(course);
-		
-		Boolean isRegistered = registCourseRepository.existsByMemberIdAndCourseId(currentMemberId, course.getId());
-		courseResponseDTO.setIsRegistered(isRegistered);
-        
-		Boolean isSaved = scrapRepository.existsByMemberIdAndCourseId(currentMemberId, course.getId());
-		courseResponseDTO.setIsSaved(isSaved);
-		
+		CourseResponseDTO courseResponseDTO = this.convertToDTO(course, currentMemberId);
 		return courseResponseDTO;
 	}
 	
@@ -362,17 +354,25 @@ public class CourseServiceImpl implements CourseService {
 		return null;
 	}
 
-	private CourseResponseDTO convertToDTO(Course course) {
+	private CourseResponseDTO convertToDTO(Course course, Long currentMemberId) {
 		CourseResponseDTO courseResponseDTO = new CourseResponseDTO();
 		courseResponseDTO.setCourseId(course.getId());
 		courseResponseDTO.setTotalCourseTime(course.getTotalCourseTime());
-		courseResponseDTO.setAvgRating(course.getAvgRating());
+		courseResponseDTO.setTitle(course.getTitle());
 		courseResponseDTO.setReviewCount(course.getReviewCount());
-		courseResponseDTO.setCourseId(course.getId());
+		courseResponseDTO.setRegistCount(course.getRegistCount());
+		courseResponseDTO.setAvgRating(course.getAvgRating());
+		courseResponseDTO.setContent(course.getContent());
 		
 		// 강좌 대표 이미지 조회
 		String filename = course.getCourseImg().getSave_file();
 		courseResponseDTO.setFileUrl(fileService.getFileUrl(filename));
+		
+		Boolean isRegistered = registCourseRepository.existsByMemberIdAndCourseId(currentMemberId, course.getId());
+		courseResponseDTO.setIsRegistered(isRegistered);
+        
+		Boolean isSaved = scrapRepository.existsByMemberIdAndCourseId(currentMemberId, course.getId());
+		courseResponseDTO.setIsSaved(isSaved);
 
 		return courseResponseDTO;
 	}

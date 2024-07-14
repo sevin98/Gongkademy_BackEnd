@@ -74,7 +74,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         //허용할 Http 메소드들 //TODO: 또뭐있지 모르겠음
-        configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PATCH ", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PATCH", "DELETE", "OPTIONS"));
 
         //허용할 origin 설정
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));

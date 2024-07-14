@@ -59,14 +59,8 @@ public class PlayerServiceImpl implements PlayerService{
 	}
 
 	@Override
-	public void updatePlayerLatest(PlayerRequestDTO playerRequestDTO, Long currentMemberId) {
-        // 요청 사용자 == 로그인 사용자 확인
-        if (!playerRequestDTO.getMemberId().equals(currentMemberId)) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
-		
+	public void updatePlayerLatest(PlayerRequestDTO playerRequestDTO, Long memberId) {
 		Long lectureId = playerRequestDTO.getLectureId();
-		Long memberId = playerRequestDTO.getMemberId();
 		RegistLecture registLecture = registLectureRepository.findByLectureIdAndMemberId(lectureId, memberId)
 				.orElseThrow(() -> new IllegalArgumentException("수강 강의 찾을 수 없음"));
 
@@ -83,11 +77,6 @@ public class PlayerServiceImpl implements PlayerService{
 
 	@Override
 	public PlayerResponseDTO getPlayerNextPrev(PlayerRequestDTO playerRequestDTO,Long currentMemberId, int dir) {
-        // 요청 사용자 == 로그인 사용자 확인
-        if (!playerRequestDTO.getMemberId().equals(currentMemberId)) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
-		
 		Lecture lecture = lectureRepository.findById(playerRequestDTO.getLectureId())
 				.orElseThrow(() -> new IllegalArgumentException("강의 찾을 수 없음"));
 		Course course = lecture.getCourse();

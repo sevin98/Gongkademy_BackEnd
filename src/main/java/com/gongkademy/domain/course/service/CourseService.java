@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 
 import com.gongkademy.domain.course.dto.request.CourseCommentRequestDTO;
 import com.gongkademy.domain.course.dto.request.CourseLikeRequestDTO;
-import com.gongkademy.domain.course.dto.request.CourseRequestDTO;
 import com.gongkademy.domain.course.dto.response.CourseCommentResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseInfoResponseDTO;
@@ -23,11 +22,11 @@ public interface CourseService {
 
 	List<CourseResponseDTO> getAllCourses(Long memberId);
 	
-	List<CourseContentsResponseDTO> getCourseContents(CourseRequestDTO courseRequestDTO);
+	List<CourseContentsResponseDTO> getCourseContents(Long courseId, Long currentMemberId);
 	
-	CourseResponseDTO registCourse(CourseRequestDTO courseRequestDTO, Long currentMemberId);
+	CourseResponseDTO registCourse(Long courseId, Long currentMemberId);
 	
-	CourseResponseDTO scrapCourse(CourseRequestDTO courseRequestDTO, Long currentMemberId);
+	CourseResponseDTO scrapCourse(Long courseId, Long currentMemberId);
 
 	void deleteRegistCourse(Long courseId, Long currentMemberId);
 	

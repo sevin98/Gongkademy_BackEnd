@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.gongkademy.domain.course.dto.request.CourseLikeRequestDTO;
-import com.gongkademy.domain.course.dto.request.CourseRequestDTO;
 import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseInfoResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseLikeResponseDTO;
@@ -120,10 +119,7 @@ public class CourseServiceImpl implements CourseService {
 
 
 	@Override
-	public List<CourseContentsResponseDTO> getCourseContents(CourseRequestDTO courseRequestDTO) {
-		Long memberId = courseRequestDTO.getMemberId();
-		Long courseId = courseRequestDTO.getCourseId();
-		
+	public List<CourseContentsResponseDTO> getCourseContents(Long courseId, Long memberId) {
 		List<Lecture> lectures = lectureRepository.findByCourseId(courseId);
 		List<CourseContentsResponseDTO> courseContentsDTOs = new ArrayList<>();
 		
@@ -148,57 +144,47 @@ public class CourseServiceImpl implements CourseService {
 	}
 
     @Override
-    public CourseResponseDTO registCourse(CourseRequestDTO courseRequestDTO, Long currentMemberId) {        
-        // 요청 사용자 == 로그인 사용자 확인
-        if (!courseRequestDTO.getMemberId().equals(currentMemberId)) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
-        
-        Member member = memberRepository.findById(currentMemberId)
+    public CourseResponseDTO registCourse(Long courseId, Long memberId) {               
+        Member member = memberRepository.findById(memberId)
         		.orElseThrow(() -> new IllegalArgumentException("사용자 찾을 수 없음"));
-        Course course = courseRepository.findById(courseRequestDTO.getCourseId())
+        Course course = courseRepository.findById(courseId)
         		.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
         
-        Optional<RegistCourse> check = registCourseRepository.findByCourseIdAndMemberId(courseRequestDTO.getCourseId(), currentMemberId);
+        Optional<RegistCourse> check = registCourseRepository.findByCourseIdAndMemberId(courseId, memberId);
         
         if(!check.isPresent()) {
-        	RegistCourse registCourse = this.converToEntityRegistCourse(courseRequestDTO);
+        	RegistCourse registCourse = this.converToEntityRegistCourse(courseId, memberId);
             member.addRegistCourse(registCourse);
         	course.addRegist(registCourse);
         	this.addRegistLectures(registCourse);
         	registCourseRepository.save(registCourse);
         }
 
-        CourseResponseDTO courseResponseDTO = this.convertToDTO(course,currentMemberId);
+        CourseResponseDTO courseResponseDTO = this.convertToDTO(course,memberId);
         courseResponseDTO.setIsRegistered(true);
         
         return courseResponseDTO;
     }
 
 	@Override
-	public CourseResponseDTO scrapCourse(CourseRequestDTO courseRequestDTO, Long currentMemberId) {
-        // 요청 사용자 == 로그인 사용자 확인
-        if (!courseRequestDTO.getMemberId().equals(currentMemberId)) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
-        
-        Member member = memberRepository.findById(currentMemberId)
+	public CourseResponseDTO scrapCourse(Long courseId, Long memberId) {
+        Member member = memberRepository.findById(memberId)
         		.orElseThrow(() -> new IllegalArgumentException("사용자 찾을 수 없음"));
 
-        Course course = courseRepository.findById(courseRequestDTO.getCourseId())
+        Course course = courseRepository.findById(courseId)
         		.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
-		Boolean isSaved = scrapRepository.existsByMemberIdAndCourseId(currentMemberId, course.getId());
+		Boolean isSaved = scrapRepository.existsByMemberIdAndCourseId(memberId, course.getId());
 		
-		CourseResponseDTO dto = this.convertToDTO(course,currentMemberId);
+		CourseResponseDTO dto = this.convertToDTO(course,memberId);
 		// 저장 -> 저장 삭제
 		if(!isSaved) {
-			Scrap scrap = this.convertToEntityScrap(courseRequestDTO);
+			Scrap scrap = this.convertToEntityScrap(courseId, memberId);
 			member.addScrap(scrap);
 			course.addScrap(scrap);
 			dto.setIsSaved(true);
 		}
 		else {
-			Scrap scrap = scrapRepository.findByCourseId(courseRequestDTO.getCourseId());
+			Scrap scrap = scrapRepository.findByCourseId(courseId);
 			course.deleteScrap(scrap);
 			dto.setIsSaved(false);
 		}
@@ -208,8 +194,8 @@ public class CourseServiceImpl implements CourseService {
 
 	@Override
 	@Transactional
-	public void deleteRegistCourse(Long courseId, Long currentMemberId) {		
-		RegistCourse registCourse = registCourseRepository.findByCourseIdAndMemberId(courseId, currentMemberId)
+	public void deleteRegistCourse(Long courseId, Long memberId) {		
+		RegistCourse registCourse = registCourseRepository.findByCourseIdAndMemberId(courseId, memberId)
 				.orElseThrow(() -> new IllegalArgumentException("수강 강좌 찾을 수 없음"));
 		
         Course course = courseRepository.findById(courseId)
@@ -232,11 +218,11 @@ public class CourseServiceImpl implements CourseService {
 
 
 	@Override
-	public CourseResponseDTO getCourseDetail(Long courseId, Long currentMemberId) {
+	public CourseResponseDTO getCourseDetail(Long courseId, Long memberId) {
 		Course course = courseRepository.findById(courseId)
 				.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
 		
-		CourseResponseDTO courseResponseDTO = this.convertToDTO(course, currentMemberId);
+		CourseResponseDTO courseResponseDTO = this.convertToDTO(course, memberId);
 		return courseResponseDTO;
 	}
 	
@@ -304,13 +290,8 @@ public class CourseServiceImpl implements CourseService {
     }
 	
 	@Override
-	public CourseLikeResponseDTO like(CourseLikeRequestDTO courseLikeRequestDTO, Long currentMemberId) {
-        // 요청 사용자 == 로그인 사용자 확인
-        if (!courseLikeRequestDTO.getMemberId().equals(currentMemberId)) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
-        
-        Member member = memberRepository.findById(currentMemberId)
+	public CourseLikeResponseDTO like(CourseLikeRequestDTO courseLikeRequestDTO, Long memberId) {
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자 찾을 수 없음"));
 		
         // 강의평 좋아요
@@ -323,11 +304,9 @@ public class CourseServiceImpl implements CourseService {
 	        if (likeOptional.isPresent()) {
 				CourseLike like = likeOptional.get();
 				review.deleteCourseLike(like);
-//		        courseReviewRepository.save(review);
 			} else {
-		        CourseLike like = convertToEntityCourseLike(courseLikeRequestDTO);
+		        CourseLike like = convertToEntityCourseLike(courseLikeRequestDTO, memberId);
 		        review.addCourseLike(like);
-//		        courseReviewRepository.save(review);
 		        member.addCourseLike(like);
 		        return convertToDTOCourseLike(like);
 			}
@@ -345,7 +324,7 @@ public class CourseServiceImpl implements CourseService {
 				comment.deleteCourseLike(like);
 //				courseCommentRepository.save(comment);
 			} else {
-		        CourseLike like = convertToEntityCourseLike(courseLikeRequestDTO);
+		        CourseLike like = convertToEntityCourseLike(courseLikeRequestDTO, memberId);
 		        comment.addCourseLike(like);
 //		        courseCommentRepository.save(comment);
 		        return convertToDTOCourseLike(like);
@@ -354,7 +333,7 @@ public class CourseServiceImpl implements CourseService {
 		return null;
 	}
 
-	private CourseResponseDTO convertToDTO(Course course, Long currentMemberId) {
+	private CourseResponseDTO convertToDTO(Course course, Long memberId) {
 		CourseResponseDTO courseResponseDTO = new CourseResponseDTO();
 		courseResponseDTO.setCourseId(course.getId());
 		courseResponseDTO.setTotalCourseTime(course.getTotalCourseTime());
@@ -368,10 +347,10 @@ public class CourseServiceImpl implements CourseService {
 		String filename = course.getCourseImg().getSave_file();
 		courseResponseDTO.setFileUrl(fileService.getFileUrl(filename));
 		
-		Boolean isRegistered = registCourseRepository.existsByMemberIdAndCourseId(currentMemberId, course.getId());
+		Boolean isRegistered = registCourseRepository.existsByMemberIdAndCourseId(memberId, course.getId());
 		courseResponseDTO.setIsRegistered(isRegistered);
         
-		Boolean isSaved = scrapRepository.existsByMemberIdAndCourseId(currentMemberId, course.getId());
+		Boolean isSaved = scrapRepository.existsByMemberIdAndCourseId(memberId, course.getId());
 		courseResponseDTO.setIsSaved(isSaved);
 
 		return courseResponseDTO;
@@ -386,24 +365,29 @@ public class CourseServiceImpl implements CourseService {
 		return courseContentsResponseDTO;
 	}
 
-	private RegistCourse converToEntityRegistCourse(CourseRequestDTO courseRequestDTO) {
-		Course course = courseRepository.findById(courseRequestDTO.getCourseId())
+	private RegistCourse converToEntityRegistCourse(Long courseId, Long memberId) {
+		Course course = courseRepository.findById(courseId)
 				.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
 		
-		Member member = memberRepository.findById(courseRequestDTO.getMemberId())
+		Member member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new IllegalArgumentException("회원 찾을 수 없음"));
 		
-		RegistCourse registCourse = new RegistCourse();
-		registCourse.setCourse(course);
-		registCourse.setMember(member);
-		return registCourse;
+	    RegistCourse registCourse = RegistCourse.builder()
+                .course(course)
+                .member(member)
+                .progressTime(0L)
+                .progressPercent(0.0)
+                .complete(false)
+                .registLectures(new ArrayList<>())
+                .build();
+      return registCourse;
 	}
 	
-	private Scrap convertToEntityScrap(CourseRequestDTO courseRequestDTO) {
-		Course course = courseRepository.findById(courseRequestDTO.getCourseId())
+	private Scrap convertToEntityScrap(Long courseId, Long memberId) {
+		Course course = courseRepository.findById(courseId)
 				.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
 		
-		Member member = memberRepository.findById(courseRequestDTO.getMemberId())
+		Member member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new IllegalArgumentException("회원 찾을 수 없음"));
 		
 		Scrap scrap = new Scrap();
@@ -412,7 +396,7 @@ public class CourseServiceImpl implements CourseService {
 		return scrap;
 	}
 	
-    private CourseLike convertToEntityCourseLike(CourseLikeRequestDTO courseLikeDTO) {
+    private CourseLike convertToEntityCourseLike(CourseLikeRequestDTO courseLikeDTO, Long memberId) {
     	CourseLike like = new CourseLike();
     	
     	like.setLikeCateg(courseLikeDTO.getLikeCateg());
@@ -435,7 +419,7 @@ public class CourseServiceImpl implements CourseService {
     		}
     	}
         
-        Optional<Member> memberOptional = memberRepository.findById(courseLikeDTO.getMemberId());
+        Optional<Member> memberOptional = memberRepository.findById(memberId);
         if (memberOptional.isPresent()) {
         	like.setMember(memberOptional.get());
         } else {

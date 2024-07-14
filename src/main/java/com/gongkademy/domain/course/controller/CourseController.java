@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gongkademy.domain.course.dto.request.CourseLikeRequestDTO;
-import com.gongkademy.domain.course.dto.request.CourseRequestDTO;
 import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseInfoResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseLikeResponseDTO;
@@ -46,7 +45,7 @@ public class CourseController {
     
 	// 1. 전체 강좌 관련
 	// - 전체 강좌 목록 조회
-	@GetMapping("")
+	@GetMapping
 	public ResponseEntity<?> getAllCourses(@AuthenticationPrincipal PrincipalDetails principalDetails){
         Long currentMemberId = principalDetails.getMemberId();
 		List<CourseResponseDTO> courseResponseDTOs = courseService.getAllCourses(currentMemberId);
@@ -54,26 +53,27 @@ public class CourseController {
 	}
 	
 	// - 목차 조회
-	@GetMapping("/list")
-	public ResponseEntity<?> getCourseContents(@RequestBody CourseRequestDTO courseRequestDTO){
-		List<CourseContentsResponseDTO> courseContentsDTOs = courseService.getCourseContents(courseRequestDTO);
+	@GetMapping("/list/{course_id}")
+	public ResponseEntity<?> getCourseContents(@PathVariable("course_id") Long id, @AuthenticationPrincipal PrincipalDetails principalDetails){
+        Long currentMemberId = principalDetails.getMemberId();
+		List<CourseContentsResponseDTO> courseContentsDTOs = courseService.getCourseContents(id,currentMemberId);
 		return new ResponseEntity<>(courseContentsDTOs, HttpStatus.OK);
 	}
 	
 	// 2. 강좌 상세 관련
 	// - 강좌 수강
-	@PostMapping("/regist")
-	public ResponseEntity<?> registCourse(@RequestBody CourseRequestDTO courseRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+	@PostMapping("/regist/{course_id}")
+	public ResponseEntity<?> registCourse(@PathVariable("course_id") Long id, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId();
-		CourseResponseDTO courseResponseDTO = courseService.registCourse(courseRequestDTO, currentMemberId);
+		CourseResponseDTO courseResponseDTO = courseService.registCourse(id, currentMemberId);
         return new ResponseEntity<>(courseResponseDTO, HttpStatus.CREATED);
 	}
 	
 	// - 강좌 저장
-	@PostMapping("/scrap")
-	public ResponseEntity<?> scrapCourse(@RequestBody CourseRequestDTO courseRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+	@PostMapping("/scrap/{course_id}")
+	public ResponseEntity<?> scrapCourse(@PathVariable("course_id") Long id, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId();
-		CourseResponseDTO courseResponseDTO = courseService.scrapCourse(courseRequestDTO, currentMemberId);
+		CourseResponseDTO courseResponseDTO = courseService.scrapCourse(id, currentMemberId);
         return new ResponseEntity<>(courseResponseDTO, HttpStatus.CREATED);
 	}
 		
@@ -86,9 +86,9 @@ public class CourseController {
 	}
 	
 	//-강의자료 다운로드
-	@GetMapping("/download")
-	public ResponseEntity<?> downloadCourseNote(@RequestBody CourseRequestDTO courseRequestDTO){
-		Map<String, byte[]> file = courseService.downloadCourseNote(courseRequestDTO.getCourseId());
+	@GetMapping("/download/{course_id}")
+	public ResponseEntity<?> downloadCourseNote(@PathVariable("course_id") Long id){
+		Map<String, byte[]> file = courseService.downloadCourseNote(id);
 		String fileName = file.keySet().iterator().next();
 		byte[] bytes = file.get(fileName);
 		ByteArrayResource resource = new ByteArrayResource(bytes);

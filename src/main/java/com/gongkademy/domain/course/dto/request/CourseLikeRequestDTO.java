@@ -14,7 +14,6 @@ import lombok.Setter;
 public class CourseLikeRequestDTO {
 
 	private CourseLikeCateg likeCateg;
-	private Long memberId;
 	private Long courseReviewId;
 	private Long courseCommentId;
 

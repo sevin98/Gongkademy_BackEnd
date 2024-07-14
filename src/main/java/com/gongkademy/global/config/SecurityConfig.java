@@ -1,5 +1,6 @@
 package com.gongkademy.global.config;
 
+import com.gongkademy.domain.member.entity.MemberRole;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.domain.member.service.OAuth2MemberService;
 import com.gongkademy.global.redis.RedisUtil;
@@ -43,12 +44,27 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        //TODO: member 말고 다른 domain의 로그인이 필요한 영역도 적어줘야하는거겠지
-                        //TODO: board나 comment 나 그건 그때 가서 상의
-                        .requestMatchers("/private/**").authenticated() // private으로 시작하는 url은 로그인이 필수
-                        .requestMatchers("/admin/**").hasRole("ADMIN") // admin으로 시작하는건 admin만 접근 가능
-                        .requestMatchers("/member/**").hasAnyRole("USER", "ADMIN")//member url은 user혹은 admin만
-                        .anyRequest().permitAll()) //TODO: 특정 url만 permitALl 로 두고, 다른곳을 다 authenticated로 막던지 상의 해보면 좋을듯
+                        //TODO: @AuthenticationPrincipal 어노테이션을 사용하지 않는 메서드 중 접근권한이 필요한 것 찾아야함
+                        //1. communityController 의 createComment
+                        .requestMatchers(new AntPathRequestMatcher("/community/comment", "POST")).authenticated()
+
+                        //2. ConsultingController의 3가지 메소드
+                        .requestMatchers(new AntPathRequestMatcher("/community/consulting", "POST")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/community/consulting/{articleId}", "PATCH")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/community/consulting/{articleId}", "DELETE")).authenticated()
+
+                        //3. QuestionController의 3가지 메소드
+                        .requestMatchers(new AntPathRequestMatcher("/community/question", "POST")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/community/question/{articleId}", "PATCH")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/community/question/{articleId}", "DELETE")).authenticated()
+
+                        //4. CourseController의 download
+                        .requestMatchers(new AntPathRequestMatcher("/course/download")).authenticated()
+
+                        .requestMatchers("/admin/**").hasRole(MemberRole.ADMIN.name()) // admin으로 시작하는건 admin만 접근 가능
+
+                        //나머지 url은 pertmiAll()
+                        .anyRequest().permitAll())
                 .logout((logout) -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/members/logout"))
                         .logoutSuccessUrl("/"))

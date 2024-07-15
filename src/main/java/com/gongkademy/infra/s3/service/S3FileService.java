@@ -121,15 +121,8 @@ public class S3FileService implements FileService {
 		}
     }
     public String getdownloadFileName(String fileAddress){
-        String key = getKeyFromImageAddress(fileAddress);
-        String fileName = "file";
-        try {
-            fileName = URLEncoder.encode(key, "UTF-8").replaceAll("\\+", "%20");
-        } catch (UnsupportedEncodingException e) {
-            log.error("파일명 에러: " + e.getMessage(), e);
-            throw new AmazonS3Exception("에러");
-        }
-        return fileName;
+        String[] addrSegments = fileAddress.split("/");
+        return addrSegments[addrSegments.length - 1];
     }
     public String getFileUrl(String filename) {
         return amazonS3.getUrl(bucketName, filename).toString();

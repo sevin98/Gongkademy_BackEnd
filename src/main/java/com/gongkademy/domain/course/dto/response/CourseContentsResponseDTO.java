@@ -11,11 +11,11 @@ import lombok.Setter;
 public class CourseContentsResponseDTO {
 	
 	private Long lectureId;
-    private Long memberId;
     
     private int lectureOrder;
     private Long time;
     private String title;
+    private String link;
 	
 	private Boolean isCompleted;// 완강여부
     

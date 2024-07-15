@@ -118,7 +118,6 @@ public class CourseServiceImpl implements CourseService {
 		return courseResponseDTOs;
 	}
 
-
 	@Override
 	public List<CourseContentsResponseDTO> getCourseContents(Long courseId, Long memberId) {
 		List<Lecture> lectures = lectureRepository.findByCourseId(courseId);
@@ -126,9 +125,7 @@ public class CourseServiceImpl implements CourseService {
 		
 		for(Lecture lecture : lectures) {
 			CourseContentsResponseDTO dto = this.convertToDToContents(lecture);
-		
-			dto.setMemberId(memberId);
-			
+					
 			// 수강하고 있는 강좌면 완강여부 확인
             Boolean isRegistered = registCourseRepository.existsByMemberIdAndCourseId(memberId, courseId);
 			if(isRegistered) {
@@ -137,10 +134,8 @@ public class CourseServiceImpl implements CourseService {
 			}
 			// 아니면 다 false
 			else dto.setIsCompleted(false);
-			
 			courseContentsDTOs.add(dto);
 		}
-		
 		return courseContentsDTOs;
 	}
 
@@ -211,8 +206,8 @@ public class CourseServiceImpl implements CourseService {
 		CourseFile courseNote = course.getCourseNote();
 
 		Map<String, byte[]> file = new HashMap<>();
-		String fileName = fileService.getdownloadFileName(courseNote.getSave_file());
-		byte[] bytes = fileService.downloadFile(courseNote.getSave_file());
+		String fileName = fileService.getdownloadFileName(courseNote.getSaveFile());
+		byte[] bytes = fileService.downloadFile(courseNote.getSaveFile());
 		file.put(fileName, bytes);
 		return file;
 	}
@@ -269,7 +264,7 @@ public class CourseServiceImpl implements CourseService {
 		List<CourseFile> imgs = courseFileRepository.findByCourseIdAndCategAndIdNot(courseId, CourseFileCateg.COURSEIMG, thumbnailId);
 		
 		List<String> fileUrls = imgs.stream()
-	            .map(file -> fileService.getFileUrl(file.getSave_file()))
+	            .map(file -> fileService.getFileUrl(file.getSaveFile()))
 	            .collect(Collectors.toList());
 		courseInfoResponseDTO.setFileUrls(fileUrls);
 		
@@ -351,7 +346,7 @@ public class CourseServiceImpl implements CourseService {
 		courseResponseDTO.setContent(course.getContent());
 		
 		// 강좌 대표 이미지 조회
-		String filename = course.getCourseImg().getSave_file();
+		String filename = course.getCourseImg().getSaveFile();
 		courseResponseDTO.setCourseImgAddress(filename);
 		
 		Boolean isRegistered = registCourseRepository.existsByMemberIdAndCourseId(memberId, course.getId());
@@ -369,6 +364,7 @@ public class CourseServiceImpl implements CourseService {
 		courseContentsResponseDTO.setLectureOrder(lecture.getLectureOrder());
 		courseContentsResponseDTO.setTime(lecture.getTime());
 		courseContentsResponseDTO.setTitle(lecture.getTitle());
+		courseContentsResponseDTO.setLink(lecture.getLink());
 		return courseContentsResponseDTO;
 	}
 

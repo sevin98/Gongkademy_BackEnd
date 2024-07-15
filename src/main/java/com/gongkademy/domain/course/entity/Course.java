@@ -90,6 +90,12 @@ public class Course {
 		this.updateAvgRating();
 	}
 	
+	// 강의파일(대표이미지, 강의자료) add
+	public void addCourseFile(CourseFile courseFile) {
+	    this.courseFiles.add(courseFile);
+	    courseFile.setCourse(this);
+	}
+	
 	//== get ==//
 	// 강의 이미지 가져오기
 	public CourseFile getCourseImg() {
@@ -132,7 +138,10 @@ public class Course {
 		this.updateReviewCount();
 		this.updateAvgRating();
 	}
-	
+	// 강의파일(대표이미지, 강의자료) delete
+	public void deleteCourseFile(CourseFile file) {
+		this.courseFiles.remove(file);
+	}
 	
 	//== 비즈니스 로직== //
 	//== update ==//

@@ -1,6 +1,7 @@
 package com.gongkademy.domain.course.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.gongkademy.domain.member.entity.Member;
 
@@ -11,11 +12,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class RegistLecture {
 	
 	@Id

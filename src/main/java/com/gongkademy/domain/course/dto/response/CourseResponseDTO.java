@@ -27,5 +27,5 @@ public class CourseResponseDTO {
 	
 	
 	// 강의 대표이미지
-	private String fileUrl;
+	private String courseImgAddress;
 }

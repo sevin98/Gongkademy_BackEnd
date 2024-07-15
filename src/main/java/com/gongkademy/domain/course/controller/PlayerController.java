@@ -44,7 +44,7 @@ public class PlayerController {
 	}
 	
 	// 강의 수강 내역 저장
-	@PatchMapping("")
+	@PatchMapping
 	public ResponseEntity<?> updatePlayerLatest(@RequestBody PlayerRequestDTO playerRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId(); 
 		playerService.updatePlayerLatest(playerRequestDTO, currentMemberId);
@@ -52,22 +52,12 @@ public class PlayerController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
-	// 다음 강의 재생
-	@GetMapping("/next")
+	// 다음/이전 강의 재생
+	@GetMapping("/switch")
 	public ResponseEntity<?> getPlayerNext(@RequestBody PlayerRequestDTO playerRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId(); 	
-		// 다음강의 있으면 반환
-		PlayerResponseDTO playerResponseDTO = playerService.getPlayerNextPrev(playerRequestDTO,currentMemberId, 1);
-        if(playerResponseDTO == null) return new ResponseEntity<>(HttpStatus.BAD_REQUEST); 
-		return ResponseEntity.ok(playerResponseDTO);
-	}
-	
-	// 이전 강의 재생
-	@GetMapping("/prev")
-	public ResponseEntity<?> getPlayerPrev(@RequestBody PlayerRequestDTO playerRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        Long currentMemberId = principalDetails.getMemberId(); 
-		// 이전강의 있으면 반환
-		PlayerResponseDTO playerResponseDTO = playerService.getPlayerNextPrev(playerRequestDTO, currentMemberId, 2);
+		
+		PlayerResponseDTO playerResponseDTO = playerService.getPlayerNextPrev(playerRequestDTO,currentMemberId);
         if(playerResponseDTO == null) return new ResponseEntity<>(HttpStatus.BAD_REQUEST); 
 		return ResponseEntity.ok(playerResponseDTO);
 	}

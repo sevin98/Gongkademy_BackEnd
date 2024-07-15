@@ -12,7 +12,8 @@ import lombok.Setter;
 public class PlayerRequestDTO {
 	// 강의 플레이어 요청 dto
 		
-	private Long LectureId;
+	private Long lectureId;
 	private Long savePoint;
+	private int dir = 0;
 	
 }

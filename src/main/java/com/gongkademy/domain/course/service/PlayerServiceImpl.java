@@ -76,20 +76,21 @@ public class PlayerServiceImpl implements PlayerService{
 	}
 
 	@Override
-	public PlayerResponseDTO getPlayerNextPrev(PlayerRequestDTO playerRequestDTO,Long currentMemberId, int dir) {
+	public PlayerResponseDTO getPlayerNextPrev(PlayerRequestDTO playerRequestDTO,Long currentMemberId) {
 		Lecture lecture = lectureRepository.findById(playerRequestDTO.getLectureId())
 				.orElseThrow(() -> new IllegalArgumentException("강의 찾을 수 없음"));
 		Course course = lecture.getCourse();
+		this.updatePlayerLatest(playerRequestDTO, currentMemberId);
 		int order = lecture.getLectureOrder();
 		
 		Lecture targetLecture = null;
 		
-		if(dir == 1) {
+		if(playerRequestDTO.getDir() == 2) {
 			targetLecture = lectureRepository.findByCourseIdAndLectureOrder(course.getId(), order+1)
 					.orElseThrow(() -> new IllegalArgumentException("다음 강의 없음"));
 		}
 		
-		else if(dir == 2) {
+		else if(playerRequestDTO.getDir() == 1) {
 			targetLecture = lectureRepository.findByCourseIdAndLectureOrder(course.getId(), order-1)
 					.orElseThrow(() -> new IllegalArgumentException("이전 강의 없음"));
 		}
@@ -105,7 +106,6 @@ public class PlayerServiceImpl implements PlayerService{
 	private PlayerResponseDTO convertToDTO(Lecture lecture, RegistLecture registLecture) {
 		PlayerResponseDTO dto = new PlayerResponseDTO();
 		
-		dto.setMemberId(registLecture.getMember().getId());
 		dto.setSavePoint(registLecture.getSavePoint());
 		dto.setRecentDate(registLecture.getRecentDate());
 		dto.setLectureId(lecture.getId());

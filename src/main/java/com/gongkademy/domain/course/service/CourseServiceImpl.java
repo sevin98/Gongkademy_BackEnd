@@ -1,5 +1,6 @@
 package com.gongkademy.domain.course.service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -280,10 +281,15 @@ public class CourseServiceImpl implements CourseService {
         List<Lecture> lectures = lectureRepository.findByCourseId(registCourse.getCourse().getId());
         
         for (Lecture lecture : lectures) {
-            RegistLecture registLecture = new RegistLecture();
-            registLecture.setLecture(lecture);
-            registLecture.setRegistCourse(registCourse);
-            registLecture.setMember(registCourse.getMember());
+        	RegistLecture registLecture = RegistLecture.builder()
+                    .savePoint(0L)
+                    .maxTime(0L)
+                    .complete(false)
+                    .recentDate(LocalDateTime.now())
+                    .lecture(lecture)
+                    .registCourse(registCourse)
+                    .member(registCourse.getMember())
+                    .build();
             
             registCourse.addRegistLecture(registLecture);
         }
@@ -340,12 +346,13 @@ public class CourseServiceImpl implements CourseService {
 		courseResponseDTO.setTitle(course.getTitle());
 		courseResponseDTO.setReviewCount(course.getReviewCount());
 		courseResponseDTO.setRegistCount(course.getRegistCount());
+		courseResponseDTO.setLectureCount(course.getLectureCount());
 		courseResponseDTO.setAvgRating(course.getAvgRating());
 		courseResponseDTO.setContent(course.getContent());
 		
 		// 강좌 대표 이미지 조회
 		String filename = course.getCourseImg().getSave_file();
-		courseResponseDTO.setFileUrl(fileService.getFileUrl(filename));
+		courseResponseDTO.setCourseImgAddress(filename);
 		
 		Boolean isRegistered = registCourseRepository.existsByMemberIdAndCourseId(memberId, course.getId());
 		courseResponseDTO.setIsRegistered(isRegistered);

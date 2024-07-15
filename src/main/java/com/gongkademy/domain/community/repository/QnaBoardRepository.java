@@ -12,7 +12,6 @@ import java.util.List;
 
 @Repository
 public interface QnaBoardRepository extends JpaRepository<QnaBoard, Long> {
-
-    Page<QnaBoard> findQnaBoardByTitleContainingOrContentContaining(String title, String content, Pageable pageable);
-    Page<QnaBoard> findAll(Pageable pageable);
+    Page<QnaBoard> findByBoardTypeAndTitleContainingOrContentContaining(BoardType boardType, String title, String content, Pageable pageable);
+    Page<QnaBoard> findByBoardType(BoardType boardType, Pageable pageable);
 }

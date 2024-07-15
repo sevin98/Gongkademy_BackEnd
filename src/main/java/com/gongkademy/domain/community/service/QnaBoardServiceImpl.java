@@ -2,6 +2,8 @@ package com.gongkademy.domain.community.service;
 
 import com.gongkademy.domain.community.dto.request.QnaBoardRequestDTO;
 import com.gongkademy.domain.community.dto.response.QnaBoardResponseDTO;
+import com.gongkademy.domain.community.entity.board.Board;
+import com.gongkademy.domain.community.entity.board.BoardType;
 import com.gongkademy.domain.community.entity.board.QnaBoard;
 import com.gongkademy.domain.community.entity.pick.Pick;
 import com.gongkademy.domain.community.entity.pick.PickType;
@@ -41,9 +43,9 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
         Page<QnaBoardResponseDTO> page;
         if (keyword == null) {
-            page = qnaBoardRepository.findAll(pageable).map(this::convertToDTO);
+            page = qnaBoardRepository.findByBoardType(BoardType.QNA, pageable).map(this::convertToDTO);
         } else {
-            page = qnaBoardRepository.findQnaBoardByTitleContainingOrContentContaining(keyword, keyword, pageable).map(this::convertToDTO);
+            page = qnaBoardRepository.findByBoardTypeAndTitleContainingOrContentContaining(BoardType.QNA, keyword, keyword, pageable).map(this::convertToDTO);
         }
 
         List<QnaBoardResponseDTO> qnaBoards = page.getContent();

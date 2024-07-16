@@ -3,6 +3,7 @@ package com.gongkademy.global.security.filter;
 import com.gongkademy.domain.member.dto.PrincipalDetails;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.redis.RedisUtil;
+import com.gongkademy.global.security.handler.OAuth2LoginSuccessHandler;
 import com.gongkademy.global.security.util.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -30,7 +31,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
     private final JWTUtil jwtUtil;
     private final RedisUtil redisUtil;
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
-
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     /**
      * 특정 경로에 대해 필터링을 제외하기 위한 메서드
      * @return 필터링을 제외할 경우 true 반환
@@ -70,6 +71,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                     log.info("refreshToken 존재, accessToken 재발급");
                     if (jwtUtil.isTokenValid(refreshToken.get())) {
                         String newAccessToken = jwtUtil.createAccessToken(memberId);
+                        oAuth2LoginSuccessHandler.addAccessTokenCookie(response, newAccessToken);
                         log.info("newAccessToken 재발급 완료" + newAccessToken);
                         saveAuthentication(memberId);
                     }

@@ -47,7 +47,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         response.sendRedirect(redirectUrl);
     }
 
-    private void addAccessTokenCookie(HttpServletResponse response, String accessToken) {
+    public void addAccessTokenCookie(HttpServletResponse response, String accessToken) {
         Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
         accessTokenCookie.setHttpOnly(true);
         accessTokenCookie.setSecure(true); // HTTPS를 사용하는 경우

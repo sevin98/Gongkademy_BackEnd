@@ -39,7 +39,7 @@ public class SecurityConfig {
     private final RedisUtil redisUtil;
     private final JWTUtil jwtUtil;
     private final OAuth2MemberService oAuth2MemberService;
-
+    private final OAuth2LoginSuccessHandler oauth2LoginSuccessHandler;
     private static final String FRONT_DEFAULT_URL = "http://localhost:3000";
 
     @Bean
@@ -75,7 +75,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 //JWT등을 사용할떄 SpringSecurity가 세션을 생성하지도않고, 기본것을 사용하지도 않게끔 STATELESS로 설정
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JWTCheckFilter(memberRepository, jwtUtil, redisUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JWTCheckFilter(memberRepository, jwtUtil, redisUtil, oauth2LoginSuccessHandler), UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         //로그인 성공하면 redirection될 기본 url
                         .defaultSuccessUrl(FRONT_DEFAULT_URL, true)

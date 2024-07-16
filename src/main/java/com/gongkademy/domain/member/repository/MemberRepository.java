@@ -18,6 +18,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("SELECT m.isNotificationEnabled FROM Member m WHERE m.id = :memberId")
     Boolean findIsNotificationEnabledById(@Param("memberId") Long id);
 
+    @EntityGraph(attributePaths = {"memberRoleList"})
     @Query("SELECT m FROM Member m WHERE m.email = :email ORDER BY m.createTime DESC LIMIT 1")
     Optional<Member> findRecentlyCreateMemberByEmail(@Param("email") String email);
 }

@@ -27,7 +27,7 @@ public interface MemberService {
                 .email(member.getEmail())
                 .birthday(member.getBirthday() != null ? member.getBirthday().toString() : null)
                 .agreeMarketing(member.getAgreeMarketing())
-                .member_role(member.getMemberRoleList().toString())
+                .memberRole(member.getMemberRoleList().toString())
                 .createTime(member.getCreateTime())
                 .isNotificationEnabled(member.isNotificationEnabled())
                 .build();

@@ -17,7 +17,7 @@ public class MemberInfoDTO {
     private String name;
     private String nickname;
     private String birthday;
-    private String member_role;
+    private String memberRole;
     private Boolean agreeMarketing;
     private LocalDateTime createTime;
     private boolean isNotificationEnabled;

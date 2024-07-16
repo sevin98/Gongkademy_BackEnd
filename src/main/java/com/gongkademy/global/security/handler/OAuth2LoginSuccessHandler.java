@@ -22,7 +22,7 @@ import java.io.IOException;
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private static final String SIGNUP_URL = "http://localhost:3000/signup";
-    private static final String MAIN_URL = "/";
+    private static final String MAIN_URL = "http://localhost:3000";
     private final JWTUtil jwtUtil;
 
     /**

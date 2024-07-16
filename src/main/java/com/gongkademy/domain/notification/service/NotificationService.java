@@ -12,5 +12,5 @@ public interface NotificationService {
     Notification createNotification(NotificationRequestDTO notificationRequestDTO);
     List<NotificationResponseDTO> getNotifications(Long memberId);
     NotificationResponseDTO getNotification(Long memberId, Long notificationId);
-    Long changeReadStatus(Long notificationId);
+    void changeReadStatus(Long notificationId);
 }

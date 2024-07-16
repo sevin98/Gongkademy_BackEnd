@@ -55,6 +55,9 @@ public enum ErrorCode {
     NOT_FOUND_NEXT_LECTURE(HttpStatus.BAD_REQUEST, "다음 강의가 없습니다."),
     NOT_FOUND_PREV_LECTURE(HttpStatus.BAD_REQUEST, "이전 강의가 없습니다."),
     NOT_FOUND_COURSE_NOTICE(HttpStatus.BAD_REQUEST, "공지사항이 존재하지 않습니다."),
+
+    // Notification 관련
+    INVALID_NOTIFICATION_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 알림 ID입니다."),
     ;
     private final HttpStatus httpStatus;
     private final String message;

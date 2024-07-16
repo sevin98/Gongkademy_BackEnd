@@ -7,6 +7,8 @@ import com.gongkademy.domain.notification.dto.response.NotificationResponseDTO;
 import com.gongkademy.domain.notification.entity.Notification;
 import com.gongkademy.domain.notification.entity.NotificationType;
 import com.gongkademy.domain.notification.repository.NotificationRepository;
+import com.gongkademy.global.exception.CustomException;
+import com.gongkademy.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -67,31 +69,22 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public NotificationResponseDTO getNotification(Long memberId, Long notificationId) {
-        Optional<Notification> notificationOptional = notificationRepository.findById(notificationId);
-        if (notificationOptional.isPresent()) {
-            Notification notification = notificationOptional.get();
-            return NotificationResponseDTO.builder()
-                    .notificationId(notification.getNotificationId())
-                    .receiver(memberId)
-                    .type(notification.getType())
-                    .articleId(notification.getArticleId())
-                    .message(notification.getMessage())
-                    .isRead(notification.isRead())
-                    .createDate(notification.getCreateTime())
-                    .build();
-        } else return null;
+        Notification notification = notificationRepository.findById(notificationId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_NOTIFICATION_ID));
+        return NotificationResponseDTO.builder()
+                .notificationId(notification.getNotificationId())
+                .receiver(memberId)
+                .type(notification.getType())
+                .articleId(notification.getArticleId())
+                .message(notification.getMessage())
+                .isRead(notification.isRead())
+                .createDate(notification.getCreateTime())
+                .build();
     }
 
 
     @Override
-    public Long changeReadStatus(Long notificationId) {
-        Optional<Notification> notificationOptional = notificationRepository.findById(notificationId);
-        if (notificationOptional.isEmpty()) return null;
-
-        Notification notification = notificationOptional.get();
+    public void changeReadStatus(Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_NOTIFICATION_ID));
         notification.changeReadStatus();
-        // TODO: JPA repository의 변경 감지를 이용하면 좋을 듯함
-//        notificationRepository.save(notification);
-        return notification.getNotificationId();
     }
 }

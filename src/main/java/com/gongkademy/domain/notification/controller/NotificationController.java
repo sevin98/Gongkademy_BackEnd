@@ -41,16 +41,13 @@ public class NotificationController {
     public ResponseEntity<?> getNotification(@AuthenticationPrincipal PrincipalDetails principalDetails,
                                                                    @PathVariable Long notificationId) {
         NotificationResponseDTO notification = notificationService.getNotification(principalDetails.getMemberId(), notificationId);
-        if (notification == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("알람 상세 조회 실패");
-        } else return ResponseEntity.ok(notification);
+        return ResponseEntity.ok(notification);
     }
 
     // 알림 읽음 상태 변경
     @PatchMapping("/notification/{notificationId}")
     public ResponseEntity<?> changeReadStatus(@PathVariable Long notificationId) {
-        Long id = notificationService.changeReadStatus(notificationId);
-        if (id == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("알람 읽음 상태 변경 실패");
-        else return ResponseEntity.status(HttpStatus.CREATED).body("알람 읽음 상태 변경 성공");
+        notificationService.changeReadStatus(notificationId);
+        return ResponseEntity.status(HttpStatus.CREATED).body("알람 읽음 상태 변경 성공");
     }
 }

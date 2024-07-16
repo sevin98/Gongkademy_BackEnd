@@ -25,7 +25,6 @@ import com.gongkademy.domain.course.entity.CourseLikeCateg;
 import com.gongkademy.domain.course.entity.CourseReview;
 import com.gongkademy.domain.course.entity.Lecture;
 import com.gongkademy.domain.course.entity.Notice;
-import com.gongkademy.domain.course.entity.PreCourse;
 import com.gongkademy.domain.course.entity.RegistCourse;
 import com.gongkademy.domain.course.entity.RegistLecture;
 import com.gongkademy.domain.course.entity.Scrap;
@@ -36,7 +35,6 @@ import com.gongkademy.domain.course.repository.CourseRepository;
 import com.gongkademy.domain.course.repository.CourseReviewRepository;
 import com.gongkademy.domain.course.repository.LectureRepository;
 import com.gongkademy.domain.course.repository.NoticeRepository;
-import com.gongkademy.domain.course.repository.PreCourseRepository;
 import com.gongkademy.domain.course.repository.RegistCourseRepository;
 import com.gongkademy.domain.course.repository.RegistLectureRepository;
 import com.gongkademy.domain.course.repository.ScrapRepository;
@@ -66,7 +64,6 @@ public class CourseServiceImpl implements CourseService {
 	private final CourseReviewRepository courseReviewRepository;
 	private final CourseCommentRepository courseCommentRepository;
 	private final S3FileService fileService;
-	private final PreCourseRepository preCourseRepository;
 	private final CourseFileRepository courseFileRepository;
 
 	private final int PAGE_SIZE = 10;
@@ -243,21 +240,13 @@ public class CourseServiceImpl implements CourseService {
 		CourseInfoResponseDTO courseInfoResponseDTO = new CourseInfoResponseDTO();
 		
 		// 선수과목
-		List<PreCourse> precourses = new ArrayList<>();
-		precourses = preCourseRepository.findByNextCourseId(courseId);
+		courseInfoResponseDTO.setPreCourses(course.getPreCourses());
 		
-		if(!precourses.isEmpty()) {
-			List<CourseInfoResponseDTO.PreCourseDTO> preCourseDTOs = precourses.stream()
-	                .map(preCourse -> new CourseInfoResponseDTO.PreCourseDTO(
-	                    preCourse.getPreCourse().getId(),
-	                    preCourse.getPreCourse().getTitle() 
-	                ))
-	                .collect(Collectors.toList());
-			courseInfoResponseDTO.setPreCourses(preCourseDTOs);
-		}
+		// 요약
+		courseInfoResponseDTO.setSummary(course.getSummary());
 		
-		// 소개,요약
-		courseInfoResponseDTO.setContent(course.getContent());
+		// 소개
+		courseInfoResponseDTO.setIntroduction(course.getIntroduction());
 
 		// 이미지 
 		Long thumbnailId = course.getCourseImg().getId();// 대표이미지 id
@@ -343,7 +332,7 @@ public class CourseServiceImpl implements CourseService {
 		courseResponseDTO.setRegistCount(course.getRegistCount());
 		courseResponseDTO.setLectureCount(course.getLectureCount());
 		courseResponseDTO.setAvgRating(course.getAvgRating());
-		courseResponseDTO.setContent(course.getContent());
+		courseResponseDTO.setSummary(course.getSummary());
 		
 		// 강좌 대표 이미지 조회
 		String filename = course.getCourseImg().getSaveFile();

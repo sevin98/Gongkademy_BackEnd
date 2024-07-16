@@ -19,7 +19,7 @@ public class CourseResponseDTO {
 	private Long reviewCount;
 	private Long registCount;
 	private Long lectureCount;
-	private String content;
+	private String summary;
 	
 	// 해당 강좌 수강&저장 여부
 	private Boolean isRegistered;

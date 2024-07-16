@@ -11,18 +11,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CourseInfoResponseDTO {
-	
-	@Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-	public static class PreCourseDTO{
-		private Long id;
-		private String title;
-	}
-	
-	 // 선수과목,강의 소개,사진
-	private List<PreCourseDTO> preCourses;
-	private String content;
+
+	 // 요약, 선수과목,강의 소개,사진
+	private String summary;
+	private String preCourses;
+	private String introduction;
 	private List<String> fileUrls;
 }

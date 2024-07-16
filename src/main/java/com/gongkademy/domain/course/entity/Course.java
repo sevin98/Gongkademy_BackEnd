@@ -35,7 +35,12 @@ public class Course {
 	
 	private Long lectureCount;
 
-	private String content;
+	private String summary;
+
+	private String preCourses;
+
+	@Column(columnDefinition = "LONGTEXT")
+	private String introduction;
 	
 	private CourseStatus status;
 
@@ -89,7 +94,6 @@ public class Course {
 		this.updateReviewCount();
 		this.updateAvgRating();
 	}
-	
 	// 강의파일(대표이미지, 강의자료) add
 	public void addCourseFile(CourseFile courseFile) {
 	    this.courseFiles.add(courseFile);
@@ -104,7 +108,6 @@ public class Course {
 				.findFirst()
 				.orElse(null);
 	}
-
 	// 강의 자료 가져오기
 	public CourseFile getCourseNote() {
 		return courseFiles.stream()

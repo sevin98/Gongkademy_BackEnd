@@ -16,8 +16,6 @@ public class CourseCommentRequestDTO {
 	private Long courseReviewId;
     private Long noticeId;
     private CommentCateg commentType;
-    private Long memberId;
-	private String nickname;
-	private String content;
-	private Long likeCount;
+	private String content = null;
+	private Long likeCount = 0L;
 }

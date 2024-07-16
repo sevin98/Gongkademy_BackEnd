@@ -35,14 +35,10 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 	
 	@Override
 	public CourseCommentResponseDTO createComment(CourseCommentRequestDTO courseCommentRequestDTO, Long currentMemberId) {
-		CourseComment comment = convertToEntity(courseCommentRequestDTO);
+		CourseComment comment = convertToEntity(courseCommentRequestDTO, currentMemberId);
 		
-		// 요청 사용자 == 로그인 사용자 확인
-        if (!comment.getMember().getId().equals(currentMemberId)) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
-		
-		Member member = memberRepository.findById(currentMemberId).get();
+		Member member = memberRepository.findById(currentMemberId)
+				.orElseThrow();
 		comment.setMember(member); //댓글 작성자 = 현재이용자
 		member.addCourseComment(comment);
 		
@@ -55,8 +51,8 @@ public class CourseCommentServiceImpl implements CourseCommentService {
         	Notice notice = comment.getNotice();
         	notice.addCourseComment(comment);
         }
-        
-        return convertToDTO(comment);
+		CourseComment saveComment = courseCommentRepository.save(comment);
+        return convertToDTO(saveComment);
 	}
 
 	@Override
@@ -81,7 +77,11 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<CourseCommentResponseDTO> getAllComments(CommentCateg categ, Long id) {
-        List<CourseComment> comments = courseCommentRepository.findAllByCommentCategAndId(categ, id);
+		List<CourseComment> comments = new ArrayList<>();
+		
+		if(categ == CommentCateg.NOTICE) comments = courseCommentRepository.findAllByCommentCategAndNoticeId(categ, id);
+		else if(categ == CommentCateg.REVIEW) comments = courseCommentRepository.findAllByCommentCategAndCourseReviewId(categ, id);
+
         List<CourseCommentResponseDTO> courseCommentResponseDTOs = new ArrayList<>();
         for (CourseComment comment : comments) {
         	courseCommentResponseDTOs.add(convertToDTO(comment));
@@ -109,7 +109,7 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 		}
 	}
 	
-    private CourseComment convertToEntity(CourseCommentRequestDTO courseCommentRequestDTO) {
+    private CourseComment convertToEntity(CourseCommentRequestDTO courseCommentRequestDTO, Long memberId) {
     	CourseComment comment = new CourseComment();
     	
     	if(courseCommentRequestDTO.getCommentType()==CommentCateg.REVIEW) {
@@ -129,13 +129,13 @@ public class CourseCommentServiceImpl implements CourseCommentService {
     		}
     	}
         comment.setCommentCateg(courseCommentRequestDTO.getCommentType());
-        Optional<Member> memberOptional = memberRepository.findById(courseCommentRequestDTO.getMemberId());
+        Optional<Member> memberOptional = memberRepository.findById(memberId);
         if (memberOptional.isPresent()) {
            comment.setMember(memberOptional.get());
+		   comment.setNickname(memberOptional.get().getNickname());
         } else {
             throw new IllegalStateException("사용자 찾을 수 없음");
         }
-    	comment.setNickname(courseCommentRequestDTO.getNickname());
     	comment.setContent(courseCommentRequestDTO.getContent());
     	comment.setLikeCount(courseCommentRequestDTO.getLikeCount());
         return comment;
@@ -143,10 +143,12 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 
     private CourseCommentResponseDTO convertToDTO(CourseComment comment) {
     	CourseCommentResponseDTO courseCommentResponseDTO = new CourseCommentResponseDTO();
-    	courseCommentResponseDTO.setCourseCommentId(comment.getId());
-    	courseCommentResponseDTO.setCourseReviewId(comment.getCourseReview().getId());
-    	courseCommentResponseDTO.setNoticeId(comment.getNotice().getId());
-    	courseCommentResponseDTO.setCommentCateg(comment.getCommentCateg());
+		courseCommentResponseDTO.setCommentCateg(comment.getCommentCateg());
+		if(comment.getCommentCateg() == CommentCateg.NOTICE)
+			courseCommentResponseDTO.setNoticeId(comment.getNotice().getId());
+		else if(comment.getCommentCateg() == CommentCateg.REVIEW)
+			courseCommentResponseDTO.setCourseReviewId(comment.getCourseReview().getId());
+		courseCommentResponseDTO.setCourseCommentId(comment.getId());
     	courseCommentResponseDTO.setMemberId(comment.getMember().getId());
     	courseCommentResponseDTO.setNickname(comment.getNickname());
     	courseCommentResponseDTO.setContent(comment.getContent());

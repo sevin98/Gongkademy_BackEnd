@@ -39,22 +39,26 @@ public class CourseCommentController {
     
     // 댓글 수정
     @PatchMapping("/{id}")
-    public ResponseEntity<?> updateComment(@PathVariable Long id, @RequestBody CourseCommentRequestDTO courseCommentRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public ResponseEntity<?> updateComment(@PathVariable("id") Long id, @RequestBody CourseCommentRequestDTO courseCommentRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
     	Long currentMemberId = principalDetails.getMemberId();
     	CourseCommentResponseDTO courseCommentResponseDTO = courseCommentService.updateComment(id, courseCommentRequestDTO, currentMemberId);
         return ResponseEntity.ok(courseCommentResponseDTO);
     }
 
     // 카테고리(리뷰, 공지사항)의 글 ID에 해당하는 댓글 모두 반환
-    @GetMapping("/{categ}/{id}")
-    public ResponseEntity<List<CourseCommentResponseDTO>> getAllComments(@PathVariable("categ") CommentCateg categ, @PathVariable("id") Long id) {
+    @GetMapping
+    public ResponseEntity<List<CourseCommentResponseDTO>> getAllComments(@RequestBody CourseCommentRequestDTO courseCommentRequestDTO) {
+        CommentCateg categ = courseCommentRequestDTO.getCommentType();
+        Long id = 0L;
+        if(categ == CommentCateg.NOTICE) id = courseCommentRequestDTO.getNoticeId();
+        else if(categ == CommentCateg.REVIEW) id = courseCommentRequestDTO.getCourseReviewId();
         List<CourseCommentResponseDTO> courseCommentResponseDTOs = courseCommentService.getAllComments(categ, id);
         return ResponseEntity.ok(courseCommentResponseDTOs);
     }
     
     // 댓글 삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteComment(@PathVariable Long id, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public ResponseEntity<?> deleteComment(@PathVariable("id") Long id, @AuthenticationPrincipal PrincipalDetails principalDetails) {
     	Long currentMemberId = principalDetails.getMemberId(); 
     	courseCommentService.deleteComment(id, currentMemberId);
         return ResponseEntity.noContent().build();

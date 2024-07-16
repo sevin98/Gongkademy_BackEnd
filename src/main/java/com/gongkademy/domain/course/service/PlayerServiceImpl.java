@@ -33,10 +33,10 @@ public class PlayerServiceImpl implements PlayerService{
 	public PlayerResponseDTO getPlayerLatestCourse(Long courseId, Long memberId) {				
 		// 수강 강의 중 가장 최근 수강 강의 조회
 		RegistCourse registCourse = registCourseRepository.findByCourseIdAndMemberId(courseId, memberId)
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_REGIST_COURSE_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REGIST_LECTURE));
 		RegistLecture registLectureLatest = registLectureRepository.findTopByRegistCourseIdOrderByRecentDateDescLectureLectureOrderAsc(registCourse.getId()).get();
 		Lecture lecture = lectureRepository.findById(registLectureLatest.getLecture().getId())
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_LECTURE_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_LECTURE));
 		
 		PlayerResponseDTO playerResponseDTO = this.convertToDTO(lecture, registLectureLatest);
 		
@@ -47,10 +47,10 @@ public class PlayerServiceImpl implements PlayerService{
 	public PlayerResponseDTO getPlayerLatestLecture(Long lectureId, Long memberId) {				
 		// 수강 강의 중 가장 최근 수강 강의 조회
 		RegistLecture registLectureLatest = registLectureRepository.findByLectureIdAndMemberId(lectureId, memberId)
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_REGIST_LECTURE_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REGIST_LECTURE));
 
 		Lecture lecture = lectureRepository.findById(registLectureLatest.getLecture().getId())
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_LECTURE_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_LECTURE));
 		
 		PlayerResponseDTO playerResponseDTO = this.convertToDTO(lecture, registLectureLatest);
 		
@@ -61,13 +61,13 @@ public class PlayerServiceImpl implements PlayerService{
 	public void updatePlayerLatest(PlayerRequestDTO playerRequestDTO, Long memberId) {
 		Long lectureId = playerRequestDTO.getLectureId();
 		RegistLecture registLecture = registLectureRepository.findByLectureIdAndMemberId(lectureId, memberId)
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_REGIST_LECTURE_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REGIST_LECTURE));
 
 		registLecture.updateSavePoint(playerRequestDTO.getSavePoint());
 		registLecture.updateRegistCourse();
 		
 		Lecture lecture = lectureRepository.findById(lectureId)
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_LECTURE_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_LECTURE));
 		
 		if(lecture.getTime() == registLecture.getSavePoint()) registLecture.updateComplete();
 		
@@ -77,7 +77,7 @@ public class PlayerServiceImpl implements PlayerService{
 	@Override
 	public PlayerResponseDTO getPlayerNextPrev(PlayerRequestDTO playerRequestDTO,Long currentMemberId) {
 		Lecture lecture = lectureRepository.findById(playerRequestDTO.getLectureId())
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_LECTURE_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_LECTURE));
 		Course course = lecture.getCourse();
 		this.updatePlayerLatest(playerRequestDTO, currentMemberId);
 		int order = lecture.getLectureOrder();
@@ -86,16 +86,16 @@ public class PlayerServiceImpl implements PlayerService{
 		
 		if(playerRequestDTO.getDir() == 2) {
 			targetLecture = lectureRepository.findByCourseIdAndLectureOrder(course.getId(), order+1)
-					.orElseThrow(() -> new CustomException(ErrorCode.EMPTY_NEXT_LECTURE));
+					.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_NEXT_LECTURE));
 		}
 		
 		else if(playerRequestDTO.getDir() == 1) {
 			targetLecture = lectureRepository.findByCourseIdAndLectureOrder(course.getId(), order-1)
-					.orElseThrow(() -> new CustomException(ErrorCode.EMPTY_PREV_LECTURE));
+					.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PREV_LECTURE));
 		}
 		
 		RegistLecture registNextLecture = registLectureRepository.findByLectureIdAndMemberId(targetLecture.getId(), currentMemberId)
-					.orElseThrow(() -> new CustomException(ErrorCode.INVALID_REGIST_LECTURE_ID));
+					.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REGIST_LECTURE));
 
 		PlayerResponseDTO playerResponseDTO = this.convertToDTO(targetLecture, registNextLecture);
 

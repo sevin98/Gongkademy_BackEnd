@@ -71,7 +71,7 @@ public class CourseCommentServiceImpl implements CourseCommentService {
             return convertToDTO(comment);
         }
 
-        throw new IllegalStateException("댓글을 찾을 수 없음");
+        throw new CustomException(ErrorCode.NOT_FOUND_COURSE_COMMENT);
 	}
 	
 	@Override
@@ -117,7 +117,7 @@ public class CourseCommentServiceImpl implements CourseCommentService {
     		if (reviewOptional.isPresent()) {
     			comment.setCourseReview(reviewOptional.get());
     		} else {
-    			throw new IllegalStateException("리뷰 찾을 수 없음");
+    			throw new CustomException(ErrorCode.NOT_FOUND_COURSE_REVIEW);
     		}
     	}
     	if(courseCommentRequestDTO.getCommentType()==CommentCateg.NOTICE) {
@@ -125,7 +125,7 @@ public class CourseCommentServiceImpl implements CourseCommentService {
     		if (noticeOptional.isPresent()) {
     			comment.setNotice(noticeOptional.get());
     		} else {
-    			throw new IllegalStateException("공지사항 찾을 수 없음");
+    			throw new CustomException(ErrorCode.NOT_FOUND_COURSE_NOTICE);
     		}
     	}
         comment.setCommentCateg(courseCommentRequestDTO.getCommentType());
@@ -134,7 +134,7 @@ public class CourseCommentServiceImpl implements CourseCommentService {
            comment.setMember(memberOptional.get());
 		   comment.setNickname(memberOptional.get().getNickname());
         } else {
-            throw new IllegalStateException("사용자 찾을 수 없음");
+			throw new CustomException(ErrorCode.NOT_FOUND_MEMBER);
         }
     	comment.setContent(courseCommentRequestDTO.getContent());
     	comment.setLikeCount(courseCommentRequestDTO.getLikeCount());

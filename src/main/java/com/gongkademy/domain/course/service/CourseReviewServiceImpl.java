@@ -48,7 +48,7 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 		if(courseReviewRepository.existsByCourseIdAndMemberId(courseReviewRequestDTO.getCourseId(), currentMemberId))
 			throw new CustomException(ErrorCode.DUPLICATE_COURSE_REVIEW);
 		Course course = courseRepository.findById(courseReviewRequestDTO.getCourseId())
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_COURSE_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
 		course.addReview(review);
 		CourseReview saveReview =courseReviewRepository.save(review);
 		return convertToDTO(saveReview);
@@ -57,7 +57,7 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 	@Override
 	public CourseReviewResponseDTO updateReview(Long id, CourseReviewRequestDTO courseReviewRequestDTO, Long currentMemberId) {
 		CourseReview review = courseReviewRepository.findById(id)
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_COURSE_REVIEW_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE_REVIEW));
 		
         // 리뷰: 평점, 내용만 수정 가능
 		review.setRating(courseReviewRequestDTO.getRating());
@@ -65,7 +65,7 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 		CourseReview saveReview = courseReviewRepository.save(review);
 		
 		Course course = courseRepository.findById(courseReviewRequestDTO.getCourseId())
-				.orElseThrow(() -> new  CustomException(ErrorCode.INVALID_COURSE_ID));
+				.orElseThrow(() -> new  CustomException(ErrorCode.NOT_FOUND_COURSE));
 		course.updateAvgRating();
 		
 		return convertToDTO(saveReview);
@@ -86,7 +86,7 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 	@Transactional
 	public void deleteReview(Long id, Long currentMemberId) {
 		CourseReview review = courseReviewRepository.findById(id)
-					.orElseThrow(() -> new CustomException(ErrorCode.INVALID_COURSE_REVIEW_ID));
+					.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE_REVIEW));
 
 		Course course = review.getCourse();
 		course.deleteReview(review);
@@ -109,7 +109,7 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 		if (courseOptional.isPresent()) {
 			review.setCourse(courseOptional.get());
 		} else {
-			throw new CustomException(ErrorCode.INVALID_COURSE_ID);
+			throw new CustomException(ErrorCode.NOT_FOUND_COURSE);
 		}
 
 		Optional<Member> memberOptional = memberRepository.findById(memberId);
@@ -117,7 +117,7 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 			review.setMember(memberOptional.get());
 			review.setNickname(member.get().getNickname());
 		} else {
-			throw new CustomException(ErrorCode.INVALID_MEMBER_ID);
+			throw new CustomException(ErrorCode.NOT_FOUND_MEMBER);
 		}
 		return review;
 	}

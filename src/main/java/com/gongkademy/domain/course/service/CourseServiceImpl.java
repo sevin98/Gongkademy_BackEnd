@@ -92,7 +92,7 @@ public class CourseServiceImpl implements CourseService {
 		
 		for(RegistCourse registCourse : registCourses) {
 			Course course = courseRepository.findById(registCourse.getCourse().getId())
-					.orElseThrow(() -> new CustomException(ErrorCode.INVALID_COURSE_ID));
+					.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
 
             CourseResponseDTO dto = this.convertToDTO(course, memberId);
 			dto.setIsRegistered(true);
@@ -109,7 +109,7 @@ public class CourseServiceImpl implements CourseService {
 		
 		for(RegistCourse registCourse : registCourses) {
 			Course course = courseRepository.findById(registCourse.getCourse().getId())
-					.orElseThrow(() -> new CustomException(ErrorCode.INVALID_COURSE_ID));
+					.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
 
             CourseResponseDTO dto = this.convertToDTO(course, memberId);
 			dto.setIsRegistered(true);
@@ -142,9 +142,9 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public CourseResponseDTO registCourse(Long courseId, Long memberId) {               
         Member member = memberRepository.findById(memberId)
-        		.orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+        		.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
         Course course = courseRepository.findById(courseId)
-        		.orElseThrow(() ->new CustomException(ErrorCode.INVALID_COURSE_ID));
+        		.orElseThrow(() ->new CustomException(ErrorCode.NOT_FOUND_COURSE));
         
         Optional<RegistCourse> check = registCourseRepository.findByCourseIdAndMemberId(courseId, memberId);
         
@@ -165,10 +165,10 @@ public class CourseServiceImpl implements CourseService {
 	@Override
 	public CourseResponseDTO scrapCourse(Long courseId, Long memberId) {
         Member member = memberRepository.findById(memberId)
-        		.orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+        		.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
 
         Course course = courseRepository.findById(courseId)
-        		.orElseThrow(() -> new CustomException(ErrorCode.INVALID_COURSE_ID));
+        		.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
 		Boolean isSaved = scrapRepository.existsByMemberIdAndCourseId(memberId, course.getId());
 		
 		CourseResponseDTO dto = this.convertToDTO(course,memberId);
@@ -192,17 +192,17 @@ public class CourseServiceImpl implements CourseService {
 	@Transactional
 	public void deleteRegistCourse(Long courseId, Long memberId) {		
 		RegistCourse registCourse = registCourseRepository.findByCourseIdAndMemberId(courseId, memberId)
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_REGIST_COURSE_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REGIST_COURSE));
 		
         Course course = courseRepository.findById(courseId)
-        		.orElseThrow(() -> new CustomException(ErrorCode.INVALID_COURSE_ID));
+        		.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
 		course.deleteRegist(registCourse);
 	}
 	
 	@Override
 	public Map<String, byte[]> downloadCourseNote(Long courseId) {
 		Course course = courseRepository.findById(courseId)
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_REGIST_COURSE_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REGIST_COURSE));
 		CourseFile courseNote = course.getCourseNote();
 
 		Map<String, byte[]> file = new HashMap<>();
@@ -216,7 +216,7 @@ public class CourseServiceImpl implements CourseService {
 	@Override
 	public CourseResponseDTO getCourseDetail(Long courseId, Long memberId) {
 		Course course = courseRepository.findById(courseId)
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_COURSE_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
 
 		CourseResponseDTO courseResponseDTO = this.convertToDTO(course, memberId);
 		return courseResponseDTO;
@@ -239,7 +239,7 @@ public class CourseServiceImpl implements CourseService {
 	@Override
 	public CourseInfoResponseDTO getCourseInfo(Long courseId) {
 		Course course = courseRepository.findById(courseId)
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_COURSE_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
 		CourseInfoResponseDTO courseInfoResponseDTO = new CourseInfoResponseDTO();
 		
 		// 선수과목
@@ -293,12 +293,12 @@ public class CourseServiceImpl implements CourseService {
 	@Override
 	public CourseLikeResponseDTO like(CourseLikeRequestDTO courseLikeRequestDTO, Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
 		
         // 강의평 좋아요
 		if(courseLikeRequestDTO.getLikeCateg()== CourseLikeCateg.REVIEW) {
 	        CourseReview review = courseReviewRepository.findById(courseLikeRequestDTO.getCourseReviewId())
-	                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_COURSE_REVIEW_ID));
+	                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE_REVIEW));
 			
 	        Optional<CourseLike> likeOptional = courseLikeRepository.findByMemberIdAndCourseReviewId(member.getId(), courseLikeRequestDTO.getCourseReviewId());
 
@@ -316,7 +316,7 @@ public class CourseServiceImpl implements CourseService {
 		// 댓글 좋아요
 		else if(courseLikeRequestDTO.getLikeCateg()== CourseLikeCateg.COMMENT) {
 	        CourseComment comment = courseCommentRepository.findById(courseLikeRequestDTO.getCourseCommentId())
-	                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_COURSE_COMMENT_ID));
+	                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE_COMMENT));
 	        
 	        Optional<CourseLike> likeOptional = courseLikeRepository.findByMemberIdAndCourseCommentId(member.getId(), courseLikeRequestDTO.getCourseCommentId());
 
@@ -370,10 +370,10 @@ public class CourseServiceImpl implements CourseService {
 
 	private RegistCourse converToEntityRegistCourse(Long courseId, Long memberId) {
 		Course course = courseRepository.findById(courseId)
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_COURSE_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
 		
 		Member member = memberRepository.findById(memberId)
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
 		
 	    RegistCourse registCourse = RegistCourse.builder()
                 .course(course)
@@ -388,10 +388,10 @@ public class CourseServiceImpl implements CourseService {
 	
 	private Scrap convertToEntityScrap(Long courseId, Long memberId) {
 		Course course = courseRepository.findById(courseId)
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_COURSE_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
 		
 		Member member = memberRepository.findById(memberId)
-				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
 		
 		Scrap scrap = new Scrap();
 		scrap.setCourse(course);
@@ -409,7 +409,7 @@ public class CourseServiceImpl implements CourseService {
     		if (reviewOptional.isPresent()) {
     			like.setCourseReview(reviewOptional.get());
     		} else {
-    			throw new CustomException(ErrorCode.INVALID_COURSE_REVIEW_ID);
+    			throw new CustomException(ErrorCode.NOT_FOUND_COURSE_REVIEW);
     		}
     	}
         
@@ -418,7 +418,7 @@ public class CourseServiceImpl implements CourseService {
     		if (commentOptional.isPresent()) {
     			like.setCourseComment(commentOptional.get());
     		} else {
-    			throw new CustomException(ErrorCode.INVALID_COURSE_COMMENT_ID);
+    			throw new CustomException(ErrorCode.NOT_FOUND_COURSE_COMMENT);
     		}
     	}
         
@@ -426,7 +426,7 @@ public class CourseServiceImpl implements CourseService {
         if (memberOptional.isPresent()) {
         	like.setMember(memberOptional.get());
         } else {
-            throw new CustomException(ErrorCode.INVALID_MEMBER_ID);
+            throw new CustomException(ErrorCode.NOT_FOUND_MEMBER);
         }
         
         return like;

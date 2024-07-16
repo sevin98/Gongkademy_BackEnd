@@ -16,6 +16,8 @@ public enum ErrorCode {
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "중복된 이메일입니다."),
     INVALID_MEMBER_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 회원 아이디입니다."),
 
+    NOT_FOUND_MEMBER(HttpStatus.BAD_REQUEST, "회원이 존재하지 않습니다."),
+
     //JWT
     JWT_MALFORMED(HttpStatus.UNAUTHORIZED, "손상된 토큰입니다."),
     JWT_HEADER_STRING(HttpStatus.UNAUTHORIZED, "토큰 헤더의 문자열이 이상합니다."),
@@ -44,14 +46,15 @@ public enum ErrorCode {
 
     // Course 관련
     DUPLICATE_COURSE_REVIEW(HttpStatus.CONFLICT, "이미 작성한 수강평이 있습니다."),
-    INVALID_COURSE_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 강좌 ID입니다."),
-    INVALID_COURSE_REVIEW_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 수강평 ID입니다."),
-    INVALID_REGIST_COURSE_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 수강 강좌 ID입니다."),
-    INVALID_REGIST_LECTURE_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 수강 강의 ID입니다."),
-    INVALID_LECTURE_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 강의 ID입니다."),
-    INVALID_COURSE_COMMENT_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 강의 댓글 ID입니다."),
-    EMPTY_NEXT_LECTURE(HttpStatus.BAD_REQUEST, "다음 강의가 없습니다."),
-    EMPTY_PREV_LECTURE(HttpStatus.BAD_REQUEST, "이전 강의가 없습니다."),
+    NOT_FOUND_COURSE(HttpStatus.BAD_REQUEST, "강좌가 존재하지 않습니다."),
+    NOT_FOUND_COURSE_REVIEW(HttpStatus.BAD_REQUEST, "수강평이 존재하지 않습니다."),
+    NOT_FOUND_REGIST_COURSE(HttpStatus.BAD_REQUEST, "수강강좌가 존재하지 않습니다."),
+    NOT_FOUND_REGIST_LECTURE(HttpStatus.BAD_REQUEST, "수강강의가 존재하지 않습니다"),
+    NOT_FOUND_LECTURE(HttpStatus.BAD_REQUEST, "강의가 존재하지 않습니다."),
+    NOT_FOUND_COURSE_COMMENT(HttpStatus.BAD_REQUEST, "댓글이 존재하지않습니다."),
+    NOT_FOUND_NEXT_LECTURE(HttpStatus.BAD_REQUEST, "다음 강의가 없습니다."),
+    NOT_FOUND_PREV_LECTURE(HttpStatus.BAD_REQUEST, "이전 강의가 없습니다."),
+    NOT_FOUND_COURSE_NOTICE(HttpStatus.BAD_REQUEST, "공지사항이 존재하지 않습니다."),
     ;
     private final HttpStatus httpStatus;
     private final String message;

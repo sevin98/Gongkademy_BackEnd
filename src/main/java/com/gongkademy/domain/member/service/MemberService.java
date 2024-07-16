@@ -10,10 +10,10 @@ import java.time.format.DateTimeFormatter;
 
 public interface MemberService {
     MemberInfoDTO getMemberInfo(long id);
-    Long joinMember(long id, MemberSignUpDTO dto);
-    Long modifyMember(long id, MemberUpdateDTO dto);
-    Long deleteMember(long id);
-    Long changeNotificationEnabledStatus(long id);
+    void joinMember(long id, MemberSignUpDTO dto);
+    void modifyMember(long id, MemberUpdateDTO dto);
+    void deleteMember(long id);
+    void changeNotificationEnabledStatus(long id);
 
     /**
      * 회원 엔티티를 회원 정보 DTO로 변환.

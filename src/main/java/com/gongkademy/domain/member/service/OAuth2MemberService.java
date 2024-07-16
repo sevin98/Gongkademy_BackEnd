@@ -4,6 +4,8 @@ import com.gongkademy.domain.member.dto.PrincipalDetails;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.entity.MemberRole;
 import com.gongkademy.domain.member.repository.MemberRepository;
+import com.gongkademy.global.exception.CustomException;
+import com.gongkademy.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -68,7 +70,7 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
                 //탈퇴시간 검사
                 if (monthsBetween < 1) {
                     log.info("현재 회원의 monthsBetween값 : " + monthsBetween);
-                    throw new IllegalStateException("탈퇴 후 1달이 지나야 재가입이 가능합니다.");
+                    throw new CustomException(ErrorCode.REJOIN_AFTER_ONE_MONTH);
                 } else {
                     log.info("getMember() : 같은 이메일의 탈퇴했지만 한달 지난 회원 존재");
                     //한 달 지났다면 재가입

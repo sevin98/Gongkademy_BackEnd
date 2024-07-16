@@ -6,6 +6,8 @@ import com.gongkademy.domain.member.dto.MemberUpdateDTO;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.entity.MemberRole;
 import com.gongkademy.domain.member.repository.MemberRepository;
+import com.gongkademy.global.exception.CustomException;
+import com.gongkademy.global.exception.ErrorCode;
 import com.gongkademy.global.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -31,8 +33,7 @@ public class MemberServiceImpl implements MemberService{
      */
     @Override
     public MemberInfoDTO getMemberInfo(long id) {
-        Member member = memberRepository.findById(id).orElseThrow(IllegalArgumentException::new);
-        //TODO: 회원 못찾으면 예외처리
+        Member member = memberRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
         return entityToMemberInfoDTO(member);
     }
 
@@ -42,19 +43,13 @@ public class MemberServiceImpl implements MemberService{
      * @return 회원 ID
      */
     @Override
-    public Long joinMember(long id, MemberSignUpDTO memberSignUpDTO) {
-        Optional<Member> optMember = memberRepository.findById(id);
-
-        if (optMember.isEmpty()) return null;
-
-        Member member = optMember.get();
+    public void joinMember(long id, MemberSignUpDTO memberSignUpDTO) {
+        Member member = memberRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
         member.addRole(MemberRole.USER);
         member.signup(memberSignUpDTO);
 
         String refreshToken = jwtUtil.createRefreshToken(member.getId());
         jwtUtil.setRefreshToken(member.getId(), refreshToken);
-
-        return member.getId();
     }
 
     /**
@@ -63,15 +58,9 @@ public class MemberServiceImpl implements MemberService{
      * @return 회원 ID
      */
     @Override
-    public Long modifyMember(long id, MemberUpdateDTO memberUpdateDTO) {
-        Optional<Member> optMember = memberRepository.findById(id);
-
-        if (optMember.isEmpty()) return null;
-
-        Member member = optMember.get();
+    public void modifyMember(long id, MemberUpdateDTO memberUpdateDTO) {
+        Member member = memberRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
         member.update(memberUpdateDTO);
-
-        return member.getId();
     }
 
     /**
@@ -80,28 +69,20 @@ public class MemberServiceImpl implements MemberService{
      * @return memberId
      */
     @Override
-    public Long deleteMember(long id) {
-        Optional<Member> memberOptional = memberRepository.findById(id);
-        Member member;
-        if (memberOptional.isPresent()) member = memberOptional.get();
-        else return null;
+    public void deleteMember(long id) {
+        Member member = memberRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
         // 닉네임 -> 탈퇴회원
         // 탈퇴여부 -> true
         // 탈퇴시간 -> now()
         member.deleteMember(DELETE_NICKNAME + member.getId());
         log.info("탈퇴후 멤버의 닉네임 : "+ member.getNickname());
-        return member.getId();
     }
 
     @Override
-    public Long changeNotificationEnabledStatus(long id) {
-        Optional<Member> memberOptional = memberRepository.findById(id);
-        if (memberOptional.isEmpty()) return null;
-
-        Member member = memberOptional.get();
+    public void changeNotificationEnabledStatus(long id) {
+        Member member = memberRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
         member.changeIsNotificationEnabled();
-        return member.getId();
     }
 
 

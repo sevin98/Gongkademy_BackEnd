@@ -13,8 +13,8 @@ public enum ErrorCode {
 
     //Member
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "중복된 닉네임입니다."),
-    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "중복된 이메일입니다."),
     INVALID_MEMBER_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 회원 아이디입니다."),
+    REJOIN_AFTER_ONE_MONTH(HttpStatus.FORBIDDEN, "탈퇴 후 한 달이 지나야 재가입이 가능합니다."),
 
     NOT_FOUND_MEMBER(HttpStatus.BAD_REQUEST, "회원이 존재하지 않습니다."),
 

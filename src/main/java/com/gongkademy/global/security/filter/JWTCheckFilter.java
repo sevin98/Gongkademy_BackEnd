@@ -1,11 +1,9 @@
 package com.gongkademy.global.security.filter;
 
 import com.gongkademy.domain.member.dto.PrincipalDetails;
-import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.redis.RedisUtil;
 import com.gongkademy.global.security.util.JWTUtil;
-import com.google.gson.Gson;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,18 +18,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Map;
 import java.util.Optional;
 
-import static com.gongkademy.global.exception.ErrorCode.JWT_EXPIRED;
-import static com.gongkademy.global.exception.ErrorCode.JWT_INVALID;
 
 @Log4j2
 @RequiredArgsConstructor
 public class JWTCheckFilter extends OncePerRequestFilter {
 
-//나중에 loginUrl 커스텀하면 여기도 바꿔야함
 //    private static final String NO_CHECK_URL = "/login";
     private final MemberRepository memberRepository;
     private final JWTUtil jwtUtil;
@@ -60,31 +53,36 @@ public class JWTCheckFilter extends OncePerRequestFilter {
 
         //accessToken 처리
         String accessToken = jwtUtil.extractToken(request).get();
+        log.info("accessToken : " + accessToken);
+        //access 토큰검증
+        if (jwtUtil.isTokenValid(accessToken)) {
+            log.info("accessToken 검증 완료, 유효함");
+            //검증한 토큰이 만료
+            if(jwtUtil.isExpired(accessToken)) {
+                log.info("accessToken 검증 완료 2, 만료됨");
+                long memberId = jwtUtil.extractMemberId(accessToken).get();
+                // Refresh Token 처리 로직 추가
+                //memberId로 refreshToken 가져옴
+                Optional<String> refreshToken = jwtUtil.getRefreshToken(memberId);
 
-            //access 토큰검증
-            if (jwtUtil.isTokenValid(accessToken)) {
-                //검증한 토큰이 만료
-                if(jwtUtil.isExpired(accessToken)) {
-                    long memberId = jwtUtil.extractMemberId(accessToken).get();
-                    // Refresh Token 처리 로직 추가
-                    //memberId로 refreshToken 가져옴
-                    Optional<String> refreshToken = jwtUtil.getRefreshToken(memberId);
-
-                    //refreshToken 유효성 검증 , 유효한 토큰이라면 accessToken 재발급
-                    if (refreshToken.isPresent()) {
-                        if (jwtUtil.isTokenValid(refreshToken.get())) {
-                            String newAccessToken = jwtUtil.createAccessToken(memberId);
-                            saveAuthentication(memberId);
-                        }
-                    } else log.info("refresh token is empty");
-                }
-                else{
-                    //만료되지 않았다면
-                    long memberId = jwtUtil.extractMemberId(accessToken).get();
-                    //securityContextHolder에 저장
-                    saveAuthentication(memberId);
-                }
+                //refreshToken 유효성 검증 , 유효한 토큰이라면 accessToken 재발급
+                if (refreshToken.isPresent()) {
+                    log.info("refreshToken 존재, accessToken 재발급");
+                    if (jwtUtil.isTokenValid(refreshToken.get())) {
+                        String newAccessToken = jwtUtil.createAccessToken(memberId);
+                        log.info("newAccessToken 재발급 완료" + newAccessToken);
+                        saveAuthentication(memberId);
+                    }
+                } else log.info("refresh token is empty");
             }
+            else{
+                //만료되지 않았다면
+                long memberId = jwtUtil.extractMemberId(accessToken).get();
+                //securityContextHolder에 저장
+                saveAuthentication(memberId);
+            }
+        }
+        log.info("최종 dofilter 동작================");
         filterChain.doFilter(request, response);
     }
 
@@ -98,7 +96,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     principalDetails, null, authoritiesMapper.mapAuthorities(principalDetails.getAuthorities())
             );
-
+            log.info("saveAuthentication 동작 =========================");
             SecurityContextHolder.getContext().setAuthentication(authentication);
         });
     }

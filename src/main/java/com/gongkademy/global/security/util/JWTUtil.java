@@ -47,7 +47,7 @@ public class JWTUtil {
         Date now = new Date();
         SecretKey key = null;
         try {
-            log.info("JWT_KEY " + JWT_KEY);
+            log.info("createAccessToken의 JWT_KEY 입니다. " + JWT_KEY);
             key = Keys.hmacShaKeyFor(JWT_KEY.getBytes("UTF-8"));
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
@@ -68,7 +68,7 @@ public class JWTUtil {
         Date now = new Date();
         SecretKey key = null;
         try {
-            log.info("JWT_KEY " + JWT_KEY);
+            log.info("createRefreshToken의 JWT_KEY입니다. " + JWT_KEY);
             key = Keys.hmacShaKeyFor(JWT_KEY.getBytes("UTF-8"));
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
@@ -114,6 +114,7 @@ public class JWTUtil {
         SecretKey key = null;
         try {
             key = Keys.hmacShaKeyFor(JWT_KEY.getBytes("UTF-8"));
+            log.info("extractMemberId의 key: " + key);
             return Optional.ofNullable((Integer) Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
@@ -135,6 +136,7 @@ public class JWTUtil {
         SecretKey key = null;
         try {
             key = Keys.hmacShaKeyFor(JWT_KEY.getBytes("UTF-8"));
+            log.info("isExpired의 key: " + key);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -158,6 +160,7 @@ public class JWTUtil {
         SecretKey key = null;
         try {
             key = Keys.hmacShaKeyFor(JWT_KEY.getBytes("UTF-8"));
+            log.info("isTokenvalid의 key: " + key);
             Map<String, Object> claim = Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()

@@ -90,7 +90,7 @@ public class MemberServiceImpl implements MemberService{
         // 탈퇴여부 -> true
         // 탈퇴시간 -> now()
         member.deleteMember(DELETE_NICKNAME + member.getId());
-
+        log.info("탈퇴후 멤버의 닉네임 : "+ member.getNickname());
         return member.getId();
     }
 

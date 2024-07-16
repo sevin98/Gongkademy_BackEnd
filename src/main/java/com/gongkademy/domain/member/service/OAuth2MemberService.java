@@ -48,29 +48,41 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
         Optional<Member> existingMember = memberRepository.findRecentlyCreateMemberByEmail(email);
         //UserDB에 Member가 있어
         if (existingMember.isPresent()) {
+            log.info(existingMember.get().getClass());
+            log.info(existingMember.get().getMemberRoleList().get(0).getClass());
+            log.info("existing member가 있다.");
             //탈퇴여부 검사
             if (existingMember.get().isDeleted()) { //탈퇴된사람이라면
+                log.info("getMember() : 같은 이메일의 탈퇴된 회원이 존재");
                 LocalDateTime withdrawDate = existingMember.get().getDeletedTime();
                 LocalDateTime currentTime = LocalDateTime.now();
                 long monthsBetween = ChronoUnit.MONTHS.between(withdrawDate, currentTime);
 
                 //탈퇴시간 검사
                 if (monthsBetween < 1) {
+                    log.info("현재 회원의 monthsBetween값 : " + monthsBetween);
                     throw new IllegalStateException("탈퇴 후 1달이 지나야 재가입이 가능합니다.");
                 } else {
+                    log.info("getMember() : 같은 이메일의 탈퇴했지만 한달 지난 회원 존재");
                     //한 달 지났다면 재가입
                     member = joinMember(email, name);
                 }
             }else{
+                log.info("getMember() : 같은 이메일의 탈퇴 안된 사람 중 같은 이메일 존재 -> 로그인으로 넘어감");
                 //탈퇴 안된 사람이라면 정보 업데이트 (로그인)
                 member = existingMember.get();
                 member.updateName(name);
             }
         }else{
+            log.info("getMember() : 같은 이메일의 회원 존재하지 않음");
             //기존DB에 없으면 join
             member = joinMember(email, name);
         }
-        return memberRepository.save(member);
+        log.info("join할 member: " + member);
+        log.info("join할 member의 Role: " + member.getMemberRoleList());
+        Member save = memberRepository.save(member);
+
+        return save;
     }
 
     private Member joinMember(String email, String name){

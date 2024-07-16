@@ -14,7 +14,5 @@ public class CourseReviewRequestDTO {
 	private int rating;
 	private String content;
 	private Long courseId;
-	private Long memberId;
-	private String nickname;
-	
+
 }

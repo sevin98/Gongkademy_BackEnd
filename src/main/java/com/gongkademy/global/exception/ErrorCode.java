@@ -41,7 +41,18 @@ public enum ErrorCode {
 
     // 권한 관련
     FORBIDDEN(HttpStatus.FORBIDDEN, "권한이 없습니다"),
-;
+
+    // Course 관련
+    DUPLICATE_COURSE_REVIEW(HttpStatus.CONFLICT, "이미 작성한 수강평이 있습니다."),
+    INVALID_COURSE_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 강좌 ID입니다."),
+    INVALID_COURSE_REVIEW_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 수강평 ID입니다."),
+    INVALID_REGIST_COURSE_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 수강 강좌 ID입니다."),
+    INVALID_REGIST_LECTURE_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 수강 강의 ID입니다."),
+    INVALID_LECTURE_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 강의 ID입니다."),
+    INVALID_COURSE_COMMENT_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 강의 댓글 ID입니다."),
+    EMPTY_NEXT_LECTURE(HttpStatus.BAD_REQUEST, "다음 강의가 없습니다."),
+    EMPTY_PREV_LECTURE(HttpStatus.BAD_REQUEST, "이전 강의가 없습니다."),
+    ;
     private final HttpStatus httpStatus;
     private final String message;
 

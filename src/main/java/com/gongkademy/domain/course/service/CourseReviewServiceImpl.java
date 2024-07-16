@@ -1,5 +1,6 @@
 package com.gongkademy.domain.course.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,33 +38,26 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 
 	@Override
 	public CourseReviewResponseDTO createReview(CourseReviewRequestDTO courseReviewRequestDTO, Long currentMemberId) {
-		CourseReview review = convertToEntity(courseReviewRequestDTO);
-		
-		// 요청 사용자 == 로그인 사용자 확인
-        if (!review.getMember().getId().equals(currentMemberId)) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
+		CourseReview review = convertToEntity(courseReviewRequestDTO,currentMemberId);
 		
 		Member member = memberRepository.findById(currentMemberId).get();
 		review.setMember(member);
 		member.addCourseReview(review);
-		
+
+		//이미 수강평있을 때
+		if(courseReviewRepository.existsByCourseIdAndMemberId(courseReviewRequestDTO.getCourseId(), currentMemberId))
+			throw new CustomException(ErrorCode.DUPLICATE_COURSE_REVIEW);
 		Course course = courseRepository.findById(courseReviewRequestDTO.getCourseId())
-				.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
+				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_COURSE_ID));
 		course.addReview(review);
-		
-		return convertToDTO(review);
+		CourseReview saveReview =courseReviewRepository.save(review);
+		return convertToDTO(saveReview);
 	}
 
 	@Override
 	public CourseReviewResponseDTO updateReview(Long id, CourseReviewRequestDTO courseReviewRequestDTO, Long currentMemberId) {
 		CourseReview review = courseReviewRepository.findById(id)
-				.orElseThrow(() -> new IllegalArgumentException("강의평 찾을 수 없음"));
-		
-		// 요청 사용자 == 로그인 사용자 확인
-        if (!review.getMember().getId().equals(currentMemberId)) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
+				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_COURSE_REVIEW_ID));
 		
         // 리뷰: 평점, 내용만 수정 가능
 		review.setRating(courseReviewRequestDTO.getRating());
@@ -71,7 +65,7 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 		CourseReview saveReview = courseReviewRepository.save(review);
 		
 		Course course = courseRepository.findById(courseReviewRequestDTO.getCourseId())
-				.orElseThrow(() -> new IllegalArgumentException("강좌 찾을 수 없음"));
+				.orElseThrow(() -> new  CustomException(ErrorCode.INVALID_COURSE_ID));
 		course.updateAvgRating();
 		
 		return convertToDTO(saveReview);
@@ -92,36 +86,38 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 	@Transactional
 	public void deleteReview(Long id, Long currentMemberId) {
 		CourseReview review = courseReviewRepository.findById(id)
-				.orElseThrow(() -> new IllegalArgumentException("강의평 찾을 수 없음"));
-		
-		// 요청 사용자 == 로그인 사용자 확인
-        if (!review.getMember().getId().equals(currentMemberId)) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
-		
+					.orElseThrow(() -> new CustomException(ErrorCode.INVALID_COURSE_REVIEW_ID));
+
 		Course course = review.getCourse();
 		course.deleteReview(review);
 	}
 
-	private CourseReview convertToEntity(CourseReviewRequestDTO courseReviewRequestDTO) {
-		CourseReview review = new CourseReview();
-
-		review.setRating(courseReviewRequestDTO.getRating());
-		review.setContent(courseReviewRequestDTO.getContent());
-		review.setNickname(courseReviewRequestDTO.getNickname());
-
+	private CourseReview convertToEntity(CourseReviewRequestDTO courseReviewRequestDTO, Long memberId) {
+		CourseReview review = CourseReview.builder()
+												.rating(courseReviewRequestDTO.getRating())
+												.createdTime(LocalDateTime.now())
+												.content(courseReviewRequestDTO.getContent())
+												.likeCount(0L)
+												.courseCommentCount(0L)
+												.registCourse(null)
+												.course(null)
+												.member(null)
+												.nickname(null)
+												.build();
+		Optional<Member> member = memberRepository.findById(memberId);
 		Optional<Course> courseOptional = courseRepository.findById(courseReviewRequestDTO.getCourseId());
 		if (courseOptional.isPresent()) {
 			review.setCourse(courseOptional.get());
 		} else {
-			throw new IllegalStateException("강의 찾을 수 없음");
+			throw new CustomException(ErrorCode.INVALID_COURSE_ID);
 		}
 
-		Optional<Member> memberOptional = memberRepository.findById(courseReviewRequestDTO.getMemberId());
+		Optional<Member> memberOptional = memberRepository.findById(memberId);
 		if (memberOptional.isPresent()) {
 			review.setMember(memberOptional.get());
+			review.setNickname(member.get().getNickname());
 		} else {
-			throw new IllegalStateException("사용자 찾을 수 없음");
+			throw new CustomException(ErrorCode.INVALID_MEMBER_ID);
 		}
 		return review;
 	}

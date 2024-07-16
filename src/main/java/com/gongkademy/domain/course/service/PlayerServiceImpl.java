@@ -33,11 +33,10 @@ public class PlayerServiceImpl implements PlayerService{
 	public PlayerResponseDTO getPlayerLatestCourse(Long courseId, Long memberId) {				
 		// 수강 강의 중 가장 최근 수강 강의 조회
 		RegistCourse registCourse = registCourseRepository.findByCourseIdAndMemberId(courseId, memberId)
-				.orElseThrow(() -> new IllegalArgumentException("수강 강좌 찾을 수 없음"));
-		RegistLecture registLectureLatest = registLectureRepository.findTopByRegistCourseIdOrderByRecentDateDescLectureLectureOrderAsc(registCourse.getId())
-				.orElseThrow(() -> new IllegalArgumentException("최근 수강 강의 찾을 수 없음"));
+				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_REGIST_COURSE_ID));
+		RegistLecture registLectureLatest = registLectureRepository.findTopByRegistCourseIdOrderByRecentDateDescLectureLectureOrderAsc(registCourse.getId()).get();
 		Lecture lecture = lectureRepository.findById(registLectureLatest.getLecture().getId())
-				.orElseThrow(() -> new IllegalArgumentException("강의 찾을 수 없음"));
+				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_LECTURE_ID));
 		
 		PlayerResponseDTO playerResponseDTO = this.convertToDTO(lecture, registLectureLatest);
 		
@@ -48,10 +47,10 @@ public class PlayerServiceImpl implements PlayerService{
 	public PlayerResponseDTO getPlayerLatestLecture(Long lectureId, Long memberId) {				
 		// 수강 강의 중 가장 최근 수강 강의 조회
 		RegistLecture registLectureLatest = registLectureRepository.findByLectureIdAndMemberId(lectureId, memberId)
-				.orElseThrow(() -> new IllegalArgumentException("수강 강의 찾을 수 없음"));
+				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_REGIST_LECTURE_ID));
 
 		Lecture lecture = lectureRepository.findById(registLectureLatest.getLecture().getId())
-				.orElseThrow(() -> new IllegalArgumentException("강의 찾을 수 없음"));
+				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_LECTURE_ID));
 		
 		PlayerResponseDTO playerResponseDTO = this.convertToDTO(lecture, registLectureLatest);
 		
@@ -62,13 +61,13 @@ public class PlayerServiceImpl implements PlayerService{
 	public void updatePlayerLatest(PlayerRequestDTO playerRequestDTO, Long memberId) {
 		Long lectureId = playerRequestDTO.getLectureId();
 		RegistLecture registLecture = registLectureRepository.findByLectureIdAndMemberId(lectureId, memberId)
-				.orElseThrow(() -> new IllegalArgumentException("수강 강의 찾을 수 없음"));
+				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_REGIST_LECTURE_ID));
 
 		registLecture.updateSavePoint(playerRequestDTO.getSavePoint());
 		registLecture.updateRegistCourse();
 		
 		Lecture lecture = lectureRepository.findById(lectureId)
-				.orElseThrow(() -> new IllegalArgumentException("강의 찾을 수 없음"));
+				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_LECTURE_ID));
 		
 		if(lecture.getTime() == registLecture.getSavePoint()) registLecture.updateComplete();
 		
@@ -78,7 +77,7 @@ public class PlayerServiceImpl implements PlayerService{
 	@Override
 	public PlayerResponseDTO getPlayerNextPrev(PlayerRequestDTO playerRequestDTO,Long currentMemberId) {
 		Lecture lecture = lectureRepository.findById(playerRequestDTO.getLectureId())
-				.orElseThrow(() -> new IllegalArgumentException("강의 찾을 수 없음"));
+				.orElseThrow(() -> new CustomException(ErrorCode.INVALID_LECTURE_ID));
 		Course course = lecture.getCourse();
 		this.updatePlayerLatest(playerRequestDTO, currentMemberId);
 		int order = lecture.getLectureOrder();
@@ -87,16 +86,16 @@ public class PlayerServiceImpl implements PlayerService{
 		
 		if(playerRequestDTO.getDir() == 2) {
 			targetLecture = lectureRepository.findByCourseIdAndLectureOrder(course.getId(), order+1)
-					.orElseThrow(() -> new IllegalArgumentException("다음 강의 없음"));
+					.orElseThrow(() -> new CustomException(ErrorCode.EMPTY_NEXT_LECTURE));
 		}
 		
 		else if(playerRequestDTO.getDir() == 1) {
 			targetLecture = lectureRepository.findByCourseIdAndLectureOrder(course.getId(), order-1)
-					.orElseThrow(() -> new IllegalArgumentException("이전 강의 없음"));
+					.orElseThrow(() -> new CustomException(ErrorCode.EMPTY_PREV_LECTURE));
 		}
 		
 		RegistLecture registNextLecture = registLectureRepository.findByLectureIdAndMemberId(targetLecture.getId(), currentMemberId)
-					.orElseThrow(() -> new IllegalArgumentException("수강 강의 찾을 수 없음"));
+					.orElseThrow(() -> new CustomException(ErrorCode.INVALID_REGIST_LECTURE_ID));
 
 		PlayerResponseDTO playerResponseDTO = this.convertToDTO(targetLecture, registNextLecture);
 

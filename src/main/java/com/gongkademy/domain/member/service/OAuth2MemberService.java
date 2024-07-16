@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -45,9 +46,15 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
 
     private Member getMember(String email, String name) {
         Member member;
+        Optional<Member> byEmail = memberRepository.findByEmail(email);
         Optional<Member> existingMember = memberRepository.findRecentlyCreateMemberByEmail(email);
         //UserDB에 Member가 있어
         if (existingMember.isPresent()) {
+            Long id = byEmail.get().getId();
+            Optional<Member> byId = memberRepository.findById(id);
+            List<MemberRole> memberRoleList1 = byId.get().getMemberRoleList();
+            log.info(memberRoleList1);
+            log.info(byEmail.get());
             log.info(existingMember.get().getClass());
             log.info(existingMember.get().getMemberRoleList().get(0).getClass());
             log.info("existing member가 있다.");
@@ -71,6 +78,7 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
                 log.info("getMember() : 같은 이메일의 탈퇴 안된 사람 중 같은 이메일 존재 -> 로그인으로 넘어감");
                 //탈퇴 안된 사람이라면 정보 업데이트 (로그인)
                 member = existingMember.get();
+                log.info("member객체정보오오오오오  " + member);
                 member.updateName(name);
             }
         }else{
@@ -81,7 +89,11 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
         log.info("join할 member: " + member);
         log.info("join할 member의 Role: " + member.getMemberRoleList());
         Member save = memberRepository.save(member);
+        List<MemberRole> memberRoleList = save.getMemberRoleList();
+        for (MemberRole role : memberRoleList ) {
 
+            log.info("role: "+role);
+        }
         return save;
     }
 

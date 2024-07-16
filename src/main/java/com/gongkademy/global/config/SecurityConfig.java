@@ -40,6 +40,8 @@ public class SecurityConfig {
     private final JWTUtil jwtUtil;
     private final OAuth2MemberService oAuth2MemberService;
 
+    private static final String FRONT_DEFAULT_URL = "http://localhost:3000";
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -67,7 +69,7 @@ public class SecurityConfig {
                         .anyRequest().permitAll())
                 .logout((logout) -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/members/logout"))
-                        .logoutSuccessUrl("/"))
+                        .logoutSuccessUrl(FRONT_DEFAULT_URL))
                 //외부 post 요청을 받아야 하는 csrf // disable
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -76,7 +78,7 @@ public class SecurityConfig {
                 .addFilterBefore(new JWTCheckFilter(memberRepository, jwtUtil, redisUtil), UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         //로그인 성공하면 redirection될 기본 url
-                        .defaultSuccessUrl("/", true)
+                        .defaultSuccessUrl(FRONT_DEFAULT_URL, true)
                         //로그인에 성공하면 가져온 user의 정보를 oAuth2MemberService가 처리한다(loadUser 호출)
                         .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2MemberService))
                         .successHandler(new OAuth2LoginSuccessHandler(jwtUtil))

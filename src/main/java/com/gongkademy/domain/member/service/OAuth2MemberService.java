@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,22 +49,19 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
 
     private Member getMember(String email, String name) {
         Member member;
-        Optional<Member> byEmail = memberRepository.findByEmail(email);
-        Optional<Member> existingMember = memberRepository.findRecentlyCreateMemberByEmail(email);
+        List<Member> members = memberRepository.findByEmail(email);
+        Member recentMember = members.stream().max(Comparator.comparing(Member::getCreateTime)).orElse(null);
         //UserDB에 Member가 있어
-        if (existingMember.isPresent()) {
-            Long id = byEmail.get().getId();
+        if (recentMember != null) {
+            Long id = recentMember.getId();
             Optional<Member> byId = memberRepository.findById(id);
             List<MemberRole> memberRoleList1 = byId.get().getMemberRoleList();
             log.info(memberRoleList1);
-            log.info(byEmail.get());
-            log.info(existingMember.get().getClass());
-            log.info(existingMember.get().getMemberRoleList().get(0).getClass());
             log.info("existing member가 있다.");
             //탈퇴여부 검사
-            if (existingMember.get().isDeleted()) { //탈퇴된사람이라면
+            if (recentMember.isDeleted()) { //탈퇴된사람이라면
                 log.info("getMember() : 같은 이메일의 탈퇴된 회원이 존재");
-                LocalDateTime withdrawDate = existingMember.get().getDeletedTime();
+                LocalDateTime withdrawDate = recentMember.getDeletedTime();
                 LocalDateTime currentTime = LocalDateTime.now();
                 long monthsBetween = ChronoUnit.MONTHS.between(withdrawDate, currentTime);
 
@@ -79,7 +77,7 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
             }else{
                 log.info("getMember() : 같은 이메일의 탈퇴 안된 사람 중 같은 이메일 존재 -> 로그인으로 넘어감");
                 //탈퇴 안된 사람이라면 정보 업데이트 (로그인)
-                member = existingMember.get();
+                member = recentMember;
                 log.info("member객체정보오오오오오  " + member);
                 member.updateName(name);
             }

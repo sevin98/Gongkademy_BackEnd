@@ -15,6 +15,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,11 +43,11 @@ class MemberRepositoryTest {
         memberRepository.save(member);
 
         // When
-        Optional<Member> foundMember = memberRepository.findByEmail(member.getEmail());
+        List<Member> foundMember = memberRepository.findByEmail(member.getEmail());
 
         // Then
-        assertThat(foundMember).isPresent();
-        assertThat(foundMember.get().getEmail()).isEqualTo(member.getEmail());
+        assertThat(foundMember).isNotEmpty();
+        assertThat(foundMember.get(0).getEmail()).isEqualTo(member.getEmail());
 
     }
 

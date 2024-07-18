@@ -49,25 +49,20 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
 
     private Member getMember(String email, String name) {
         Member member;
-        List<Member> members = memberRepository.findByEmail(email);
-        Member recentMember = members.stream().max(Comparator.comparing(Member::getCreateTime)).orElse(null);
+        Optional<Member> memberOptional = memberRepository.findFirstByEmailOrderByCreateTimeDesc(email);
         //UserDB에 Member가 있어
-        if (recentMember != null) {
-            Long id = recentMember.getId();
-            Optional<Member> byId = memberRepository.findById(id);
-            List<MemberRole> memberRoleList1 = byId.get().getMemberRoleList();
-            log.info(memberRoleList1);
-            log.info("existing member가 있다.");
+        if (memberOptional.isPresent()) {
+            member = memberOptional.get();
             //탈퇴여부 검사
-            if (recentMember.isDeleted()) { //탈퇴된사람이라면
+            if (member.isDeleted()) { // 탈퇴된 사람이라면
                 log.info("getMember() : 같은 이메일의 탈퇴된 회원이 존재");
-                LocalDateTime withdrawDate = recentMember.getDeletedTime();
+                LocalDateTime withdrawDate = member.getDeletedTime();
                 LocalDateTime currentTime = LocalDateTime.now();
                 long monthsBetween = ChronoUnit.MONTHS.between(withdrawDate, currentTime);
 
                 //탈퇴시간 검사
                 if (monthsBetween < 1) {
-                    log.info("현재 회원의 monthsBetween값 : " + monthsBetween);
+                    log.info("getMember(): 같은 이메일의 탈퇴했지만 한달 안 지난 회원 존재");
                     throw new CustomException(ErrorCode.REJOIN_AFTER_ONE_MONTH);
                 } else {
                     log.info("getMember() : 같은 이메일의 탈퇴했지만 한달 지난 회원 존재");
@@ -77,8 +72,6 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
             }else{
                 log.info("getMember() : 같은 이메일의 탈퇴 안된 사람 중 같은 이메일 존재 -> 로그인으로 넘어감");
                 //탈퇴 안된 사람이라면 정보 업데이트 (로그인)
-                member = recentMember;
-                log.info("member객체정보오오오오오  " + member);
                 member.updateName(name);
             }
         }else{
@@ -88,13 +81,7 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
         }
         log.info("join할 member: " + member);
         log.info("join할 member의 Role: " + member.getMemberRoleList());
-        Member save = memberRepository.save(member);
-        List<MemberRole> memberRoleList = save.getMemberRoleList();
-        for (MemberRole role : memberRoleList ) {
-
-            log.info("role: "+role);
-        }
-        return save;
+        return memberRepository.save(member);
     }
 
     private Member joinMember(String email, String name){

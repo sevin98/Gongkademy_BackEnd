@@ -1,5 +1,6 @@
 package com.gongkademy.domain.course.service;
 
+import com.gongkademy.domain.course.entity.CourseStatus;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -73,7 +74,7 @@ public class CourseServiceImpl implements CourseService {
 	public List<CourseResponseDTO> getAllCourses(Long memberId) {
 		List<CourseResponseDTO> courseResponseDTOs = new ArrayList<>();
 		
-		List<Course> courses = courseRepository.findAll();
+		List<Course> courses = courseRepository.findAllByStatus(CourseStatus.OPEN);
 		for(Course course : courses) {
             CourseResponseDTO dto = this.convertToDTO(course, memberId);
             courseResponseDTOs.add(dto);
@@ -214,6 +215,8 @@ public class CourseServiceImpl implements CourseService {
 	public CourseResponseDTO getCourseDetail(Long courseId, Long memberId) {
 		Course course = courseRepository.findById(courseId)
 				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
+
+		if(course.getStatus() == CourseStatus.WAIT) throw new CustomException(ErrorCode.WAIT_STATUS_COURSE);
 
 		CourseResponseDTO courseResponseDTO = this.convertToDTO(course, memberId);
 		return courseResponseDTO;

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gongkademy.domain.course.dto.request.PlayerRequestDTO;
@@ -54,11 +55,13 @@ public class PlayerController {
 	
 	// 다음/이전 강의 재생
 	@GetMapping("/switch")
-	public ResponseEntity<?> getPlayerNext(@RequestBody PlayerRequestDTO playerRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        Long currentMemberId = principalDetails.getMemberId(); 	
-		
-		PlayerResponseDTO playerResponseDTO = playerService.getPlayerNextPrev(playerRequestDTO,currentMemberId);
-        if(playerResponseDTO == null) return new ResponseEntity<>(HttpStatus.BAD_REQUEST); 
+	public ResponseEntity<?> getPlayerNext(@RequestParam(value = "lectureId") Long lectureId,
+			@RequestParam(value = "direction") int dir, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+		Long currentMemberId = principalDetails.getMemberId();
+
+		PlayerResponseDTO playerResponseDTO = playerService.getPlayerNextPrev(lectureId, dir, currentMemberId);
+		if (playerResponseDTO == null)
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		return ResponseEntity.ok(playerResponseDTO);
 	}
 }

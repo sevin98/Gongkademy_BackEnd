@@ -75,21 +75,21 @@ public class PlayerServiceImpl implements PlayerService{
 	}
 
 	@Override
-	public PlayerResponseDTO getPlayerNextPrev(PlayerRequestDTO playerRequestDTO,Long currentMemberId) {
-		Lecture lecture = lectureRepository.findById(playerRequestDTO.getLectureId())
+	public PlayerResponseDTO getPlayerNextPrev(Long lectureId, int direction, Long currentMemberId) {
+		Lecture lecture = lectureRepository.findById(lectureId)
 				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_LECTURE));
 		Course course = lecture.getCourse();
-		this.updatePlayerLatest(playerRequestDTO, currentMemberId);
+
 		int order = lecture.getLectureOrder();
 		
 		Lecture targetLecture = null;
 		
-		if(playerRequestDTO.getDir() == 2) {
+		if(direction == 2) {
 			targetLecture = lectureRepository.findByCourseIdAndLectureOrder(course.getId(), order+1)
 					.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_NEXT_LECTURE));
 		}
 		
-		else if(playerRequestDTO.getDir() == 1) {
+		else if(direction == 1) {
 			targetLecture = lectureRepository.findByCourseIdAndLectureOrder(course.getId(), order-1)
 					.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PREV_LECTURE));
 		}

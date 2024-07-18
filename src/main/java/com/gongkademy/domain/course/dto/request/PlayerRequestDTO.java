@@ -10,10 +10,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlayerRequestDTO {
-	// 강의 플레이어 요청 dto
 		
 	private Long lectureId;
 	private Long savePoint;
-	private int dir = 0;
 	
 }

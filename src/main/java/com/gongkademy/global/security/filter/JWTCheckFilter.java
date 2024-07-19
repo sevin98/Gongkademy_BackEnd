@@ -2,6 +2,8 @@ package com.gongkademy.global.security.filter;
 
 import com.gongkademy.domain.member.dto.PrincipalDetails;
 import com.gongkademy.domain.member.repository.MemberRepository;
+import com.gongkademy.global.exception.CustomException;
+import com.gongkademy.global.exception.ErrorCode;
 import com.gongkademy.global.redis.RedisUtil;
 import com.gongkademy.global.security.handler.OAuth2LoginSuccessHandler;
 import com.gongkademy.global.security.util.JWTUtil;
@@ -75,7 +77,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                         log.info("newAccessToken 재발급 완료" + newAccessToken);
                         saveAuthentication(memberId);
                     }
-                } else log.info("refresh token is empty");
+                } else throw new CustomException(ErrorCode.JWT_NULL_REFRESH);
             }
             else{
                 //만료되지 않았다면

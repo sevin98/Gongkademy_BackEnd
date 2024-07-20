@@ -45,9 +45,9 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
         Page<ConsultingBoardResponseDTO> page;
         if (keyword == null) {
-            page = boardRepository.findByBoardType(BoardType.CONSULT, pageable).map(this::convertToDTO);
+            page = boardRepository.findConsultBoard(BoardType.CONSULT, pageable).map(this::convertToDTO);
         } else {
-            page = boardRepository.findByBoardTypeAndTitleContainingOrContentContaining(BoardType.CONSULT, keyword, keyword, pageable).map(this::convertToDTO);
+            page = boardRepository.findConsultBoardsWithKeyword(BoardType.CONSULT, keyword, pageable).map(this::convertToDTO);
         }
 
         List<ConsultingBoardResponseDTO> consultingBoards = page.getContent();

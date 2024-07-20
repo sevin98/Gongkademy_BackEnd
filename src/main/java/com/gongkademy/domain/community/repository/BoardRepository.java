@@ -17,9 +17,11 @@ import java.util.Optional;
 public interface BoardRepository extends JpaRepository<Board, Long> {
 
     // CONSULT 전체 조회
-    Page<Board> findByBoardType(BoardType boardType, Pageable pageable);
-    // CONSULT keyword 기반 조회
-    Page<Board> findByBoardTypeAndTitleContainingOrContentContaining(BoardType boardType, String title, String content, Pageable pageable);
+    @Query("SELECT b FROM Board b WHERE b.boardType = :boardType")
+    Page<Board> findConsultBoard(@Param("boardType")BoardType boardType, Pageable pageable);
+    // CONSULT 타입과 키워드를 이용한 조회
+    @Query("SELECT b FROM Board b WHERE b.boardType = :boardType AND (b.title LIKE %:keyword% OR b.content LIKE %:keyword%)")
+    Page<Board> findConsultBoardsWithKeyword(@Param("boardType")BoardType boardType, @Param("keyword") String keyword, Pageable pageable);
 
     // 최신순 조회
     Page<Board> findByBoardTypeOrderByCreateTimeDesc(BoardType boardtype, Pageable pageable);

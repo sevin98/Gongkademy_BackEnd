@@ -38,14 +38,14 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
     // 전체 QnaBoard 조회
     @Override
-    public List<QnaBoardResponseDTO> findAllQnaBoards(int pageNo, String criteria, String keyword, Long memberId) {
+    public Map<String, Object> findAllQnaBoards(int pageNo, String criteria, String keyword, Long memberId) {
         // 정렬 기준 내림차순 정렬
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
         Page<QnaBoardResponseDTO> page;
         if (keyword == null) {
-            page = qnaBoardRepository.findByBoardType(BoardType.QNA, pageable).map(this::convertToDTO);
+            page = qnaBoardRepository.findQnaBoard(BoardType.QNA, pageable).map(this::convertToDTO);
         } else {
-            page = qnaBoardRepository.findByBoardTypeAndTitleContainingOrContentContaining(BoardType.QNA, keyword, keyword, pageable).map(this::convertToDTO);
+            page = qnaBoardRepository.findQnaBoardsWithKeyword(BoardType.QNA, keyword, pageable).map(this::convertToDTO);
         }
 
         List<QnaBoardResponseDTO> qnaBoards = page.getContent();
@@ -63,7 +63,13 @@ public class QnaBoardServiceImpl implements QnaBoardService {
             }
         }
 
-        return qnaBoards;
+        Map<String, Object> qnas = new HashMap<>();
+
+        qnas.put("data", qnaBoards);
+        qnas.put("totalPage", page.getTotalPages());
+        qnas.put("totalCount", page.getTotalElements());
+
+        return qnas;
     }
 
     // QnaBoard 생성

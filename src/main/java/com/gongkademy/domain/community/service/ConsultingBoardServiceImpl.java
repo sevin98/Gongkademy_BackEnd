@@ -25,9 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
@@ -40,7 +38,7 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
 
     private final int PAGE_SIZE = 10;
     @Override
-    public List<ConsultingBoardResponseDTO> findAllConsultingBoards(int pageNo, String criteria, String keyword, Long memberId) {
+    public Map<String, Object> findAllConsultingBoards(int pageNo, String criteria, String keyword, Long memberId) {
         // 정렬 기준 내림차순 정렬
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
         Page<ConsultingBoardResponseDTO> page;
@@ -65,7 +63,13 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
             }
         }
 
-        return consultingBoards;
+        Map<String, Object> consults = new HashMap<>();
+
+        consults.put("data", consultingBoards);
+        consults.put("totalPage", page.getTotalPages());
+        consults.put("totalCount", page.getTotalElements());
+
+        return consults;
     }
 
     @Override

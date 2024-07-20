@@ -4,10 +4,12 @@ import com.gongkademy.domain.community.dto.request.ConsultingBoardRequestDTO;
 import com.gongkademy.domain.community.dto.response.ConsultingBoardResponseDTO;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public interface ConsultingBoardService {
     // 모든 Consulting 게시글 조회하기
-    List<ConsultingBoardResponseDTO> findAllConsultingBoards(int pageNo, String criteria, String keyword, Long memberId);
+    Map<String, Object> findAllConsultingBoards(int pageNo, String criteria, String keyword, Long memberId);
 
     // Consulting 게시글 작성하기
     ConsultingBoardResponseDTO createConsultingBoard(ConsultingBoardRequestDTO ConsultingBoardRequestDTO);

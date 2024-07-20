@@ -4,10 +4,11 @@ import com.gongkademy.domain.community.dto.request.QnaBoardRequestDTO;
 import com.gongkademy.domain.community.dto.response.QnaBoardResponseDTO;
 
 import java.util.List;
+import java.util.Map;
 
 public interface QnaBoardService {
     // 모든 Qna 게시글 조회하기
-    List<QnaBoardResponseDTO> findAllQnaBoards(int pageNo, String criteria, String keyword, Long memberId);
+    Map<String, Object> findAllQnaBoards(int pageNo, String criteria, String keyword, Long memberId);
 
     // Qna 게시글 작성하기
     QnaBoardResponseDTO createQnaBoard(QnaBoardRequestDTO qnaBoardRequestDTO);

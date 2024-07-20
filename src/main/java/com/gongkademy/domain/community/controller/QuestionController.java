@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/community/question")
@@ -32,7 +33,7 @@ public class QuestionController {
                                        @RequestParam(value = KEY_WORD) String keyword,
                                        @AuthenticationPrincipal PrincipalDetails principalDetails){
         Long currentMemberId = principalDetails.getMemberId();
-        List<QnaBoardResponseDTO> result = qnaboardService.findAllQnaBoards(pageNo, criteria, keyword, currentMemberId);
+        Map<String, Object> result = qnaboardService.findAllQnaBoards(pageNo, criteria, keyword, currentMemberId);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 

@@ -14,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/community/consulting")
@@ -35,7 +36,7 @@ public class ConsultingController {
                                               @RequestParam(value = KEY_WORD) String keyword,
                                               @AuthenticationPrincipal PrincipalDetails principalDetails){
         Long currentMemberId = principalDetails.getMemberId();
-        List<ConsultingBoardResponseDTO> result = consultingBoardService.findAllConsultingBoards(pageNo, criteria, keyword, currentMemberId);
+        Map<String, Object> result = consultingBoardService.findAllConsultingBoards(pageNo, criteria, keyword, currentMemberId);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 

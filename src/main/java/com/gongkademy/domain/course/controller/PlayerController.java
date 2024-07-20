@@ -53,15 +53,4 @@ public class PlayerController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
-	// 다음/이전 강의 재생
-	@GetMapping("/switch")
-	public ResponseEntity<?> getPlayerNext(@RequestParam(value = "lectureId") Long lectureId,
-			@RequestParam(value = "direction") int dir, @AuthenticationPrincipal PrincipalDetails principalDetails) {
-		Long currentMemberId = principalDetails.getMemberId();
-
-		PlayerResponseDTO playerResponseDTO = playerService.getPlayerNextPrev(lectureId, dir, currentMemberId);
-		if (playerResponseDTO == null)
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		return ResponseEntity.ok(playerResponseDTO);
-	}
 }

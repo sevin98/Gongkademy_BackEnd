@@ -13,10 +13,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PlayerResponseDTO {
-	
+public class LectureDetailResponseDTO {
 	private Long lectureId;
-	private Long savePoint;
-	private LocalDateTime recentDate;
 	
+	private Long time;
+	private String link;
+	private String title;
+	
+	// [강좌관련]
+	private Long progressTime;
+	private Double progressPercent;
+	private Long totalCourseTime;
 }

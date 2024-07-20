@@ -1,7 +1,6 @@
 package com.gongkademy.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
@@ -22,6 +21,8 @@ import com.gongkademy.domain.course.repository.LectureRepository;
 import com.gongkademy.domain.course.repository.RegistCourseRepository;
 import com.gongkademy.domain.course.repository.RegistLectureRepository;
 import com.gongkademy.domain.course.service.PlayerService;
+import com.gongkademy.domain.member.entity.Member;
+import com.gongkademy.domain.member.repository.MemberRepository;
 
 
 @SpringBootTest
@@ -37,6 +38,8 @@ public class PlayerServiceTest {
 	@Autowired
 	RegistCourseRepository rcr;
 	@Autowired
+	MemberRepository mr;
+	@Autowired
 	PlayerService ps;
 	
 	
@@ -49,6 +52,8 @@ public class PlayerServiceTest {
 		//given
 		Course c = new Course();
 		Lecture l = new Lecture();
+		Member member = new Member();
+    	mr.save(member);
 		
 		cr.save(c);
 		lr.save(l);
@@ -64,47 +69,9 @@ public class PlayerServiceTest {
 		rcr.save(rc);
 		
 		//when
-		PlayerResponseDTO playerResponseDTO = ps.getPlayerLatest(rc.getId());
+		PlayerResponseDTO playerResponseDTO = ps.getPlayerLatestLecture(rc.getCourse().getId(), member.getId());
 		
 		//then
 		assertEquals(now, playerResponseDTO.getRecentDate());
-	}
-	
-	@Test
-	void 다음_강의_조회() {
-		//given
-		Course c = new Course();
-		Lecture l1 = new Lecture();
-		Lecture l2 = new Lecture();
-		
-		l1.setCourse(c);
-		l2.setCourse(c);
-		l1.setLectureOrder(1);
-		l2.setLectureOrder(2);
-		
-		cr.save(c);
-		lr.save(l1);
-		lr.save(l2);
-		
-		RegistLecture rl1 = new RegistLecture();
-		RegistLecture rl2 = new RegistLecture();
-		RegistCourse rc = new RegistCourse();
-		rl1.setRegistCourse(rc);
-		rl2.setRegistCourse(rc);
-		rl1.setLecture(l1);
-		rl2.setLecture(l2);
-		
-		rlr.save(rl1);
-		rlr.save(rl2);
-		rcr.save(rc);
-		
-		PlayerRequestDTO playerRequestDTO = new PlayerRequestDTO();
-		playerRequestDTO.setLectureId(l1.getId());
-		
-		//when
-		PlayerResponseDTO playerResponseDTO = ps.getPlayerNext(playerRequestDTO);
-		
-		//then
-		assertEquals(l2.getId(), playerResponseDTO.getLectureId());		
 	}
 }

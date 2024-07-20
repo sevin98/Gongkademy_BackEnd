@@ -10,6 +10,4 @@ public interface PlayerService {
 	PlayerResponseDTO getPlayerLatestLecture(Long courseId, Long memberId);
 	
 	void updatePlayerLatest(PlayerRequestDTO playerRequestDTO, Long currentMemberId);
-	
-	PlayerResponseDTO getPlayerNextPrev(Long lectureId, int dir, Long currentMemberId);
-}
+	}

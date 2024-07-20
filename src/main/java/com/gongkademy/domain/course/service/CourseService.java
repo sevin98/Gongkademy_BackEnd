@@ -13,6 +13,7 @@ import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseInfoResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseLikeResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseResponseDTO;
+import com.gongkademy.domain.course.dto.response.LectureDetailResponseDTO;
 import com.gongkademy.domain.course.dto.response.NoticeResponseDTO;
 import com.gongkademy.domain.course.entity.Course;
 import com.gongkademy.domain.course.entity.Lecture;
@@ -31,6 +32,8 @@ public interface CourseService {
 	void deleteRegistCourse(Long courseId, Long currentMemberId);
 	
 	CourseResponseDTO getCourseDetail(Long courseId, Long currentMemberId);
+
+	LectureDetailResponseDTO getLectureDetail(Long courseId, int lectureOrder, Long currentMemberId);	
 	
 	Page<NoticeResponseDTO> getCourseNotices(Long courseId, int pageNo);
 
@@ -42,6 +45,7 @@ public interface CourseService {
 
 	Map<String, byte[]> downloadCourseNote(Long courseId);
 
-	CourseInfoResponseDTO getCourseInfo(Long id);	
+	CourseInfoResponseDTO getCourseInfo(Long id);
+
 	
 }

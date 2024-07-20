@@ -25,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 public class PlayerServiceImpl implements PlayerService{
 	
 	private final LectureRepository lectureRepository;
-	private final CourseRepository courseRepository;
 	private final RegistCourseRepository registCourseRepository;
 	private final RegistLectureRepository registLectureRepository;
 	
@@ -74,51 +73,11 @@ public class PlayerServiceImpl implements PlayerService{
 		registLectureRepository.save(registLecture);
 	}
 
-	@Override
-	public PlayerResponseDTO getPlayerNextPrev(Long lectureId, int direction, Long currentMemberId) {
-		Lecture lecture = lectureRepository.findById(lectureId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_LECTURE));
-		Course course = lecture.getCourse();
-
-		int order = lecture.getLectureOrder();
-		
-		Lecture targetLecture = null;
-		
-		if(direction == 2) {
-			targetLecture = lectureRepository.findByCourseIdAndLectureOrder(course.getId(), order+1)
-					.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_NEXT_LECTURE));
-		}
-		
-		else if(direction == 1) {
-			targetLecture = lectureRepository.findByCourseIdAndLectureOrder(course.getId(), order-1)
-					.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PREV_LECTURE));
-		}
-		
-		RegistLecture registNextLecture = registLectureRepository.findByLectureIdAndMemberId(targetLecture.getId(), currentMemberId)
-					.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REGIST_LECTURE));
-
-		PlayerResponseDTO playerResponseDTO = this.convertToDTO(targetLecture, registNextLecture);
-
-		return playerResponseDTO;
-	}
-
 	private PlayerResponseDTO convertToDTO(Lecture lecture, RegistLecture registLecture) {
-		PlayerResponseDTO dto = new PlayerResponseDTO();
-		
-		dto.setSavePoint(registLecture.getSavePoint());
-		dto.setRecentDate(registLecture.getRecentDate());
-		dto.setLectureId(lecture.getId());
-		dto.setTime(lecture.getTime());
-		dto.setLink(lecture.getLink());
-		dto.setTitle(lecture.getTitle());
-	
-		Optional<RegistCourse> registCourse = registCourseRepository.findById(registLecture.getRegistCourse().getId());
-		Optional<Course> course = courseRepository.findById(lecture.getCourse().getId());
-		
-		dto.setProgressTime(registCourse.get().getProgressTime());
-		dto.setProgressPercent(registCourse.get().getProgressPercent());
-		dto.setTotalCourseTime(course.get().getTotalCourseTime());
-
-		return dto;
+		return PlayerResponseDTO.builder()
+				.lectureId(lecture.getId())
+				.savePoint(registLecture.getSavePoint())
+				.recentDate(registLecture.getRecentDate())
+				.build();
 	}
 }

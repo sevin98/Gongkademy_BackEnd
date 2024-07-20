@@ -27,6 +27,7 @@ import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseInfoResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseLikeResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseResponseDTO;
+import com.gongkademy.domain.course.dto.response.LectureDetailResponseDTO;
 import com.gongkademy.domain.course.dto.response.NoticeResponseDTO;
 import com.gongkademy.domain.course.service.CourseService;
 import com.gongkademy.domain.member.dto.PrincipalDetails;
@@ -101,14 +102,24 @@ public class CourseController {
 		return new ResponseEntity<>(resource, httpHeaders, HttpStatus.OK);
 	}
 	
-	// - 강좌 조회
+	// - 강좌 상세 조회
 	@GetMapping("/{course_id}")
 	public ResponseEntity<?> getCourseDetail(@PathVariable("course_id") Long id, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId();
 		CourseResponseDTO courseResponseDTO = courseService.getCourseDetail(id, currentMemberId);
 		return new ResponseEntity<>(courseResponseDTO, HttpStatus.OK);
 	}
-	
+
+	// - 강의 상세 조회
+	@GetMapping("/lecture")
+	public ResponseEntity<?> getLectureDetail(@RequestParam(value="courseId") Long courseId,
+			@RequestParam(value="lectureOrder") int lectureOrder,
+			@AuthenticationPrincipal PrincipalDetails principalDetails) {
+		Long currentMemberId = principalDetails.getMemberId();
+		LectureDetailResponseDTO lectureDetailResponseDTO = courseService.getLectureDetail(courseId, lectureOrder, currentMemberId);
+		return new ResponseEntity<>(lectureDetailResponseDTO, HttpStatus.OK);
+	}
+
 	// - 공지사항 조회
 	@GetMapping("/notice/{course_id}")
 	public ResponseEntity<?> getCourseNoticesPerPage(@PathVariable("course_id") Long courseId,

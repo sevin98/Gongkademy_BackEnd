@@ -16,6 +16,7 @@ import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseInfoResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseLikeResponseDTO;
 import com.gongkademy.domain.course.dto.response.CourseResponseDTO;
+import com.gongkademy.domain.course.dto.response.LectureDetailResponseDTO;
 import com.gongkademy.domain.course.dto.response.NoticeResponseDTO;
 import com.gongkademy.domain.course.entity.Course;
 import com.gongkademy.domain.course.entity.CourseComment;
@@ -220,6 +221,26 @@ public class CourseServiceImpl implements CourseService {
 
 		CourseResponseDTO courseResponseDTO = this.convertToDTO(course, memberId);
 		return courseResponseDTO;
+	}
+	
+
+	@Override
+	public LectureDetailResponseDTO getLectureDetail(Long courseId, int lectureOrder, Long currentMemberId) {
+		Lecture lecture = lectureRepository.findByCourseIdAndLectureOrder(courseId, lectureOrder)
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_NEXT_LECTURE));
+	
+		RegistCourse registCourse = registCourseRepository.findByCourseIdAndMemberId(courseId, currentMemberId)
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REGIST_COURSE));
+		
+		return LectureDetailResponseDTO.builder()
+				.lectureId(lecture.getId())
+				.time(lecture.getTime())
+				.link(lecture.getLink())
+				.title(lecture.getTitle())
+				.progressTime(registCourse.getProgressTime())
+				.progressPercent(registCourse.getProgressPercent())
+				.totalCourseTime(registCourse.getCourse().getTotalCourseTime())
+				.build();
 	}
 	
 	@Override
@@ -435,6 +456,4 @@ public class CourseServiceImpl implements CourseService {
     	courseLikeResponseDTO.setMemberId(courseLike.getMember().getId());
         return courseLikeResponseDTO;
     }
-
-
 }

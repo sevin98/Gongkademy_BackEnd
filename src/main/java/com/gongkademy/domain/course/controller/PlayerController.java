@@ -26,13 +26,13 @@ public class PlayerController {
 
 	private final PlayerService playerService;
 	
-	// 강좌에 대한 최근 수강 구간 반환
+	// 강좌에 대한 최근 수강 강의 반환
 	@GetMapping("/course/{course_id}")
 	public ResponseEntity<?> getPlayerLatestCourse(@PathVariable("course_id") Long courseId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId(); 
 		// 가장 최근 강의와 최근 수강 구간 반환
-		PlayerResponseDTO playerResponseDTO = playerService.getPlayerLatestCourse(courseId, currentMemberId);
-        return ResponseEntity.ok(playerResponseDTO);
+		Integer lectureOrder = playerService.getPlayerLatestCourse(courseId, currentMemberId);
+        return ResponseEntity.ok(lectureOrder);
 	}
 	
 	// 강의에 대한 최근 수강 구간 반환

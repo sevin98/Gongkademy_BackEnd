@@ -29,17 +29,13 @@ public class PlayerServiceImpl implements PlayerService{
 	private final RegistLectureRepository registLectureRepository;
 	
 	@Override
-	public PlayerResponseDTO getPlayerLatestCourse(Long courseId, Long memberId) {				
+	public Integer getPlayerLatestCourse(Long courseId, Long memberId) {				
 		// 수강 강의 중 가장 최근 수강 강의 조회
 		RegistCourse registCourse = registCourseRepository.findByCourseIdAndMemberId(courseId, memberId)
 				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REGIST_LECTURE));
 		RegistLecture registLectureLatest = registLectureRepository.findTopByRegistCourseIdOrderByRecentDateDescLectureLectureOrderAsc(registCourse.getId()).get();
-		Lecture lecture = lectureRepository.findById(registLectureLatest.getLecture().getId())
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_LECTURE));
 		
-		PlayerResponseDTO playerResponseDTO = this.convertToDTO(lecture, registLectureLatest);
-		
-		return playerResponseDTO;
+		return registLectureLatest.getLecture().getLectureOrder();
 	}
 	
 	@Override

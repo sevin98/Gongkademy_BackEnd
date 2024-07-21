@@ -24,7 +24,10 @@ public enum ErrorCode {
     JWT_NULL_REFRESH(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 없습니다."),
     JWT_EXPIRED(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
     JWT_INVALID(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
+    JWT_NULL_MEMBER_ID(HttpStatus.UNAUTHORIZED, "memberId가 없습니다"),
     JWT_ERROR(HttpStatus.UNAUTHORIZED, "기타 JWT 에러"),
+
+    NOT_FOUND_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "쿠키에 엑세스 토큰이 없습니다."),
 
     //Board
     INVALID_BOARD_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 게시글 ID입니다."),

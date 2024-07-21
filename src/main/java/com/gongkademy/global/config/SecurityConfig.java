@@ -4,6 +4,7 @@ import com.gongkademy.domain.member.entity.MemberRole;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.domain.member.service.OAuth2MemberService;
 import com.gongkademy.global.redis.RedisUtil;
+import com.gongkademy.global.security.filter.ExceptionHandlerFilter;
 import com.gongkademy.global.security.filter.JWTCheckFilter;
 import com.gongkademy.global.security.handler.OAuth2LoginFailureHandler;
 import com.gongkademy.global.security.handler.OAuth2LoginSuccessHandler;
@@ -75,6 +76,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 //JWT등을 사용할떄 SpringSecurity가 세션을 생성하지도않고, 기본것을 사용하지도 않게끔 STATELESS로 설정
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(new ExceptionHandlerFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JWTCheckFilter(memberRepository, jwtUtil, redisUtil, oauth2LoginSuccessHandler), UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         //로그인 성공하면 redirection될 기본 url

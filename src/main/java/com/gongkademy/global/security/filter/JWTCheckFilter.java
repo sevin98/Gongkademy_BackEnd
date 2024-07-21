@@ -28,7 +28,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JWTCheckFilter extends OncePerRequestFilter {
 
-//    private static final String NO_CHECK_URL = "/login";
+    //    private static final String NO_CHECK_URL = "/login";
     private final MemberRepository memberRepository;
     private final JWTUtil jwtUtil;
     private final RedisUtil redisUtil;
@@ -54,21 +54,17 @@ public class JWTCheckFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         log.info("JWTCheckFilter doFilterInternal 메소드 ===================");
 
-        //accessToken 처리
-        String accessToken = jwtUtil.extractToken(request).get();
+        String accessToken = jwtUtil.extractToken(request).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ACCESS_TOKEN));
         log.info("accessToken : " + accessToken);
-        //access 토큰검증
+
         if (jwtUtil.isTokenValid(accessToken)) {
             log.info("accessToken 검증 완료, 유효함");
-            //검증한 토큰이 만료
+
             if(jwtUtil.isExpired(accessToken)) {
                 log.info("accessToken 검증 완료 2, 만료됨");
-                long memberId = jwtUtil.extractMemberId(accessToken).get();
-                // Refresh Token 처리 로직 추가
-                //memberId로 refreshToken 가져옴
+                long memberId = jwtUtil.extractMemberId(accessToken).orElseThrow(() -> new CustomException(ErrorCode.JWT_NULL_MEMBER_ID));
                 Optional<String> refreshToken = jwtUtil.getRefreshToken(memberId);
 
-                //refreshToken 유효성 검증 , 유효한 토큰이라면 accessToken 재발급
                 if (refreshToken.isPresent()) {
                     log.info("refreshToken 존재, accessToken 재발급");
                     if (jwtUtil.isTokenValid(refreshToken.get())) {
@@ -80,9 +76,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 } else throw new CustomException(ErrorCode.JWT_NULL_REFRESH);
             }
             else{
-                //만료되지 않았다면
-                long memberId = jwtUtil.extractMemberId(accessToken).get();
-                //securityContextHolder에 저장
+                long memberId = jwtUtil.extractMemberId(accessToken).orElseThrow(() -> new CustomException(ErrorCode.JWT_NULL_MEMBER_ID));
                 saveAuthentication(memberId);
             }
         }

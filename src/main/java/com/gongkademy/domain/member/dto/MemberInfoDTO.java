@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class MemberInfoDTO {
 
     //멤버 정보 조회
+    private Long id;
     private String email;
     private String name;
     private String nickname;

@@ -22,6 +22,7 @@ public interface MemberService {
      */
     default MemberInfoDTO entityToMemberInfoDTO(Member member) {
         return MemberInfoDTO.builder()
+                .id(member.getId())
                 .name(member.getName())
                 .nickname(member.getNickname())
                 .email(member.getEmail())

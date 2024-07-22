@@ -10,20 +10,28 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 @Component
 @RequiredArgsConstructor
 @Log4j2
-public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
+public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     private static final String SIGNUP_URL = "http://localhost:3000/signup";
     private static final String MAIN_URL = "http://localhost:3000";
+
     private final JWTUtil jwtUtil;
+
+    private String redirectUrl = "http://localhost:3000/auth/google/val";
 
     /**
      * 로그인 성공 후 핸들러 메서드
@@ -37,14 +45,12 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         addAccessTokenCookie(response, accessToken);
 
-        String redirectUrl = oAuthUser.getRoleNames().contains(MemberRole.USER.toString()) ? MAIN_URL : SIGNUP_URL;
-        log.info("MemberRole: " + oAuthUser.getRoleNames());
-        log.info("redirectUrl: " + redirectUrl);
-        log.info("accessToken: " + accessToken);
-        if(redirectUrl.equals(MAIN_URL)){
-            loginSuccess(response, oAuthUser);
-        }
-        response.sendRedirect(redirectUrl);
+        String mode = oAuthUser.getRoleNames().contains(MemberRole.USER.toString()) ? "login" : "signup";
+
+        String targetUrl = UriComponentsBuilder.fromUriString(redirectUrl)
+                .queryParam("mode",mode )
+                .build().toUriString();
+        getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 
     public void addAccessTokenCookie(HttpServletResponse response, String accessToken) {

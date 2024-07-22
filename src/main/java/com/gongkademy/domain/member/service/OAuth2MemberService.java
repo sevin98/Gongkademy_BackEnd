@@ -11,14 +11,13 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -41,10 +40,12 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
 
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
-        Member member = getMember(email, name);
-
-        // 기존 사용자 정보를 사용하여 OAuth2User 객체 반환
-        return new PrincipalDetails(member, oAuth2User.getAttributes());
+        try {
+            Member member = getMember(email, name);
+            return new PrincipalDetails(member, oAuth2User.getAttributes());
+        } catch (CustomException e) {
+            throw new OAuth2AuthenticationException(new OAuth2Error(e.getErrorCode().name(), e.getErrorCode().getMessage(), null), e.getErrorCode().getMessage(), e);
+        }
     }
 
     private Member getMember(String email, String name) {

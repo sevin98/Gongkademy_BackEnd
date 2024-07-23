@@ -55,11 +55,18 @@ public class CourseController {
 		return new ResponseEntity<>(courseResponseDTOs, HttpStatus.OK);
 	}
 	
-	// - 목차 조회
+	// - 목차 조회(로그인 유저)
 	@GetMapping("/list/{course_id}")
 	public ResponseEntity<?> getCourseContents(@PathVariable("course_id") Long id, @AuthenticationPrincipal PrincipalDetails principalDetails){
         Long currentMemberId = principalDetails.getMemberId();
 		List<CourseContentsResponseDTO> courseContentsDTOs = courseService.getCourseContents(id,currentMemberId);
+		return new ResponseEntity<>(courseContentsDTOs, HttpStatus.OK);
+	}
+
+	// - 목차 조회(비로그인유저)
+	@GetMapping("/list/all/{course_id}")
+	public ResponseEntity<?> getCourseContentList(@PathVariable("course_id") Long id){
+		List<CourseContentsGuestResponseDTO> courseContentsDTOs = courseService.getCourseContentsForGuest(id);
 		return new ResponseEntity<>(courseContentsDTOs, HttpStatus.OK);
 	}
 	

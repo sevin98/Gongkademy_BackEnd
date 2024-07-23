@@ -20,7 +20,9 @@ public interface CourseService {
 	List<CourseGuestResponseDTO> getAllCoursesForGuest();
 	
 	List<CourseContentsResponseDTO> getCourseContents(Long courseId, Long currentMemberId);
-	
+
+	List<CourseContentsGuestResponseDTO> getCourseContentsForGuest(Long courseId);
+
 	CourseResponseDTO registCourse(Long courseId, Long currentMemberId);
 	
 	CourseResponseDTO scrapCourse(Long courseId, Long currentMemberId);

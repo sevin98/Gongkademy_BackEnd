@@ -145,6 +145,18 @@ public class CourseServiceImpl implements CourseService {
 		return courseContentsDTOs;
 	}
 
+	@Override
+	public List<CourseContentsGuestResponseDTO> getCourseContentsForGuest(Long courseId) {
+		List<Lecture> lectures = lectureRepository.findByCourseId(courseId);
+		List<CourseContentsGuestResponseDTO> courseContentsDTOs = new ArrayList<>();
+
+		for(Lecture lecture : lectures) {
+			CourseContentsGuestResponseDTO dto = this.convertToDTOContentsGuest(lecture);
+			courseContentsDTOs.add(dto);
+		}
+		return courseContentsDTOs;
+	}
+
     @Override
     public CourseResponseDTO registCourse(Long courseId, Long memberId) {               
         Member member = memberRepository.findById(memberId)
@@ -407,6 +419,16 @@ public class CourseServiceImpl implements CourseService {
 		courseContentsResponseDTO.setTitle(lecture.getTitle());
 		courseContentsResponseDTO.setLink(lecture.getLink());
 		return courseContentsResponseDTO;
+	}
+
+	private CourseContentsGuestResponseDTO convertToDTOContentsGuest(Lecture lecture) {
+		return CourseContentsGuestResponseDTO.builder()
+				.lectureId(lecture.getId())
+				.lectureOrder(lecture.getLectureOrder())
+				.time(lecture.getTime())
+				.title(lecture.getTitle())
+				.link(lecture.getLink())
+				.build();
 	}
 
 	private RegistCourse converToEntityRegistCourse(Long courseId, Long memberId) {

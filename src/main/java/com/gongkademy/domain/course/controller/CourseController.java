@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.gongkademy.domain.course.dto.response.*;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -23,12 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gongkademy.domain.course.dto.request.CourseLikeRequestDTO;
-import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
-import com.gongkademy.domain.course.dto.response.CourseInfoResponseDTO;
-import com.gongkademy.domain.course.dto.response.CourseLikeResponseDTO;
-import com.gongkademy.domain.course.dto.response.CourseResponseDTO;
-import com.gongkademy.domain.course.dto.response.LectureDetailResponseDTO;
-import com.gongkademy.domain.course.dto.response.NoticeResponseDTO;
 import com.gongkademy.domain.course.service.CourseService;
 import com.gongkademy.domain.member.dto.PrincipalDetails;
 
@@ -45,11 +40,18 @@ public class CourseController {
     private final String REQUEST_PARAM_PAGE = "page";
     
 	// 1. 전체 강좌 관련
-	// - 전체 강좌 목록 조회
+	// - 전체 강좌 목록 조회(로그인 유저)
 	@GetMapping
 	public ResponseEntity<?> getAllCourses(@AuthenticationPrincipal PrincipalDetails principalDetails){
         Long currentMemberId = principalDetails.getMemberId();
 		List<CourseResponseDTO> courseResponseDTOs = courseService.getAllCourses(currentMemberId);
+		return new ResponseEntity<>(courseResponseDTOs, HttpStatus.OK);
+	}
+
+	// - 전체 강좌 목록 조회(비로그인 유저)
+	@GetMapping("/all")
+	public ResponseEntity<?> getAllCourseList(){
+		List<CourseGuestResponseDTO> courseResponseDTOs = courseService.getAllCoursesForGuest();
 		return new ResponseEntity<>(courseResponseDTOs, HttpStatus.OK);
 	}
 	

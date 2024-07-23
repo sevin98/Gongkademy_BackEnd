@@ -1,5 +1,6 @@
 package com.gongkademy.domain.course.service;
 
+import com.gongkademy.domain.course.dto.response.*;
 import com.gongkademy.domain.course.entity.CourseStatus;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -12,12 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.gongkademy.domain.course.dto.request.CourseLikeRequestDTO;
-import com.gongkademy.domain.course.dto.response.CourseContentsResponseDTO;
-import com.gongkademy.domain.course.dto.response.CourseInfoResponseDTO;
-import com.gongkademy.domain.course.dto.response.CourseLikeResponseDTO;
-import com.gongkademy.domain.course.dto.response.CourseResponseDTO;
-import com.gongkademy.domain.course.dto.response.LectureDetailResponseDTO;
-import com.gongkademy.domain.course.dto.response.NoticeResponseDTO;
 import com.gongkademy.domain.course.entity.Course;
 import com.gongkademy.domain.course.entity.CourseComment;
 import com.gongkademy.domain.course.entity.CourseFile;
@@ -79,6 +74,18 @@ public class CourseServiceImpl implements CourseService {
 		for(Course course : courses) {
             CourseResponseDTO dto = this.convertToDTO(course, memberId);
             courseResponseDTOs.add(dto);
+		}
+		return courseResponseDTOs;
+	}
+
+	@Override
+	public List<CourseGuestResponseDTO> getAllCoursesForGuest() {
+		List<CourseGuestResponseDTO> courseResponseDTOs = new ArrayList<>();
+
+		List<Course> courses = courseRepository.findAllByStatus(CourseStatus.OPEN);
+		for(Course course : courses) {
+			CourseGuestResponseDTO dto = this.convertToGuestDTO(course);
+			courseResponseDTOs.add(dto);
 		}
 		return courseResponseDTOs;
 	}
@@ -359,8 +366,10 @@ public class CourseServiceImpl implements CourseService {
 		courseResponseDTO.setSummary(course.getSummary());
 		
 		// 강좌 대표 이미지 조회
-		String filename = course.getCourseImg().getSaveFile();
-		courseResponseDTO.setCourseImgAddress(filename);
+		if(course.getCourseImg()!=null){
+			String filename = course.getCourseImg().getSaveFile();
+			courseResponseDTO.setCourseImgAddress(filename);
+		}
 		
 		Boolean isRegistered = registCourseRepository.existsByMemberIdAndCourseId(memberId, course.getId());
 		courseResponseDTO.setIsRegistered(isRegistered);
@@ -368,6 +377,25 @@ public class CourseServiceImpl implements CourseService {
 		Boolean isSaved = scrapRepository.existsByMemberIdAndCourseId(memberId, course.getId());
 		courseResponseDTO.setIsSaved(isSaved);
 
+		return courseResponseDTO;
+	}
+
+	private CourseGuestResponseDTO convertToGuestDTO(Course course) {
+		CourseGuestResponseDTO courseResponseDTO = new CourseGuestResponseDTO();
+		courseResponseDTO.setCourseId(course.getId());
+		courseResponseDTO.setTotalCourseTime(course.getTotalCourseTime());
+		courseResponseDTO.setTitle(course.getTitle());
+		courseResponseDTO.setReviewCount(course.getReviewCount());
+		courseResponseDTO.setRegistCount(course.getRegistCount());
+		courseResponseDTO.setLectureCount(course.getLectureCount());
+		courseResponseDTO.setAvgRating(course.getAvgRating());
+		courseResponseDTO.setSummary(course.getSummary());
+
+		// 강좌 대표 이미지 조회
+		if(course.getCourseImg()!=null){
+			String filename = course.getCourseImg().getSaveFile();
+			courseResponseDTO.setCourseImgAddress(filename);
+		}
 		return courseResponseDTO;
 	}
 	

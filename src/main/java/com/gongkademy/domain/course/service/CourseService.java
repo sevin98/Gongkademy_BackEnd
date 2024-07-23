@@ -31,6 +31,8 @@ public interface CourseService {
 	
 	CourseResponseDTO getCourseDetail(Long courseId, Long currentMemberId);
 
+	CourseGuestResponseDTO getCourseDetailInfo(Long courseId);
+
 	LectureDetailResponseDTO getLectureDetail(Long courseId, int lectureOrder, Long currentMemberId);	
 	
 	Page<NoticeResponseDTO> getCourseNotices(Long courseId, int pageNo);

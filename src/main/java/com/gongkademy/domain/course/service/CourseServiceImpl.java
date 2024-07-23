@@ -238,8 +238,16 @@ public class CourseServiceImpl implements CourseService {
 
 		if(course.getStatus() == CourseStatus.WAIT) throw new CustomException(ErrorCode.WAIT_STATUS_COURSE);
 
-		CourseResponseDTO courseResponseDTO = this.convertToDTO(course, memberId);
-		return courseResponseDTO;
+		return convertToDTO(course, memberId);
+	}
+
+	@Override
+	public CourseGuestResponseDTO getCourseDetailInfo(Long courseId) {
+		Course course = courseRepository.findById(courseId)
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
+
+		if(course.getStatus() == CourseStatus.WAIT) throw new CustomException(ErrorCode.WAIT_STATUS_COURSE);
+		return convertToGuestDTO(course);
 	}
 	
 

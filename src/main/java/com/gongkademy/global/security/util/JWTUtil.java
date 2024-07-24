@@ -27,8 +27,8 @@ public class JWTUtil {
     private static String JWT_KEY;
 
     private static final String ACCESS_TOKEN = "accessToken";
-    private static final Long ACCESS_TOKEN_EXPIRATION_PERIOD = 1800000L; // 30분(임의 설정)
-    private static final Long REFRESH_TOKEN_EXPIRATION_PERIOD = 604800000L; // 7일(임의 설정)
+    private static final Long ACCESS_TOKEN_EXPIRATION_PERIOD = 5000L; // 30분(임의 설정)
+    private static final Long REFRESH_TOKEN_EXPIRATION_PERIOD = 5000L; // 7일(임의 설정)
     private static final String PK_CLAIM = "pk";
 
     private final RedisUtil redisUtil;

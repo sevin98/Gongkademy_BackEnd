@@ -26,30 +26,17 @@ import java.io.PrintWriter;
 @Log4j2
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-    private static final String SIGNUP_URL = "http://localhost:3000/signup";
-    private static final String MAIN_URL = "http://localhost:3000";
-
     private final JWTUtil jwtUtil;
-
     private String redirectUrl = "http://localhost:3000/auth/google/val";
 
-    /**
-     * 로그인 성공 후 핸들러 메서드
-     * if 멤버의 role에 USER 가 없다면 (아직 GUEST만 존재) 회원가입 페이지로 이동
-     * else 로그인
-     */
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         PrincipalDetails oAuthUser = (PrincipalDetails) authentication.getPrincipal();
-        String accessToken = jwtUtil.createAccessToken(oAuthUser.getMemberId());
 
+        String accessToken = jwtUtil.createAccessToken(oAuthUser.getMemberId());
         addAccessTokenCookie(response, accessToken);
 
-        String mode = oAuthUser.getRoleNames().contains(MemberRole.USER.toString()) ? "login" : "signup";
-
-        String targetUrl = UriComponentsBuilder.fromUriString(redirectUrl)
-                .queryParam("mode",mode )
-                .build().toUriString();
+        String targetUrl = UriComponentsBuilder.fromUriString(redirectUrl).build().toUriString();
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 

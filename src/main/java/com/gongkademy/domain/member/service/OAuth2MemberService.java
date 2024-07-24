@@ -30,6 +30,7 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
 
     /**
      * OAuth2UserRequest를 사용하여 사용자를 로드합니다.
+     *
      * @param userRequest OAuth2UserRequest
      * @return OAuth2User 객체
      * @throws OAuth2AuthenticationException 인증 예외
@@ -70,12 +71,12 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
                     //한 달 지났다면 재가입
                     member = joinMember(email, name);
                 }
-            }else{
+            } else {
                 log.info("getMember() : 같은 이메일의 탈퇴 안된 사람 중 같은 이메일 존재 -> 로그인으로 넘어감");
                 //탈퇴 안된 사람이라면 정보 업데이트 (로그인)
                 member.updateName(name);
             }
-        }else{
+        } else {
             log.info("getMember() : 같은 이메일의 회원 존재하지 않음");
             //기존DB에 없으면 join
             member = joinMember(email, name);
@@ -85,16 +86,16 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
         return memberRepository.save(member);
     }
 
-    private Member joinMember(String email, String name){
+    private Member joinMember(String email, String name) {
         Member member = Member.builder()
                 .email(email)
                 .name(name)
-                .nickname("")
+                .nickname(name)
                 .birthday(null)
                 .agreeMarketing(false)
                 .isNotificationEnabled(true)
                 .build();
-        member.addRole(MemberRole.GUEST); // 이후 회원가입을 위해 최초 로그인은 GUEST로 설정
+        member.addRole(MemberRole.USER);
         return member;
     }
 }

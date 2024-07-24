@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -22,39 +23,31 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Getter
+@Setter
 public class JWTUtil {
 
     private static String JWT_KEY;
 
     private static final String ACCESS_TOKEN = "accessToken";
-    private static final Long ACCESS_TOKEN_EXPIRATION_PERIOD = 5000L; // 30분(임의 설정)
-    private static final Long REFRESH_TOKEN_EXPIRATION_PERIOD = 5000L; // 7일(임의 설정)
     private static final String PK_CLAIM = "pk";
 
     private final RedisUtil redisUtil;
 
-    private List<String> excludeMethods;
-    private List<String> excludeEndpoints;
+
+    @Value("${jwt.access-token-expiration-period}")
+    private Long ACCESS_TOKEN_EXPIRATION_PERIOD;
+    @Value("${jwt.refresh-token-expiration-period}")
+    private Long REFRESH_TOKEN_EXPIRATION_PERIOD;
+
     @Value("${JWT_KEY}")
     public void setJwtKey(String jwtKey) {
         JWT_KEY = jwtKey;
     }
 
-    @Value("${jwt-filter.exclude-methods}")
-    public void setExcludeMethods(List<String> excludeMethods){
-        this.excludeMethods = excludeMethods;
-    }
-    @Value("${jwt-filter.exclude-endpoints}")
-    public void setExcludeEndpoints(List<String> excludeEndpoints){
-        this.excludeEndpoints = excludeEndpoints;
-    }
-
-
-
 
     /**
      * AccessToken 생성 메서드
-     * */
+     */
     public String createAccessToken(long id) {
         Date now = new Date();
         SecretKey key = null;
@@ -116,7 +109,7 @@ public class JWTUtil {
      */
     public Optional<String> extractToken(HttpServletRequest request) {
         //TODO: 예외상황 고민 필요
-        return  Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
+        return Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
                 .filter(cookie -> ACCESS_TOKEN.equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .findFirst();
@@ -166,8 +159,8 @@ public class JWTUtil {
     }
 
     /**
-    * 토큰 유효성 검증
-    */
+     * 토큰 유효성 검증
+     */
     public boolean isTokenValid(String token) {
         SecretKey key = null;
         try {

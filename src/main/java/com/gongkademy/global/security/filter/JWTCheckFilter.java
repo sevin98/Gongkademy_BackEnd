@@ -11,21 +11,30 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 
 @Log4j2
 @RequiredArgsConstructor
+@Setter
+@Getter
+@Component
 public class JWTCheckFilter extends OncePerRequestFilter {
 
     private final MemberRepository memberRepository;
@@ -34,10 +43,16 @@ public class JWTCheckFilter extends OncePerRequestFilter {
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
-
+    @Value("${jwt-filter.exclude-methods}")
+    private List<String> excludeMethods;
+    @Value("${jwt-filter.exclude-endpoints}")
+    private List<String> excludeEndpoints;
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return jwtUtil.getExcludeMethods().contains(request.getMethod()) && jwtUtil.getExcludeEndpoints().contains(request.getRequestURI());
+        log.info("메소드와 엔드포인트");
+        log.info(excludeMethods);
+        log.info(excludeEndpoints);
+        return excludeMethods.contains(request.getMethod()) && excludeEndpoints.contains(request.getRequestURI());
     }
 
     /**

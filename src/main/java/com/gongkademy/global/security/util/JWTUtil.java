@@ -2,8 +2,7 @@ package com.gongkademy.global.security.util;
 
 import javax.crypto.SecretKey;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 
 import com.gongkademy.global.exception.ErrorCode;
 import com.gongkademy.global.exception.CustomException;
@@ -13,17 +12,16 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.Optional;
-
 @Log4j2
 @Component
 @RequiredArgsConstructor
+@Getter
 public class JWTUtil {
 
     private static String JWT_KEY;
@@ -35,10 +33,24 @@ public class JWTUtil {
 
     private final RedisUtil redisUtil;
 
+    private List<String> excludeMethods;
+    private List<String> excludeEndpoints;
     @Value("${JWT_KEY}")
     public void setJwtKey(String jwtKey) {
         JWT_KEY = jwtKey;
     }
+
+    @Value("${jwt-filter.exclude-methods}")
+    public void setExcludeMethods(List<String> excludeMethods){
+        this.excludeMethods = excludeMethods;
+    }
+    @Value("${jwt-filter.exclude-endpoints}")
+    public void setExcludeEndpoints(List<String> excludeEndpoints){
+        this.excludeEndpoints = excludeEndpoints;
+    }
+
+
+
 
     /**
      * AccessToken 생성 메서드

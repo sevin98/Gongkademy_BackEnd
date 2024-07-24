@@ -28,24 +28,17 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JWTCheckFilter extends OncePerRequestFilter {
 
-    //    private static final String NO_CHECK_URL = "/login";
     private final MemberRepository memberRepository;
     private final JWTUtil jwtUtil;
     private final RedisUtil redisUtil;
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-    /**
-     * 특정 경로에 대해 필터링을 제외하기 위한 메서드
-     * @return 필터링을 제외할 경우 true 반환
-     * 개발단계에서는 해당 메소드 사용할 필요 없음
-     * 나중에 loginUrl 커스텀하면 여기도 바꿔야함
-     */
-//    @Override
-//    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-//        String path = request.getRequestURI();
-//        log.info("url검사 ======================" + path);
-//        return path.equals(NO_CHECK_URL);
-//    }
+
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        return jwtUtil.getExcludeMethods().contains(request.getMethod()) && jwtUtil.getExcludeEndpoints().contains(request.getRequestURI());
+    }
 
     /**
      * JWT 토큰을 검증하고 인증을 처리하는 메서드

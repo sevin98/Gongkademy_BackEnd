@@ -22,6 +22,7 @@ public enum ErrorCode {
     JWT_MALFORMED(HttpStatus.UNAUTHORIZED, "손상된 토큰입니다."),
     JWT_HEADER_STRING(HttpStatus.UNAUTHORIZED, "토큰 헤더의 문자열이 이상합니다."),
     JWT_NULL_REFRESH(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 없습니다."),
+    JWT_EXPIRED_REFRESH(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 만료되었습니다."),
     JWT_EXPIRED(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
     JWT_INVALID(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
     JWT_NULL_MEMBER_ID(HttpStatus.UNAUTHORIZED, "memberId가 없습니다"),

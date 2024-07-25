@@ -36,6 +36,10 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String accessToken = jwtUtil.createAccessToken(oAuthUser.getMemberId());
         addAccessTokenCookie(response, accessToken);
 
+        String refreshToken = jwtUtil.createRefreshToken(oAuthUser.getMemberId());
+        log.info("==loginSucess== refresh token : {}", refreshToken);
+        jwtUtil.setRefreshToken(oAuthUser.getMemberId(), refreshToken);
+
         String targetUrl = UriComponentsBuilder.fromUriString(redirectUrl).build().toUriString();
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
@@ -47,11 +51,5 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         accessTokenCookie.setPath("/");
         accessTokenCookie.setMaxAge(60 * 60); // 1시간 동안 유효
         response.addCookie(accessTokenCookie);
-    }
-
-    private void loginSuccess(HttpServletResponse response, PrincipalDetails oAuthUser) {
-        String refreshToken = jwtUtil.createRefreshToken(oAuthUser.getMemberId());
-        log.info("==loginSucess== refresh token : " + refreshToken);
-        jwtUtil.setRefreshToken(oAuthUser.getMemberId(), refreshToken);
     }
 }

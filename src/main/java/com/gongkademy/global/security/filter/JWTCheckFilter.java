@@ -74,12 +74,14 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 Optional<String> refreshToken = jwtUtil.getRefreshToken(memberId);
 
                 if (refreshToken.isPresent()) {
-                    log.info("refreshToken 존재, accessToken 재발급");
+                    log.info("refreshToken 존재, refresh token 만료 확인");
                     if (jwtUtil.isTokenValid(refreshToken.get())) {
-                        String newAccessToken = jwtUtil.createAccessToken(memberId);
-                        oAuth2LoginSuccessHandler.addAccessTokenCookie(response, newAccessToken);
-                        log.info("newAccessToken 재발급 완료" + newAccessToken);
-                        saveAuthentication(memberId);
+                        if (!jwtUtil.isExpired(refreshToken.get())) {
+                            String newAccessToken = jwtUtil.createAccessToken(memberId);
+                            oAuth2LoginSuccessHandler.addAccessTokenCookie(response, newAccessToken);
+                            log.info("newAccessToken 재발급 완료" + newAccessToken);
+                            saveAuthentication(memberId);
+                        } else throw new CustomException(ErrorCode.JWT_EXPIRED_REFRESH);
                     }
                 } else throw new CustomException(ErrorCode.JWT_NULL_REFRESH);
             }

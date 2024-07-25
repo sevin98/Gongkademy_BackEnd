@@ -1,11 +1,11 @@
 package com.gongkademy.domain.community.controller;
 
-import com.gongkademy.domain.community.dto.request.BoardRequestDTO;
 import com.gongkademy.domain.community.dto.request.ConsultingBoardRequestDTO;
-import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
 import com.gongkademy.domain.community.dto.response.ConsultingBoardResponseDTO;
 import com.gongkademy.domain.community.service.ConsultingBoardService;
 import com.gongkademy.domain.member.dto.PrincipalDetails;
+import com.gongkademy.global.exception.CustomException;
+import com.gongkademy.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -29,49 +29,84 @@ public class ConsultingController {
     private final String REQUEST_PARAM_PAGE = "page";
     private final String REQUEST_PARAM_CRITERIA = "criteria";
     private final String KEY_WORD = "keyword";
-    // Consulting 전체 리스트 반환
-    @GetMapping("")
+    // Consulting 전체 리스트 반환 (로그인 한 경우)
+    @GetMapping("/login")
     public ResponseEntity<?> getAllConsulitng(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
                                        @RequestParam(defaultValue = BASE_CRITERIA, value = REQUEST_PARAM_CRITERIA) String criteria,
                                               @RequestParam(value = KEY_WORD) String keyword,
                                               @AuthenticationPrincipal PrincipalDetails principalDetails){
         Long currentMemberId = principalDetails.getMemberId();
+        if(currentMemberId == null) throw new CustomException(ErrorCode.JWT_NULL_MEMBER_ID);
+
         Map<String, Object> result = consultingBoardService.findAllConsultingBoards(pageNo, criteria, keyword, currentMemberId);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
-    // Consulting 상세 조회
-    @GetMapping("/{articleId}")
+    @GetMapping("/myboard")
+    public ResponseEntity<?> getMyConsulitng(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
+                                              @RequestParam(defaultValue = BASE_CRITERIA, value = REQUEST_PARAM_CRITERIA) String criteria,
+                                              @AuthenticationPrincipal PrincipalDetails principalDetails){
+        Long currentMemberId = principalDetails.getMemberId();
+        if(currentMemberId == null) throw new CustomException(ErrorCode.JWT_NULL_MEMBER_ID);
+
+        Map<String, Object> result = consultingBoardService.findMyConsultingBoards(pageNo, criteria, currentMemberId);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    // Consulting 전체 리스트 반환 (로그인 하지 않은 경우)
+    @GetMapping
+    public ResponseEntity<?> getAllConsulitng(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
+                                              @RequestParam(defaultValue = BASE_CRITERIA, value = REQUEST_PARAM_CRITERIA) String criteria,
+                                              @RequestParam(value = KEY_WORD) String keyword){
+        Map<String, Object> result = consultingBoardService.findAllConsultingBoards(pageNo, criteria, keyword);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    // Consulting 상세 조회 (로그인 한 경우)
+    @GetMapping("/{articleId}/login")
     public ResponseEntity<?> getConsulting(@AuthenticationPrincipal PrincipalDetails principalDetails, @PathVariable Long articleId) {
         Long currentMemberId = principalDetails.getMemberId();
+        if(currentMemberId == null) throw new CustomException(ErrorCode.JWT_NULL_MEMBER_ID);
+
         ConsultingBoardResponseDTO result = consultingBoardService.findConsultingBoard(articleId, currentMemberId);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
+    // Consulting 상세 조회 (로그인 하지 않은 경우)
+    @GetMapping("/{articleId}")
+    public ResponseEntity<?> getConsulting(@PathVariable Long articleId) {
+        ConsultingBoardResponseDTO result = consultingBoardService.findConsultingBoard(articleId);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
     // Consulting 작성
-    @PostMapping("")
-    public ResponseEntity<?> createConsulting(@RequestBody ConsultingBoardRequestDTO consultingBoardRequestDTO) {
+    @PostMapping
+    public ResponseEntity<?> createConsulting(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody ConsultingBoardRequestDTO consultingBoardRequestDTO) {
+        Long currentMemberId = principalDetails.getMemberId();
+        if(currentMemberId == null) throw new CustomException(ErrorCode.JWT_NULL_MEMBER_ID);
+
         ConsultingBoardResponseDTO result = consultingBoardService.createConsultingBoard(consultingBoardRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     // Consulting 수정
     @PatchMapping("/{articleId}")
-    public ResponseEntity<?> updateConsulting(@PathVariable Long articleId, @RequestBody ConsultingBoardRequestDTO consultingBoardRequestDTO) {
+    public ResponseEntity<?> updateConsulting(@AuthenticationPrincipal PrincipalDetails principalDetails, @PathVariable Long articleId, @RequestBody ConsultingBoardRequestDTO consultingBoardRequestDTO) {
+        Long currentMemberId = principalDetails.getMemberId();
+        if(currentMemberId == null) throw new CustomException(ErrorCode.JWT_NULL_MEMBER_ID);
+
         Long updatedArticleNo = consultingBoardService.updateConsultingBoard(articleId, consultingBoardRequestDTO);
 
-        // 해당 Consulting 게시글이 없는 경우
-        if (updatedArticleNo == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        } else {
-            return ResponseEntity.status(HttpStatus.OK).body(updatedArticleNo);
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(updatedArticleNo);
     }
 
     // Consulting 삭제
     @DeleteMapping("/{articleId}")
-    public ResponseEntity<?> deleteConsulting(@PathVariable Long articleId) {
-        consultingBoardService.deleteConsultingBoard(articleId);
+    public ResponseEntity<?> deleteConsulting(@AuthenticationPrincipal PrincipalDetails principalDetails, @PathVariable Long articleId) {
+        Long currentMemberId = principalDetails.getMemberId();
+        if(currentMemberId == null) throw new CustomException(ErrorCode.JWT_NULL_MEMBER_ID);
+
+        consultingBoardService.deleteConsultingBoard(articleId, currentMemberId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -79,6 +114,8 @@ public class ConsultingController {
     @PostMapping("/{articleId}/like")
     public ResponseEntity<?> toggleLikeCount(@AuthenticationPrincipal PrincipalDetails principalDetails, @PathVariable Long articleId) {
         Long currentMemberId = principalDetails.getMemberId();
+        if(currentMemberId == null) throw new CustomException(ErrorCode.JWT_NULL_MEMBER_ID);
+
         consultingBoardService.toggleLikeBoard(articleId, currentMemberId);
         return ResponseEntity.ok().build();
     }
@@ -88,6 +125,8 @@ public class ConsultingController {
     @PostMapping("/{articleId}/scrap")
     public ResponseEntity<?> toggleScrapCount(@AuthenticationPrincipal PrincipalDetails principalDetails, @PathVariable Long articleId) {
         Long currentMemberId = principalDetails.getMemberId();
+        if(currentMemberId == null) throw new CustomException(ErrorCode.JWT_NULL_MEMBER_ID);
+
         consultingBoardService.toggleScrapBoard(articleId, currentMemberId);
         return ResponseEntity.ok().build();
     }
@@ -96,6 +135,8 @@ public class ConsultingController {
     @GetMapping("/liked")
     public ResponseEntity<List<ConsultingBoardResponseDTO>> getLikeBoards(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId();
+        if(currentMemberId == null) throw new CustomException(ErrorCode.JWT_NULL_MEMBER_ID);
+
         List<ConsultingBoardResponseDTO> likeBoards = consultingBoardService.getLikeBoards(currentMemberId);
         return ResponseEntity.ok(likeBoards);
     }
@@ -104,6 +145,8 @@ public class ConsultingController {
     @GetMapping("/scrapped")
     public ResponseEntity<List<ConsultingBoardResponseDTO>> getScrapBoards(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId();
+        if(currentMemberId == null) throw new CustomException(ErrorCode.JWT_NULL_MEMBER_ID);
+
         List<ConsultingBoardResponseDTO> scrapBoards = consultingBoardService.getScrapBoards(currentMemberId);
         return ResponseEntity.ok(scrapBoards);
     }

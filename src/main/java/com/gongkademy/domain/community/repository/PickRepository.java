@@ -18,7 +18,7 @@ public interface PickRepository extends JpaRepository<Pick, Long> {
     // 보드와 멤버와 픽타입 불러오기
     Optional<Pick> findByBoardAndMemberAndPickType(Board board, Member member, PickType pickType);
 
-    List<Pick> findAllByMemberAndPickType(Member member, PickType pickType);
+    Optional<Pick> findByBoardArticleIdAndMemberAndPickType(Long articleId, Member member, PickType pickType);
 
-    Optional<Pick> findByBoardArticleIdAndMemberIdAndPickType(Long articleId, Long memberId, PickType pickType);
+    List<Pick> findAllByMemberAndPickType(Member member, PickType pickType);
 }

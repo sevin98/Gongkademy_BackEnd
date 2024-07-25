@@ -49,20 +49,61 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
         }
 
         List<ConsultingBoardResponseDTO> consultingBoards = page.getContent();
+        Map<String, Object> consults = new HashMap<>();
 
         for (ConsultingBoardResponseDTO c : consultingBoards) {
-            Optional<Pick> optionalLike = pickRepository.findByBoardArticleIdAndMemberIdAndPickType(c.getArticleId(), memberId, PickType.LIKE);
-            Optional<Pick> optionalScrap = pickRepository.findByBoardArticleIdAndMemberIdAndPickType(c.getArticleId(), memberId, PickType.SCRAP);
+            boolean isLiked = isLikedByMember(c.getArticleId(), memberId);
+            boolean isScrapped = isScrappedByMember(c.getArticleId(), memberId);
 
-            if(optionalLike.isPresent()) {
-                c.setIsLiked(true);
-            }
-
-            if(optionalScrap.isPresent()) {
-                c.setIsScrapped(true);
-            }
+            c.setIsLiked(isLiked);
+            c.setIsScrapped(isScrapped);
         }
 
+        consults.put("data", consultingBoards);
+        consults.put("totalPage", page.getTotalPages());
+        consults.put("totalCount", page.getTotalElements());
+
+        return consults;
+    }
+
+    @Override
+    public Map<String, Object> findMyConsultingBoards(int pageNo, String criteria, Long memberId) {
+        // 정렬 기준 내림차순 정렬
+        Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
+        Page<ConsultingBoardResponseDTO> page;
+
+        page = boardRepository.findMyConsultBoard(BoardType.CONSULT, memberId, pageable).map(this::convertToDTO);
+
+        List<ConsultingBoardResponseDTO> consultingBoards = page.getContent();
+        Map<String, Object> consults = new HashMap<>();
+
+        for (ConsultingBoardResponseDTO c : consultingBoards) {
+            boolean isLiked = isLikedByMember(c.getArticleId(), memberId);
+            boolean isScrapped = isScrappedByMember(c.getArticleId(), memberId);
+
+            c.setIsLiked(isLiked);
+            c.setIsScrapped(isScrapped);
+        }
+
+        consults.put("data", consultingBoards);
+        consults.put("totalPage", page.getTotalPages());
+        consults.put("totalCount", page.getTotalElements());
+
+        return consults;
+    }
+
+    @Override
+    public Map<String, Object> findAllConsultingBoards(int pageNo, String criteria, String keyword) {
+        // 정렬 기준 내림차순 정렬
+        Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
+        Page<ConsultingBoardResponseDTO> page;
+        if (keyword == null) {
+            page = boardRepository.findConsultBoard(BoardType.CONSULT, pageable).map(this::convertToDTO);
+        } else {
+            page = boardRepository.findConsultBoardsWithKeyword(BoardType.CONSULT, keyword, pageable).map(this::convertToDTO);
+        }
+
+        List<ConsultingBoardResponseDTO> consultingBoards = page.getContent();
         Map<String, Object> consults = new HashMap<>();
 
         consults.put("data", consultingBoards);
@@ -83,24 +124,26 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
     public ConsultingBoardResponseDTO findConsultingBoard(Long articleId, Long memberId) {
         Optional<Board> optionalQnaBoard = boardRepository.findById(articleId);
 
-        Optional<Pick> optionalLike = pickRepository.findByBoardArticleIdAndMemberIdAndPickType(articleId, memberId, PickType.LIKE);
-        Optional<Pick> optionalScrap = pickRepository.findByBoardArticleIdAndMemberIdAndPickType(articleId, memberId, PickType.SCRAP);
-
         if(optionalQnaBoard.isPresent()) {
             Board consultingBoard = optionalQnaBoard.get();
-            boolean isLiked = false;
-            boolean isScrapped = false;
-
-            if(optionalLike.isPresent()) {
-                isLiked = true;
-            }
-
-            if(optionalScrap.isPresent()) {
-                isScrapped = true;
-            }
+            boolean isLiked = isLikedByMember(consultingBoard.getArticleId(), memberId);
+            boolean isScrapped = isScrappedByMember(consultingBoard.getArticleId(), memberId);
 
             consultingBoard.setHit(consultingBoard.getHit() + 1);
             return convertToDTO(consultingBoard, isLiked, isScrapped);
+        }
+
+        throw new CustomException(ErrorCode.INVALID_BOARD_ID);
+    }
+
+    @Override
+    public ConsultingBoardResponseDTO findConsultingBoard(Long articleId) {
+        Optional<Board> optionalQnaBoard = boardRepository.findById(articleId);
+
+        if(optionalQnaBoard.isPresent()) {
+            Board consultingBoard = optionalQnaBoard.get();
+            consultingBoard.setHit(consultingBoard.getHit() + 1);
+            return convertToDTO(consultingBoard);
         }
 
         throw new CustomException(ErrorCode.INVALID_BOARD_ID);
@@ -111,11 +154,13 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
         Optional<Board> optConsultingBoard = boardRepository.findById(articleId);
 
         // articleId에 해당하는 게시글이 없는 경우
-        if (optConsultingBoard.isEmpty()) {
-            return null;
-        }
+        if (optConsultingBoard.isEmpty()) throw new CustomException(ErrorCode.INVALID_BOARD_ID);
 
         Board consultingBoard = optConsultingBoard.get();
+
+        // 게시글 작성자와 수정 요청자가 다른 경우
+        if (!consultingBoard.getMember().getId().equals(consultingBoardRequestDTO.getMemberId())) throw new CustomException(ErrorCode.FORBIDDEN);
+
         consultingBoard.setTitle(consultingBoardRequestDTO.getTitle());
         consultingBoard.setContent(consultingBoardRequestDTO.getContent());
 
@@ -123,7 +168,11 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
     }
 
     @Override
-    public void deleteConsultingBoard(Long articleId) {
+    public void deleteConsultingBoard(Long articleId, Long memberId) {
+        Board consultingBoard = boardRepository.findById(articleId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_BOARD_ID));
+
+        if (!consultingBoard.getMember().getId().equals(memberId)) throw new CustomException(ErrorCode.FORBIDDEN);
+
         boardRepository.deleteById(articleId);
     }
 
@@ -204,6 +253,20 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
         return scrapBoardDTOs;
     }
 
+    private boolean isLikedByMember(Long articleId, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+        Optional<Pick> pickOptional = pickRepository.findByBoardArticleIdAndMemberAndPickType(articleId, member, PickType.LIKE);
+        return pickOptional.isPresent();
+    }
+
+    private boolean isScrappedByMember(Long articleId, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+        Optional<Pick> pickOptional = pickRepository.findByBoardArticleIdAndMemberAndPickType(articleId, member, PickType.SCRAP);
+        return pickOptional.isPresent();
+    }
+
     private Board convertToEntity(ConsultingBoardRequestDTO consultingBoardRequestDTO) {
         Member member = memberRepository.findById(consultingBoardRequestDTO.getMemberId())
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
@@ -255,6 +318,5 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
                 .isScrapped(isScrapped)
                 .comments(consultingBoard.getComments())
                 .build();
-
     }
 }

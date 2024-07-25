@@ -7,20 +7,29 @@ import java.util.List;
 import java.util.Map;
 
 public interface QnaBoardService {
-    // 모든 Qna 게시글 조회하기
+    // 모든 Qna 게시글 조회하기 (로그인 한 경우)
     Map<String, Object> findAllQnaBoards(int pageNo, String criteria, String keyword, Long memberId);
+
+    // 내 Qna 게시글 조회하기
+    Map<String, Object> findMyQnaBoards(int pageNo, String criteria, Long memberId);
+
+    // 모든 Qna 게시글 조회하기 (로그인 하지 않은 경우)
+    Map<String, Object> findAllQnaBoards(int pageNo, String criteria, String keyword);
 
     // Qna 게시글 작성하기
     QnaBoardResponseDTO createQnaBoard(QnaBoardRequestDTO qnaBoardRequestDTO);
 
-    // Qna 게시글 조회하기
+    // Qna 게시글 조회하기 (로그인 한 경우)
     QnaBoardResponseDTO findQnaBoard(Long articleId, Long memberId);
+
+    // Qna 게시글 조회하기 (로그인 하지 않은 경우)
+    QnaBoardResponseDTO findQnaBoard(Long articleId);
 
     // Qna 게시글 수정하기
     Long updateQnaBoard(Long articleId, QnaBoardRequestDTO qnaBoardRequestDTO);
 
     // Qna 게시글 삭제하기
-    void deleteQnaBoard(Long articleId);
+    void deleteQnaBoard(Long articleId, Long memberId);
 
     // Qna 게시글 좋아요
     void toggleLikeBoard(Long articleId, Long memberId);

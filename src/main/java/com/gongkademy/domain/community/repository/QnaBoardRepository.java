@@ -16,7 +16,10 @@ import java.util.List;
 public interface QnaBoardRepository extends JpaRepository<QnaBoard, Long> {
     @Query("SELECT b FROM QnaBoard b WHERE b.boardType = :boardType")
     Page<QnaBoard> findQnaBoard(@Param("boardType") BoardType boardType, Pageable pageable);
-    // CONSULT 타입과 키워드를 이용한 조회
+    // BOARD 타입과 키워드를 이용한 조회
     @Query("SELECT b FROM QnaBoard b WHERE b.boardType = :boardType AND (b.title LIKE %:keyword% OR b.content LIKE %:keyword%)")
     Page<QnaBoard> findQnaBoardsWithKeyword(@Param("boardType") BoardType boardType, @Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT b FROM QnaBoard b WHERE b.boardType = :boardType AND b.member.id = :memberId")
+    Page<QnaBoard> findMyQnaBoard(@Param("boardType") BoardType boardType, @Param("memberId") Long memberId, Pageable pageable);
 }

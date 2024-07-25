@@ -23,6 +23,9 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     @Query("SELECT b FROM Board b WHERE b.boardType = :boardType AND (b.title LIKE %:keyword% OR b.content LIKE %:keyword%)")
     Page<Board> findConsultBoardsWithKeyword(@Param("boardType")BoardType boardType, @Param("keyword") String keyword, Pageable pageable);
 
+    @Query("SELECT b FROM Board b WHERE b.boardType = :boardType AND b.member.id = :memberId")
+    Page<Board> findMyConsultBoard(@Param("boardType")BoardType boardType, @Param("memberId") Long memberId, Pageable pageable);
+
     // 최신순 조회
     Page<Board> findByBoardTypeOrderByCreateTimeDesc(BoardType boardtype, Pageable pageable);
 
@@ -31,6 +34,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 
     @Query("SELECT b.boardType FROM Board b WHERE b.articleId = :boardId")
     BoardType findBoardTypeByBoardId(@Param("boardId") Long boardId);
+
 
 
 }

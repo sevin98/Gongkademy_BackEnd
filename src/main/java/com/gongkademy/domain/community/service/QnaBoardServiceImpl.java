@@ -49,20 +49,59 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         }
 
         List<QnaBoardResponseDTO> qnaBoards = page.getContent();
+        Map<String, Object> qnas = new HashMap<>();
 
         for (QnaBoardResponseDTO q : qnaBoards) {
-            Optional<Pick> optionalLike = pickRepository.findByBoardArticleIdAndMemberIdAndPickType(q.getArticleId(), memberId, PickType.LIKE);
-            Optional<Pick> optionalScrap = pickRepository.findByBoardArticleIdAndMemberIdAndPickType(q.getArticleId(), memberId, PickType.SCRAP);
-
-            if(optionalLike.isPresent()) {
-                q.setIsLiked(true);
-            }
-
-            if(optionalScrap.isPresent()) {
-                q.setIsScrapped(true);
-            }
+            boolean isLiked = isLikedByMember(q.getArticleId(), memberId);
+            boolean isScrapped = isScrappedByMember(q.getArticleId(), memberId);
+            q.setIsLiked(isLiked);
+            q.setIsScrapped(isScrapped);
         }
 
+        qnas.put("data", qnaBoards);
+        qnas.put("totalPage", page.getTotalPages());
+        qnas.put("totalCount", page.getTotalElements());
+
+        return qnas;
+    }
+
+    @Override
+    public Map<String, Object> findMyQnaBoards(int pageNo, String criteria, Long memberId) {
+        // 정렬 기준 내림차순 정렬
+        Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
+        Page<QnaBoardResponseDTO> page;
+
+        page = qnaBoardRepository.findMyQnaBoard(BoardType.QNA, memberId, pageable).map(this::convertToDTO);
+
+        List<QnaBoardResponseDTO> qnaBoards = page.getContent();
+
+        for (QnaBoardResponseDTO q : qnaBoards) {
+            boolean isLiked = isLikedByMember(q.getArticleId(), memberId);
+            boolean isScrapped = isScrappedByMember(q.getArticleId(), memberId);
+            q.setIsLiked(isLiked);
+            q.setIsScrapped(isScrapped);
+        }
+
+        Map<String, Object> qnas = new HashMap<>();
+        qnas.put("data", qnaBoards);
+        qnas.put("totalPage", page.getTotalPages());
+        qnas.put("totalCount", page.getTotalElements());
+
+        return qnas;
+    }
+
+    @Override
+    public Map<String, Object> findAllQnaBoards(int pageNo, String criteria, String keyword) {
+        // 정렬 기준 내림차순 정렬
+        Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
+        Page<QnaBoardResponseDTO> page;
+        if (keyword == null) {
+            page = qnaBoardRepository.findQnaBoard(BoardType.QNA, pageable).map(this::convertToDTO);
+        } else {
+            page = qnaBoardRepository.findQnaBoardsWithKeyword(BoardType.QNA, keyword, pageable).map(this::convertToDTO);
+        }
+
+        List<QnaBoardResponseDTO> qnaBoards = page.getContent();
         Map<String, Object> qnas = new HashMap<>();
 
         qnas.put("data", qnaBoards);
@@ -80,29 +119,32 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         return convertToDTO(savedBoard);
     }
 
-    // QnaBoard 조회
+    // QnaBoard 조회 (로그인 한 경우)
     @Override
     public QnaBoardResponseDTO findQnaBoard(Long articleId, Long memberId) {
         Optional<QnaBoard> optionalQnaBoard = qnaBoardRepository.findById(articleId);
 
-        Optional<Pick> optionalLike = pickRepository.findByBoardArticleIdAndMemberIdAndPickType(articleId, memberId, PickType.LIKE);
-        Optional<Pick> optionalScrap = pickRepository.findByBoardArticleIdAndMemberIdAndPickType(articleId, memberId, PickType.SCRAP);
-
         if(optionalQnaBoard.isPresent()) {
             QnaBoard qnaBoard = optionalQnaBoard.get();
-            boolean isLiked = false;
-            boolean isScrapped = false;
-
-            if(optionalLike.isPresent()) {
-                isLiked = true;
-            }
-
-            if(optionalScrap.isPresent()) {
-                isScrapped = true;
-            }
+            boolean isLiked = isLikedByMember(qnaBoard.getArticleId(), memberId);
+            boolean isScrapped = isScrappedByMember(qnaBoard.getArticleId(), memberId);
 
             qnaBoard.setHit(qnaBoard.getHit() + 1);
             return convertToDTO(qnaBoard, isLiked, isScrapped);
+        }
+
+        throw new CustomException(ErrorCode.INVALID_BOARD_ID);
+    }
+
+    // QnaBoard 조회 (로그인 하지 않은 경우)
+    @Override
+    public QnaBoardResponseDTO findQnaBoard(Long articleId) {
+        Optional<QnaBoard> optionalQnaBoard = qnaBoardRepository.findById(articleId);
+
+        if(optionalQnaBoard.isPresent()) {
+            QnaBoard qnaBoard = optionalQnaBoard.get();
+            qnaBoard.setHit(qnaBoard.getHit() + 1);
+            return convertToDTO(qnaBoard);
         }
 
         throw new CustomException(ErrorCode.INVALID_BOARD_ID);
@@ -114,16 +156,24 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         Optional<QnaBoard> optQnaBoard = qnaBoardRepository.findById(articleId);
 
         // articleId에 해당하는 게시글이 없는 경우
-        if (optQnaBoard.isEmpty()) {
-            return null;
-        }
+        if (optQnaBoard.isEmpty()) throw new CustomException(ErrorCode.INVALID_BOARD_ID);
+
         QnaBoard qnaBoard = optQnaBoard.get();
+
+        // 게시글 작성자와 수정 요청자가 다른 경우
+        if (!qnaBoard.getMember().getId().equals(qnaBoardRequestDto.getMemberId())) throw new CustomException(ErrorCode.FORBIDDEN);
+
         qnaBoard.update(qnaBoardRequestDto);
         return qnaBoard.getArticleId();
     }
 
     // QnaBoard 삭제
-    public void deleteQnaBoard(Long articleId) {
+    @Override
+    public void deleteQnaBoard(Long articleId, Long memberId) {
+        Board qnaBoard = qnaBoardRepository.findById(articleId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_BOARD_ID));
+
+        if (!qnaBoard.getMember().getId().equals(memberId)) throw new CustomException(ErrorCode.FORBIDDEN);
+
         qnaBoardRepository.deleteById(articleId);
     }
 
@@ -201,11 +251,24 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         for (Pick like : likes) {
             Optional<QnaBoard> qnaBoard = qnaBoardRepository.findById(like.getBoard().getArticleId());
             qnaBoard.ifPresent(board -> scrapBoardDTOs.add(convertToDTO(board)));
-            ;
         }
 
         return scrapBoardDTOs;
 
+    }
+
+    private boolean isLikedByMember(Long articleId, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+        Optional<Pick> pickOptional = pickRepository.findByBoardArticleIdAndMemberAndPickType(articleId, member, PickType.LIKE);
+        return pickOptional.isPresent();
+    }
+
+    private boolean isScrappedByMember(Long articleId, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+        Optional<Pick> pickOptional = pickRepository.findByBoardArticleIdAndMemberAndPickType(articleId, member, PickType.SCRAP);
+        return pickOptional.isPresent();
     }
 
 

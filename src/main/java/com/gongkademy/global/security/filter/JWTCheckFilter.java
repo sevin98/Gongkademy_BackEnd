@@ -60,26 +60,20 @@ public class JWTCheckFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("JWTCheckFilter doFilterInternal 메소드 ===================");
 
         String accessToken = jwtUtil.extractToken(request).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ACCESS_TOKEN));
-        log.info("accessToken : " + accessToken);
 
         if (jwtUtil.isTokenValid(accessToken)) {
-            log.info("accessToken 검증 완료, 유효함");
 
             if(jwtUtil.isExpired(accessToken)) {
-                log.info("accessToken 검증 완료 2, 만료됨");
                 long memberId = jwtUtil.extractMemberId(accessToken).orElseThrow(() -> new CustomException(ErrorCode.JWT_NULL_MEMBER_ID));
                 Optional<String> refreshToken = jwtUtil.getRefreshToken(memberId);
 
                 if (refreshToken.isPresent()) {
-                    log.info("refreshToken 존재, refresh token 만료 확인");
                     if (jwtUtil.isTokenValid(refreshToken.get())) {
                         if (!jwtUtil.isExpired(refreshToken.get())) {
                             String newAccessToken = jwtUtil.createAccessToken(memberId);
                             oAuth2LoginSuccessHandler.addAccessTokenCookie(response, newAccessToken);
-                            log.info("newAccessToken 재발급 완료" + newAccessToken);
                             saveAuthentication(memberId);
                         } else throw new CustomException(ErrorCode.JWT_EXPIRED_REFRESH);
                     }
@@ -90,7 +84,6 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 saveAuthentication(memberId);
             }
         }
-        log.info("최종 dofilter 동작================");
         filterChain.doFilter(request, response);
     }
 
@@ -104,7 +97,6 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     principalDetails, null, authoritiesMapper.mapAuthorities(principalDetails.getAuthorities())
             );
-            log.info("saveAuthentication 동작 =========================");
             SecurityContextHolder.getContext().setAuthentication(authentication);
         });
     }

@@ -98,7 +98,6 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendNotificationIfNeeded(CommentRequestDTO commentRequestDTO, BoardType boardType) {
         Long articleId = commentRequestDTO.getArticleId();
 
-        //게시글 주인 아이디 찾기
         // receiverId가 댓글의 부모아이디가 없다면, 게시글의 Id가 receiverId가 됨, 대댓글이라면, 부모아이디의 memberId가 receiverId가 됨
         Long receiverId = (commentRequestDTO.getParentId() == null)
                 ? boardRepository.findMemberIdByBoardId(articleId)

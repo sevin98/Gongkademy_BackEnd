@@ -72,11 +72,7 @@ public class MemberServiceImpl implements MemberService{
     public void deleteMember(long id) {
         Member member = memberRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
-        // 닉네임 -> 탈퇴회원
-        // 탈퇴여부 -> true
-        // 탈퇴시간 -> now()
         member.deleteMember(DELETE_NICKNAME + member.getId());
-        log.info("탈퇴후 멤버의 닉네임 : "+ member.getNickname());
     }
 
     @Override

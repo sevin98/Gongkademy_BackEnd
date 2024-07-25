@@ -52,37 +52,26 @@ public class OAuth2MemberService extends DefaultOAuth2UserService {
     private Member getMember(String email, String name) {
         Member member;
         Optional<Member> memberOptional = memberRepository.findFirstByEmailOrderByCreateTimeDesc(email);
-        //UserDB에 Member가 있어
+
         if (memberOptional.isPresent()) {
             member = memberOptional.get();
-            //탈퇴여부 검사
+
             if (member.isDeleted()) { // 탈퇴된 사람이라면
-                log.info("getMember() : 같은 이메일의 탈퇴된 회원이 존재");
                 LocalDateTime withdrawDate = member.getDeletedTime();
                 LocalDateTime currentTime = LocalDateTime.now();
                 long monthsBetween = ChronoUnit.MONTHS.between(withdrawDate, currentTime);
 
-                //탈퇴시간 검사
                 if (monthsBetween < 1) {
-                    log.info("getMember(): 같은 이메일의 탈퇴했지만 한달 안 지난 회원 존재");
                     throw new CustomException(ErrorCode.REJOIN_AFTER_ONE_MONTH);
                 } else {
-                    log.info("getMember() : 같은 이메일의 탈퇴했지만 한달 지난 회원 존재");
-                    //한 달 지났다면 재가입
                     member = joinMember(email, name);
                 }
             } else {
-                log.info("getMember() : 같은 이메일의 탈퇴 안된 사람 중 같은 이메일 존재 -> 로그인으로 넘어감");
-                //탈퇴 안된 사람이라면 정보 업데이트 (로그인)
                 member.updateName(name);
             }
         } else {
-            log.info("getMember() : 같은 이메일의 회원 존재하지 않음");
-            //기존DB에 없으면 join
             member = joinMember(email, name);
         }
-        log.info("join할 member: " + member);
-        log.info("join할 member의 Role: " + member.getMemberRoleList());
         return memberRepository.save(member);
     }
 

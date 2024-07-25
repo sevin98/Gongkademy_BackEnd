@@ -10,8 +10,14 @@ public interface BoardService {
     // 공지사항 상세보기
     BoardResponseDTO getBoard(Long id, Long memberId);
 
-    // 공지사항 최신순 3개
+    // 비로그인 공지사항 상세보기
+    BoardResponseDTO getNotLoginBoard(Long id);
+
+    // 공지사항 최신순
     List<BoardResponseDTO> getLatestBoards(int index, Long memberId);
+
+    // 비로그인 공지사항 최신순
+    List<BoardResponseDTO> getNotLoginLatestBoards(int index);
 
     // 좋아요 버튼
     void toggleLikeBoard(Long articleId, Long memberId);

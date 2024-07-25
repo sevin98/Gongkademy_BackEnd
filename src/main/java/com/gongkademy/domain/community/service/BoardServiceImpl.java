@@ -15,6 +15,7 @@ import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -53,6 +54,15 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
+    public BoardResponseDTO getNotLoginBoard(Long id) {
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_BOARD_ID));
+        board.setHit(board.getHit() + 1);
+
+        return convertToDTO(board);
+    }
+
+    @Override
     public List<BoardResponseDTO> getLatestBoards(int LIMIT, Long memberId) {
         Pageable pageable = PageRequest.of(DEFAULT_TOP, LIMIT);
         List<Board> boards = boardRepository.findByBoardTypeOrderByCreateTimeDesc(BoardType.NOTICE,pageable).getContent();
@@ -63,6 +73,19 @@ public class BoardServiceImpl implements BoardService {
             boolean isLiked = (memberId != null) && isLikedByMember(board, memberId);
             boolean isScrapped = (memberId != null) && isScrappedByMember(board, memberId);
             boardResponseDTOS.add(convertToDTO(board, isLiked, isScrapped));
+        }
+        return boardResponseDTOS;
+    }
+
+    @Override
+    public List<BoardResponseDTO> getNotLoginLatestBoards(int index) {
+        Pageable pageable = PageRequest.of(DEFAULT_TOP, index);
+        List<Board> boards = boardRepository.findByBoardTypeOrderByCreateTimeDesc(BoardType.NOTICE, pageable).getContent();
+
+        List<BoardResponseDTO> boardResponseDTOS = new ArrayList<>();
+
+        for (Board board : boards) {
+            boardResponseDTOS.add(convertToDTO(board));
         }
         return boardResponseDTOS;
     }

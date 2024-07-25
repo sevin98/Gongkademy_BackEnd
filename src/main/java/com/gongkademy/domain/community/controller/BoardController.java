@@ -33,11 +33,28 @@ public class BoardController {
         return ResponseEntity.ok(boardResponseDTO);
     }
 
+    // 비로그인 공지사항 상세보기
+    @GetMapping("/notice/{articleId}/non-login")
+    public ResponseEntity<?> getNonLogin(@PathVariable Long articleId) {
+        BoardResponseDTO boardResponseDTO = boardService.getNotLoginBoard(articleId);
+        return ResponseEntity.ok(boardResponseDTO);
+    }
+
     // 최신 순 3개 가져오기
     @GetMapping("/notice/top_latest")
     public ResponseEntity<List<BoardResponseDTO>> getLimitLatestBoards(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = (principalDetails != null) ? principalDetails.getMemberId() : null;
         List<BoardResponseDTO> boardResponseDTOS = boardService.getLatestBoards(LIMIT, currentMemberId);
+        if (boardResponseDTOS.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(boardResponseDTOS);
+    }
+
+    // 비로그인 공지사항 리스트 보기
+    @GetMapping("/notice/top_latest/non-login")
+    public ResponseEntity<?> getNonLoginLimitLatestBoards() {
+        List<BoardResponseDTO> boardResponseDTOS = boardService.getNotLoginLatestBoards(LIMIT);
         if (boardResponseDTOS.isEmpty()) {
             return ResponseEntity.noContent().build();
         }

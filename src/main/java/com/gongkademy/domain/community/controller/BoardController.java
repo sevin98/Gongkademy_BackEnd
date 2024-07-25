@@ -38,6 +38,9 @@ public class BoardController {
     public ResponseEntity<List<BoardResponseDTO>> getLimitLatestBoards(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = (principalDetails != null) ? principalDetails.getMemberId() : null;
         List<BoardResponseDTO> boardResponseDTOS = boardService.getLatestBoards(LIMIT, currentMemberId);
+        if (boardResponseDTOS.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(boardResponseDTOS);
     }
 

@@ -3,16 +3,20 @@ package com.gongkademy.domain.community.service;
 import com.gongkademy.domain.community.dto.request.CommentRequestDTO;
 import com.gongkademy.domain.community.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.entity.board.Board;
+import com.gongkademy.domain.community.entity.board.BoardType;
 import com.gongkademy.domain.community.entity.comment.Comment;
 import com.gongkademy.domain.community.entity.comment.CommentLike;
 import com.gongkademy.domain.community.repository.BoardRepository;
 import com.gongkademy.domain.community.repository.CommentLikeRepository;
 import com.gongkademy.domain.community.repository.CommentRepository;
+import com.gongkademy.domain.member.dto.PrincipalDetails;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
+import com.gongkademy.domain.notification.service.NotificationService;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,13 +32,22 @@ public class CommentServiceImpl implements CommentService {
     private final MemberRepository memberRepository;
     private final BoardRepository boardRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final NotificationService notificationService;
 
 
     @Override
     @Transactional
-    public CommentResponseDTO createComment(CommentRequestDTO commentRequestDTO) {
+    public CommentResponseDTO createComment(CommentRequestDTO commentRequestDTO, PrincipalDetails principalDetails) {
+        if (principalDetails == null) {
+            throw new CustomException(ErrorCode.JWT_NULL_MEMBER_ID);
+        }
+        commentRequestDTO.setMemberId(principalDetails.getMemberId());
         Comment comment = convertToEntity(commentRequestDTO);
         commentRepository.save(comment);
+
+        BoardType boardType = boardRepository.findBoardTypeByBoardId(commentRequestDTO.getArticleId());
+        notificationService.sendNotificationIfNeeded(commentRequestDTO, boardType);
+
         return convertToDTO(comment);
     }
 
@@ -53,15 +66,15 @@ public class CommentServiceImpl implements CommentService {
         return convertToDTO(comment);
     }
 
-    @Override
-    public List<CommentResponseDTO> getComments(Long articleId) {
-        List<Comment> comments = commentRepository.findByBoardArticleIdAndParentIsNullOrderByCreateTimeAsc(articleId);
-        List<CommentResponseDTO> commentResponseDTOS = new ArrayList<>();
-        for (Comment comment : comments) {
-            commentResponseDTOS.add(convertToDTO(comment));
-        }
-        return commentResponseDTOS;
-    }
+//    @Override
+//    public List<CommentResponseDTO> getComments(Long articleId) {
+//        List<Comment> comments = commentRepository.findByBoardArticleIdAndParentIsNullOrderByCreateTimeAsc(articleId);
+//        List<CommentResponseDTO> commentResponseDTOS = new ArrayList<>();
+//        for (Comment comment : comments) {
+//            commentResponseDTOS.add(convertToDTO(comment));
+//        }
+//        return commentResponseDTOS;
+//    }
 
     @Override
     @Transactional

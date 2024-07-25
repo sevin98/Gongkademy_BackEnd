@@ -11,6 +11,8 @@ import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.domain.notification.dto.request.NotificationRequestDTO;
 import com.gongkademy.domain.notification.entity.NotificationType;
 import com.gongkademy.domain.notification.service.NotificationServiceImpl;
+import com.gongkademy.global.exception.CustomException;
+import com.gongkademy.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,36 +25,10 @@ import org.springframework.web.bind.annotation.*;
 public class CommentController {
 
     private final CommentService commentService;
-    private final NotificationServiceImpl notificationService;
-    private final MemberRepository memberRepository;
-    private final BoardRepository boardRepository;
-    private final CommentRepository commentRepository;
 
     @PostMapping
-    public ResponseEntity<?> createComment(@RequestBody CommentRequestDTO commentRequestDTO) {
-        CommentResponseDTO commentResponseDTO = commentService.createComment(commentRequestDTO);
-
-        long articleId = commentRequestDTO.getArticleId();
-        BoardType boardType = boardRepository.findBoardTypeByBoardId(articleId);
-        //게시글 주인 아이디 찾기
-        // receiverId가 = 댓글의 부모아이디가 없다면, 게시글의 Id가 receiverId가 됨, 대댓글이라면, 부모아이디의 memberId가 receiverId가 됨
-        long receiverId = (commentRequestDTO.getParentId() == null)
-                ? boardRepository.findMemberIdByBoardId(articleId)
-                : commentRepository.findMemberIdByCommentId(commentRequestDTO.getParentId());
-
-        // 회원의 알람 기능 on일 경우에만 전송
-        if (memberRepository.findIsNotificationEnabledById(receiverId)) {
-            NotificationRequestDTO notificationRequestDTO = NotificationRequestDTO.builder()
-                    .receiver(receiverId)
-                    .type(mapToNotificationType(boardType))
-                    .articleId(commentRequestDTO.getArticleId())
-                    .message(commentRequestDTO.getContent())
-                    .build();
-
-            //Todo: 알림 전송 기능
-            notificationService.createNotification(notificationRequestDTO);
-        }
-
+    public ResponseEntity<?> createComment(@RequestBody CommentRequestDTO commentRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        CommentResponseDTO commentResponseDTO = commentService.createComment(commentRequestDTO, principalDetails);
         return new ResponseEntity<>(commentResponseDTO, HttpStatus.CREATED);
     }
 
@@ -80,18 +56,5 @@ public class CommentController {
         Long currentMemberId = principalDetails.getMemberId();
         commentService.toggleLikeComment(commentId, currentMemberId);
         return ResponseEntity.ok().build();
-    }
-
-    private NotificationType mapToNotificationType(BoardType boardType) {
-        switch (boardType) {
-            case NOTICE:
-                return NotificationType.NOTICE;
-            case CONSULT:
-                return NotificationType.CONSULTING;
-            case QNA:
-                return NotificationType.QUESTION;
-            default:
-                throw new IllegalArgumentException("Unsupported board type: " + boardType);
-        }
     }
 }

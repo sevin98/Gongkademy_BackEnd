@@ -9,10 +9,12 @@ import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
 import com.gongkademy.global.security.util.JWTUtil;
+import com.gongkademy.infra.s3.service.S3FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -27,6 +29,8 @@ public class MemberServiceImpl implements MemberService{
     private final MemberRepository memberRepository;
     private final JWTUtil jwtUtil;
     private final String DELETE_NICKNAME = "탈퇴회원";
+    private final String S3DIRECTORY = "profile-images";
+    private final S3FileService s3FileService;
 
     /**
      * 주어진 회원 ID로 회원 정보를 가져옵니다.
@@ -70,7 +74,26 @@ public class MemberServiceImpl implements MemberService{
     @Override
     public void modifyMember(long id, MemberUpdateDTO memberUpdateDTO) {
         Member member = memberRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
-        member.update(memberUpdateDTO);
+
+        // 프로필 사진 변경
+        MultipartFile profileImage = memberUpdateDTO.getProfileImage();
+        if (profileImage != null && !profileImage.isEmpty()) {
+            // 조건을 기본 이미지로 맞출 수 있음
+            if (member.getProfilePath() != null) {
+                s3FileService.deleteFile(member.getProfilePath());
+            }
+            String profileImagePath = s3FileService.uploadProfileFile(profileImage, S3DIRECTORY);
+            member.setProfilePath(profileImagePath);
+        }
+
+        if (memberUpdateDTO.getNewNickname() != member.getNickname()) {
+            member.setNickname(memberUpdateDTO.getNewNickname());
+        }
+
+        if (memberUpdateDTO.getAgreeMarketing() != member.getAgreeMarketing()) {
+            member.setAgreeMarketing(memberUpdateDTO.getAgreeMarketing());
+        }
+        memberRepository.save(member);
     }
 
     /**

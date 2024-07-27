@@ -48,7 +48,7 @@ public class MemberController {
     }
 
     @PatchMapping
-    public ResponseEntity<?> updateMember(@RequestBody MemberUpdateDTO memberUpdateDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public ResponseEntity<?> updateMember(@ModelAttribute MemberUpdateDTO memberUpdateDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         long loginMemberId = principalDetails.getMemberId();
         memberService.modifyMember(loginMemberId, memberUpdateDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body("회원수정 성공");

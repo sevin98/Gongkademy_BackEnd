@@ -31,6 +31,7 @@ public interface MemberService {
                 .nickname(member.getNickname())
                 .email(member.getEmail())
                 .birthday(member.getBirthday() != null ? member.getBirthday().toString() : null)
+                .profilePath(member.getProfilePath())
                 .agreeMarketing(member.getAgreeMarketing())
                 .memberRole(member.getMemberRoleList().toString())
                 .createTime(member.getCreateTime())

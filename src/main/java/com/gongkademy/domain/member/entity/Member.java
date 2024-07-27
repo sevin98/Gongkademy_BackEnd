@@ -41,6 +41,9 @@ public class Member {
     @NotEmpty
     private String email;
     private String nickname;
+
+    // S3에 저장된 프로필 사진 Path
+    private String profilePath;
     private LocalDate birthday;
     private Boolean agreeMarketing;
 

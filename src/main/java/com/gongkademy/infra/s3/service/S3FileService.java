@@ -127,4 +127,34 @@ public class S3FileService implements FileService {
     public String getFileUrl(String filename) {
         return amazonS3.getUrl(bucketName, filename).toString();
     }
+
+
+    public String uploadProfileFile(MultipartFile file, String folderName) {
+        if (file.isEmpty() || Objects.isNull(file.getOriginalFilename())) {
+            throw new AmazonS3Exception("파일 없음");
+        }
+        this.validateExtension(file.getOriginalFilename());
+        return this.uploadProfileImageToS3(file, folderName);
+    }
+
+    private String uploadProfileImageToS3(MultipartFile file, String folderName) {
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String s3FileName = folderName + "/" + UUID.randomUUID().toString().substring(0, 10) + originalFilename;
+
+        try (InputStream inputStream = file.getInputStream();
+             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(IOUtils.toByteArray(inputStream))) {
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            objectMetadata.setContentType("image/" + extension);
+            objectMetadata.setContentLength(byteArrayInputStream.available());
+
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, s3FileName, byteArrayInputStream, objectMetadata)
+                    .withCannedAcl(CannedAccessControlList.PublicRead);
+            amazonS3.putObject(putObjectRequest);
+            return amazonS3.getUrl(bucketName, s3FileName).toString();
+        } catch (Exception e) {
+            log.error("putObject 도중 에러 : " + e.getMessage().toString());
+            throw new AmazonS3Exception("에러");
+        }
+    }
 }

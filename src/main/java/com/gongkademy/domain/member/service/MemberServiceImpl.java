@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import static com.gongkademy.domain.member.entity.MemberRole.*;
+
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -37,6 +39,14 @@ public class MemberServiceImpl implements MemberService{
         return entityToMemberInfoDTO(member);
     }
 
+    @Override
+    public void validateAuthority(Long id, MemberRole role) {
+        Optional.ofNullable(memberRepository.findById(id)
+                        .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID)))
+                .filter(member -> member.getMemberRoleList().contains(role))
+                .orElseThrow(() -> new CustomException(ErrorCode.FORBIDDEN));
+    }
+
     /**
      * @param id 회원 ID
      * @param memberSignUpDTO 회원가입 정보
@@ -45,7 +55,7 @@ public class MemberServiceImpl implements MemberService{
     @Override
     public void joinMember(long id, MemberSignUpDTO memberSignUpDTO) {
         Member member = memberRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
-        member.addRole(MemberRole.USER);
+        member.addRole(USER);
         member.signup(memberSignUpDTO);
 
         String refreshToken = jwtUtil.createRefreshToken(member.getId());

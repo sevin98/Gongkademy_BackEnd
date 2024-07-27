@@ -4,12 +4,15 @@ import com.gongkademy.domain.member.dto.MemberInfoDTO;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.dto.MemberSignUpDTO;
 import com.gongkademy.domain.member.dto.MemberUpdateDTO;
+import com.gongkademy.domain.member.entity.MemberRole;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public interface MemberService {
     MemberInfoDTO getMemberInfo(long id);
+
+    void validateAuthority(Long id, MemberRole role);
     void joinMember(long id, MemberSignUpDTO dto);
     void modifyMember(long id, MemberUpdateDTO dto);
     void deleteMember(long id);
@@ -20,6 +23,7 @@ public interface MemberService {
      * @param member 회원 엔티티
      * @return 회원 정보 DTO
      */
+
     default MemberInfoDTO entityToMemberInfoDTO(Member member) {
         return MemberInfoDTO.builder()
                 .id(member.getId())

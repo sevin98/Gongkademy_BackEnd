@@ -1,11 +1,10 @@
 package com.gongkademy.domain.notification.service;
 
-import com.gongkademy.domain.community.dto.request.CommentRequestDTO;
-import com.gongkademy.domain.community.entity.board.BoardType;
+import com.gongkademy.domain.community.service.dto.request.CommentRequestDTO;
+import com.gongkademy.domain.community.common.entity.board.BoardType;
 import com.gongkademy.domain.notification.dto.request.NotificationRequestDTO;
 import com.gongkademy.domain.notification.dto.response.NotificationResponseDTO;
 import com.gongkademy.domain.notification.entity.Notification;
-import com.gongkademy.domain.notification.entity.NotificationType;
 
 import java.util.List;
 

@@ -1,10 +1,10 @@
 package com.gongkademy.repository;
 
-import com.gongkademy.domain.community.dto.request.QnaBoardRequestDTO;
-import com.gongkademy.domain.community.entity.board.BoardType;
-import com.gongkademy.domain.community.entity.board.QnaBoard;
-import com.gongkademy.domain.community.repository.QnaBoardRepository;
-import com.gongkademy.domain.community.service.QnaBoardServiceImpl;
+import com.gongkademy.domain.community.service.dto.request.QnaBoardRequestDTO;
+import com.gongkademy.domain.community.common.entity.board.BoardType;
+import com.gongkademy.domain.community.common.entity.board.QnaBoard;
+import com.gongkademy.domain.community.common.repository.QnaBoardRepository;
+import com.gongkademy.domain.community.service.service.QnaBoardServiceImpl;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;

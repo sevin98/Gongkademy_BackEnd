@@ -1,10 +1,11 @@
 package com.gongkademy.domain.community.service;
 
 
-import com.gongkademy.domain.community.dto.response.BoardResponseDTO;
-import com.gongkademy.domain.community.entity.board.Board;
-import com.gongkademy.domain.community.entity.board.BoardType;
-import com.gongkademy.domain.community.repository.BoardRepository;
+import com.gongkademy.domain.community.service.dto.response.BoardResponseDTO;
+import com.gongkademy.domain.community.common.entity.board.Board;
+import com.gongkademy.domain.community.common.entity.board.BoardType;
+import com.gongkademy.domain.community.common.repository.BoardRepository;
+import com.gongkademy.domain.community.service.service.BoardServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

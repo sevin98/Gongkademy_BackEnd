@@ -3,7 +3,7 @@ package com.gongkademy.domain.course.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.gongkademy.domain.community.entity.board.Board;
+import com.gongkademy.domain.community.common.entity.board.Board;
 import com.gongkademy.domain.member.entity.Member;
 
 import jakarta.persistence.CascadeType;

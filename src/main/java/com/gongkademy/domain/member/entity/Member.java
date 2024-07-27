@@ -1,9 +1,9 @@
 package com.gongkademy.domain.member.entity;
 
-import com.gongkademy.domain.community.entity.board.Board;
-import com.gongkademy.domain.community.entity.comment.Comment;
-import com.gongkademy.domain.community.entity.comment.CommentLike;
-import com.gongkademy.domain.community.entity.pick.Pick;
+import com.gongkademy.domain.community.common.entity.board.Board;
+import com.gongkademy.domain.community.common.entity.comment.Comment;
+import com.gongkademy.domain.community.common.entity.comment.CommentLike;
+import com.gongkademy.domain.community.common.entity.pick.Pick;
 import com.gongkademy.domain.course.entity.CourseComment;
 import com.gongkademy.domain.course.entity.CourseLike;
 import com.gongkademy.domain.course.entity.CourseReview;

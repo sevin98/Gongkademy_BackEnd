@@ -1,11 +1,11 @@
 //package com.gongkademy.domain.community.service;
 //
-//import com.gongkademy.domain.community.dto.request.CommentRequestDTO;
-//import com.gongkademy.domain.community.dto.response.CommentResponseDTO;
-//import com.gongkademy.domain.community.entity.board.Board;
-//import com.gongkademy.domain.community.entity.comment.Comment;
-//import com.gongkademy.domain.community.repository.BoardRepository;
-//import com.gongkademy.domain.community.repository.CommentRepository;
+//import com.gongkademy.domain.community.service.dto.request.CommentRequestDTO;
+//import com.gongkademy.domain.community.service.dto.response.CommentResponseDTO;
+//import com.gongkademy.domain.community.common.entity.board.Board;
+//import com.gongkademy.domain.community.common.entity.comment.Comment;
+//import com.gongkademy.domain.community.common.repository.BoardRepository;
+//import com.gongkademy.domain.community.common.repository.CommentRepository;
 //import com.gongkademy.domain.member.entity.Member;
 //import com.gongkademy.domain.member.repository.MemberRepository;
 //import com.gongkademy.global.exception.CustomException;

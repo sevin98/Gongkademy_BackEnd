@@ -1,9 +1,9 @@
 package com.gongkademy.domain.notification.service;
 
-import com.gongkademy.domain.community.dto.request.CommentRequestDTO;
-import com.gongkademy.domain.community.entity.board.BoardType;
-import com.gongkademy.domain.community.repository.BoardRepository;
-import com.gongkademy.domain.community.repository.CommentRepository;
+import com.gongkademy.domain.community.service.dto.request.CommentRequestDTO;
+import com.gongkademy.domain.community.common.entity.board.BoardType;
+import com.gongkademy.domain.community.common.repository.BoardRepository;
+import com.gongkademy.domain.community.common.repository.CommentRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.domain.notification.dto.request.NotificationRequestDTO;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service

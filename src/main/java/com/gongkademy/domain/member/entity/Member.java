@@ -4,12 +4,12 @@ import com.gongkademy.domain.community.common.entity.board.Board;
 import com.gongkademy.domain.community.common.entity.comment.Comment;
 import com.gongkademy.domain.community.common.entity.comment.CommentLike;
 import com.gongkademy.domain.community.common.entity.pick.Pick;
-import com.gongkademy.domain.course.entity.CourseComment;
-import com.gongkademy.domain.course.entity.CourseLike;
-import com.gongkademy.domain.course.entity.CourseReview;
-import com.gongkademy.domain.course.entity.RegistCourse;
-import com.gongkademy.domain.course.entity.RegistLecture;
-import com.gongkademy.domain.course.entity.Scrap;
+import com.gongkademy.domain.course.common.entity.CourseComment;
+import com.gongkademy.domain.course.common.entity.CourseLike;
+import com.gongkademy.domain.course.common.entity.CourseReview;
+import com.gongkademy.domain.course.common.entity.RegistCourse;
+import com.gongkademy.domain.course.common.entity.RegistLecture;
+import com.gongkademy.domain.course.common.entity.Scrap;
 
 import com.gongkademy.domain.member.dto.MemberSignUpDTO;
 import com.gongkademy.domain.member.dto.MemberUpdateDTO;

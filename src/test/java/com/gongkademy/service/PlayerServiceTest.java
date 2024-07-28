@@ -2,7 +2,6 @@ package com.gongkademy.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
@@ -10,17 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.gongkademy.domain.course.dto.request.PlayerRequestDTO;
-import com.gongkademy.domain.course.dto.response.PlayerResponseDTO;
-import com.gongkademy.domain.course.entity.Course;
-import com.gongkademy.domain.course.entity.Lecture;
-import com.gongkademy.domain.course.entity.RegistCourse;
-import com.gongkademy.domain.course.entity.RegistLecture;
-import com.gongkademy.domain.course.repository.CourseRepository;
-import com.gongkademy.domain.course.repository.LectureRepository;
-import com.gongkademy.domain.course.repository.RegistCourseRepository;
-import com.gongkademy.domain.course.repository.RegistLectureRepository;
-import com.gongkademy.domain.course.service.PlayerService;
+import com.gongkademy.domain.course.service.dto.response.PlayerResponseDTO;
+import com.gongkademy.domain.course.common.entity.Course;
+import com.gongkademy.domain.course.common.entity.Lecture;
+import com.gongkademy.domain.course.common.entity.RegistCourse;
+import com.gongkademy.domain.course.common.entity.RegistLecture;
+import com.gongkademy.domain.course.common.repository.CourseRepository;
+import com.gongkademy.domain.course.common.repository.LectureRepository;
+import com.gongkademy.domain.course.common.repository.RegistCourseRepository;
+import com.gongkademy.domain.course.common.repository.RegistLectureRepository;
+import com.gongkademy.domain.course.service.service.PlayerService;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
 

@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.gongkademy.domain.course.entity.CourseComment;
-import com.gongkademy.domain.course.repository.CourseCommentRepository;
-import com.gongkademy.domain.course.service.CourseCommentService;
+import com.gongkademy.domain.course.common.entity.CourseComment;
+import com.gongkademy.domain.course.common.repository.CourseCommentRepository;
+import com.gongkademy.domain.course.service.service.CourseCommentService;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
 

@@ -60,6 +60,12 @@ public enum ErrorCode {
     NOT_FOUND_PREV_LECTURE(HttpStatus.BAD_REQUEST, "이전 강의가 없습니다."),
     NOT_FOUND_COURSE_NOTICE(HttpStatus.BAD_REQUEST, "공지사항이 존재하지 않습니다."),
 
+    // Lecture 관련
+    DUPLICATE_LECTURE_ORDER(HttpStatus.CONFLICT, "이미 존재하는 Lecture_Order입니다."),
+
+    //Notice
+    NOT_FOUND_NOTICE(HttpStatus.BAD_REQUEST, "존재하지 않는 공지사항입니다."),
+
     // Notification 관련
     INVALID_NOTIFICATION_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 알림 ID입니다."),
     WAIT_STATUS_COURSE(HttpStatus.BAD_REQUEST, "대기 상태인 강좌입니다."),

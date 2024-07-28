@@ -3,6 +3,8 @@ package com.gongkademy.infra.s3.service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
+import com.gongkademy.domain.course.common.entity.CourseFileCateg;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,12 +28,19 @@ import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
+@Getter
 @Service
 public class S3FileService implements FileService {
     private final AmazonS3 amazonS3;
 
     @Value("${cloud.aws.s3.bucketName}")
     private String bucketName;
+
+    @Value("${cloud.aws.s3.folder.folderName1}")
+    private String courseImgFolder;
+
+    @Value("${cloud.aws.s3.folder.folderName2}")
+    private String courseNoteFolder;
 
     public String uploadFile(MultipartFile file) {
         //파일 비었는지 체크
@@ -157,4 +166,57 @@ public class S3FileService implements FileService {
             throw new AmazonS3Exception("에러");
         }
     }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // 폴더 구분을 위한 Course upload&delete 로직
+    public String uploadCourseFile(MultipartFile file, CourseFileCateg categ) {
+        //파일 비었는지 체크
+        if (file.isEmpty() || Objects.isNull(file.getOriginalFilename())) {
+            throw new AmazonS3Exception("파일이 비어있습니다");
+        }
+        //확장자명 체크
+        this.validateExtension(file.getOriginalFilename());
+
+        //성공로직
+        return this.uploadCourseFileToS3(file, categ);
+    }
+
+    private String uploadCourseFileToS3(MultipartFile file, CourseFileCateg categ) {
+        // 실제 업로드
+        String originalFilename = file.getOriginalFilename(); // 원본 파일명
+        String extension = originalFilename.substring(originalFilename.lastIndexOf(".")); // 확장자명
+        String s3FileName = getFileFolder(categ)+UUID.randomUUID().toString().substring(0, 10) + originalFilename; // 변경된 파일 명
+
+        try (InputStream is = file.getInputStream();
+             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(IOUtils.toByteArray(is))) {
+
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType("image/" + extension);
+            metadata.setContentLength(byteArrayInputStream.available());
+
+            // S3에 파일 올리기
+            PutObjectRequest putObjectRequest =
+                    new PutObjectRequest(bucketName, s3FileName, byteArrayInputStream, metadata)
+                            .withCannedAcl(CannedAccessControlList.PublicRead);
+
+            amazonS3.putObject(putObjectRequest);
+            return amazonS3.getUrl(bucketName, s3FileName).toString();
+
+        } catch (Exception e) {
+            log.error("putObject 도중 에러: " + e.getMessage(), e);
+            throw new AmazonS3Exception("에러");
+        }
+    }
+
+    public String getFileFolder(CourseFileCateg categ) {
+        String folder = "";
+        if(categ == CourseFileCateg.COURSEIMG) {
+            folder = this.getCourseImgFolder();
+
+        }else if(categ == CourseFileCateg.COURSENOTE){
+            folder = this.getCourseNoteFolder();
+        }
+        return folder;
+    }
+
 }

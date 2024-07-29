@@ -3,6 +3,7 @@ package com.gongkademy.domain.course.common.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.gongkademy.infra.s3.service.FileCateg;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -101,14 +102,14 @@ public class Course {
 	// 강의 이미지 가져오기
 	public CourseFile getCourseImg() {
 		return courseFiles.stream()
-				.filter(file -> file.getCateg() == CourseFileCateg.COURSEIMG)
+				.filter(file -> file.getCateg() == FileCateg.COURSEIMG)
 				.findFirst()
 				.orElse(null);
 	}
 	// 강의 자료 가져오기
 	public CourseFile getCourseNote() {
 		return courseFiles.stream()
-				.filter(file -> file.getCateg() == CourseFileCateg.COURSENOTE)
+				.filter(file -> file.getCateg() == FileCateg.COURSENOTE)
 				.findFirst()
 				.orElse(null);
 	}

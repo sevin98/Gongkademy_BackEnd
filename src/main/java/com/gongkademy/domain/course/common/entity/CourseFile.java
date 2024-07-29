@@ -1,5 +1,6 @@
 package com.gongkademy.domain.course.common.entity;
 
+import com.gongkademy.infra.s3.service.FileCateg;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -31,5 +32,5 @@ public class CourseFile {
 	private Course course;
 
 	@Enumerated(EnumType.STRING)
-	private CourseFileCateg categ; // 강좌파일 카테고리 [COURSEIMG, COURSENOTE]
+	private FileCateg categ; // 강좌파일 카테고리 [COURSEIMG, COURSENOTE]
 }

@@ -1,55 +1,26 @@
 package com.gongkademy.domain.course.service.service;
 
-import com.gongkademy.domain.course.common.repository.CourseNoticeRepository;
-import com.gongkademy.domain.course.common.entity.CourseStatus;
-import com.gongkademy.domain.course.service.dto.response.CourseContentsGuestResponseDTO;
-import com.gongkademy.domain.course.service.dto.response.CourseContentsResponseDTO;
-import com.gongkademy.domain.course.service.dto.response.CourseGuestResponseDTO;
-import com.gongkademy.domain.course.service.dto.response.CourseInfoResponseDTO;
-import com.gongkademy.domain.course.service.dto.response.CourseLikeResponseDTO;
-import com.gongkademy.domain.course.service.dto.response.CourseResponseDTO;
-import com.gongkademy.domain.course.service.dto.response.LectureDetailResponseDTO;
-import com.gongkademy.domain.course.service.dto.response.NoticeResponseDTO;
-import com.gongkademy.domain.course.common.entity.Course;
-import com.gongkademy.domain.course.common.entity.CourseComment;
-import com.gongkademy.domain.course.common.entity.CourseFile;
-import com.gongkademy.domain.course.common.entity.CourseFileCateg;
-import com.gongkademy.domain.course.common.entity.CourseLike;
-import com.gongkademy.domain.course.common.entity.CourseLikeCateg;
-import com.gongkademy.domain.course.common.entity.CourseReview;
-import com.gongkademy.domain.course.common.entity.Lecture;
-import com.gongkademy.domain.course.common.entity.Notice;
-import com.gongkademy.domain.course.common.entity.RegistCourse;
-import com.gongkademy.domain.course.common.entity.RegistLecture;
-import com.gongkademy.domain.course.common.entity.Scrap;
-import com.gongkademy.domain.course.common.repository.CourseCommentRepository;
-import com.gongkademy.domain.course.common.repository.CourseFileRepository;
-import com.gongkademy.domain.course.common.repository.CourseLikeRepository;
-import com.gongkademy.domain.course.common.repository.CourseRepository;
-import com.gongkademy.domain.course.common.repository.CourseReviewRepository;
-import com.gongkademy.domain.course.common.repository.LectureRepository;
-import com.gongkademy.domain.course.common.repository.RegistCourseRepository;
-import com.gongkademy.domain.course.common.repository.RegistLectureRepository;
-import com.gongkademy.domain.course.common.repository.ScrapRepository;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
-
+import com.gongkademy.domain.course.common.entity.*;
+import com.gongkademy.domain.course.common.repository.*;
+import com.gongkademy.domain.course.service.dto.request.CourseLikeRequestDTO;
+import com.gongkademy.domain.course.service.dto.response.*;
+import com.gongkademy.domain.member.entity.Member;
+import com.gongkademy.domain.member.repository.MemberRepository;
+import com.gongkademy.global.exception.CustomException;
+import com.gongkademy.global.exception.ErrorCode;
+import com.gongkademy.infra.s3.service.FileCateg;
+import com.gongkademy.infra.s3.service.S3FileService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.gongkademy.domain.course.service.dto.request.CourseLikeRequestDTO;
-import com.gongkademy.domain.member.entity.Member;
-import com.gongkademy.domain.member.repository.MemberRepository;
-import com.gongkademy.global.exception.CustomException;
-import com.gongkademy.global.exception.ErrorCode;
-import com.gongkademy.infra.s3.service.S3FileService;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -308,7 +279,7 @@ public class CourseServiceImpl implements CourseService {
 
 		// 이미지 
 		Long thumbnailId = course.getCourseImg().getId();// 대표이미지 id
-		List<CourseFile> imgs = courseFileRepository.findByCourseIdAndCategAndIdNot(courseId, CourseFileCateg.COURSEIMG, thumbnailId);
+		List<CourseFile> imgs = courseFileRepository.findByCourseIdAndCategAndIdNot(courseId, FileCateg.COURSEIMG, thumbnailId);
 		
 		List<String> fileUrls = imgs.stream()
 	            .map(file -> fileService.getFileUrl(file.getSaveFile()))

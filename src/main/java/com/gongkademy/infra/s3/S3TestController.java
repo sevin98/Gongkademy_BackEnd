@@ -1,5 +1,6 @@
 package com.gongkademy.infra.s3;
 
+import com.gongkademy.infra.s3.service.FileCateg;
 import com.gongkademy.infra.s3.service.S3FileService;
 import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +23,9 @@ public class S3TestController {
     S3FileService s3ImageService;
     @PostMapping("/s3/upload")
     public ResponseEntity<?> s3Upload(@RequestPart(value = "image", required = false) MultipartFile image) {
-        String profileImage = s3ImageService.uploadFile(image);
+        String profileImage = s3ImageService.uploadFile(image, FileCateg.PROFILE);
         return ResponseEntity.ok(profileImage);
     }
-
 
     @DeleteMapping("/s3/delete")
     public ResponseEntity<?> s3delete(@RequestParam String addr){

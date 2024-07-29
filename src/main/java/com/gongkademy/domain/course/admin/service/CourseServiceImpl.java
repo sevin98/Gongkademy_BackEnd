@@ -10,6 +10,7 @@ import com.gongkademy.domain.course.common.entity.*;
 import com.gongkademy.domain.course.common.repository.CourseRepository;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
+import com.gongkademy.infra.s3.service.FileCateg;
 import com.gongkademy.infra.s3.service.S3FileService;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +51,7 @@ public class CourseServiceImpl implements CourseService {
 		Course course = convertToNewEntity(courseCreateRequestDTO);
 		// AWS: 강좌 이미지 DB로 저장
 		if(courseCreateRequestDTO.getCourseImg()!=null && !courseCreateRequestDTO.getCourseImg().isEmpty()) {
-			CourseFile file = uploadCourseFileToS3(courseCreateRequestDTO.getCourseImg(), CourseFileCateg.COURSEIMG);
+			CourseFile file = uploadCourseFileToS3(courseCreateRequestDTO.getCourseImg(), FileCateg.COURSEIMG);
 			course.addCourseFile(file); // 연관관계 설정
 		}
 
@@ -72,7 +73,7 @@ public class CourseServiceImpl implements CourseService {
 				s3FileService.deleteFile(course.getCourseImg().getSaveFile());
 				course.deleteCourseFile(course.getCourseImg());
 			}
-			CourseFile file = uploadCourseFileToS3(courseUpdateRequestDTO.getCourseImg(), CourseFileCateg.COURSEIMG);
+			CourseFile file = uploadCourseFileToS3(courseUpdateRequestDTO.getCourseImg(), FileCateg.COURSEIMG);
 			course.addCourseFile(file); // 연관관계 설정
 		}
 		
@@ -83,7 +84,7 @@ public class CourseServiceImpl implements CourseService {
 				s3FileService.deleteFile(course.getCourseNote().getSaveFile());
 				course.deleteCourseFile(course.getCourseNote());
 			}
-			CourseFile file = uploadCourseFileToS3(courseUpdateRequestDTO.getCourseNote(), CourseFileCateg.COURSENOTE);
+			CourseFile file = uploadCourseFileToS3(courseUpdateRequestDTO.getCourseNote(), FileCateg.COURSENOTE);
 			course.addCourseFile(file); // 연관관계 설정
 		}
 
@@ -116,9 +117,9 @@ public class CourseServiceImpl implements CourseService {
 		return convertToInfoDTO(saveCourse);
 	}
 
-	private CourseFile uploadCourseFileToS3(MultipartFile multipartFile, CourseFileCateg categ) {
+	private CourseFile uploadCourseFileToS3(MultipartFile multipartFile, FileCateg categ) {
 		CourseFile file = new CourseFile();
-		String saveFile = s3FileService.uploadCourseFile(multipartFile, categ); // 저장 파일 이름
+		String saveFile = s3FileService.uploadFile(multipartFile, categ); // 저장 파일 이름
 		file.setSaveFile(saveFile);
 		file.setSaveFolder(s3FileService.getFileFolder(categ)); // 저장 폴더
 		file.setOriginalFile(multipartFile.getOriginalFilename()); // 원본 파일 이름

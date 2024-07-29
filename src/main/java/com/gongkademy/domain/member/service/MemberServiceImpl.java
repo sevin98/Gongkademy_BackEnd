@@ -9,6 +9,7 @@ import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
 import com.gongkademy.global.security.util.JWTUtil;
+import com.gongkademy.infra.s3.service.FileCateg;
 import com.gongkademy.infra.s3.service.S3FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -29,7 +30,6 @@ public class MemberServiceImpl implements MemberService{
     private final MemberRepository memberRepository;
     private final JWTUtil jwtUtil;
     private final String DELETE_NICKNAME = "탈퇴회원";
-    private final String S3DIRECTORY = "profile-images";
     private final S3FileService s3FileService;
 
     /**
@@ -82,7 +82,7 @@ public class MemberServiceImpl implements MemberService{
             if (member.getProfilePath() != null) {
                 s3FileService.deleteFile(member.getProfilePath());
             }
-            String profileImagePath = s3FileService.uploadProfileFile(profileImage, S3DIRECTORY);
+            String profileImagePath = s3FileService.uploadFile(profileImage, FileCateg.PROFILE);
             member.setProfilePath(profileImagePath);
         }
 

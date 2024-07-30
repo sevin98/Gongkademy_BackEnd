@@ -5,6 +5,7 @@ import com.gongkademy.domain.community.common.entity.board.Board;
 import com.gongkademy.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.List;
 @Setter
 @Getter
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 public class Comment {
 
@@ -31,11 +32,13 @@ public class Comment {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @Column(nullable = false)
     private String content;
 
     private String nickname;
 
-    private Long likeCount;
+    @Builder.Default
+    private Long likeCount = 0L;
 
     @Builder.Default
     private LocalDateTime createTime = LocalDateTime.now();

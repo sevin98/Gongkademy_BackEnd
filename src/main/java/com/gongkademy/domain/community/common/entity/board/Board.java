@@ -21,6 +21,7 @@ import java.util.List;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @SuperBuilder
 public class Board {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long articleId;
@@ -29,8 +30,10 @@ public class Board {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @Column(nullable = false)
     private String title;
 
+    @Column(columnDefinition = "LONGTEXT", nullable = false)
     private String content;
 
     @Builder.Default
@@ -42,7 +45,8 @@ public class Board {
     @Builder.Default
     private Long scrapCount = 0L;   // 스크랩 수
 
-    private Long hit;
+    @Builder.Default
+    private Long hit = 0L;
 
     private Long commentCount;  // 댓글 수 추가
 

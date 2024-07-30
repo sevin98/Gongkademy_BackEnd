@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import static com.gongkademy.infra.s3.service.FileCateg.*;
+
 @Slf4j
 @RequiredArgsConstructor
 @Getter
@@ -99,13 +101,13 @@ public class S3FileService implements FileService {
     // - 폴더 경로 지정 메서드
     public String getFileFolder(FileCateg categ) {
         String folder = "";
-        if(categ == FileCateg.COURSEIMG) {
+        if(categ == COURSEIMG) {
             folder = this.getCourseImgFolder();
-        }else if(categ == FileCateg.COURSENOTE){
+        }else if(categ == COURSENOTE){
             folder = this.getCourseNoteFolder();
-        }else if(categ == FileCateg.COURSEINTRO){
+        }else if(categ == COURSEINTRO){
             folder = this.getCourseIntroFolder();
-        }else if(categ == FileCateg.PROFILE){
+        }else if(categ == PROFILE){
             folder = this.getProfileFolder();
         }
         return folder;

@@ -70,6 +70,10 @@ public enum ErrorCode {
     INVALID_NOTIFICATION_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 알림 ID입니다."),
     WAIT_STATUS_COURSE(HttpStatus.BAD_REQUEST, "대기 상태인 강좌입니다."),
     INVALID_NOTIFICATION_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 알림 타입입니다."),
+    
+    // S3
+    INVALID_FILECATEG(HttpStatus.BAD_REQUEST, "유효하지 않은 카테고리 입니다. (PROFILE, COURSEIMG, COURSENOTE, COURSEINTRO)")
+    
     ;
     private final HttpStatus httpStatus;
     private final String message;

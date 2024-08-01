@@ -256,6 +256,8 @@ public class CourseServiceImpl implements CourseService {
 		Page<NoticeResponseDTO> noticeResponseDtos = notices.map(m -> NoticeResponseDTO.builder()
                 .id(m.getId())
                 .createdTime(m.getCreatedTime())
+				.updatedTime(m.getUpdatedTime())
+				.title(m.getTitle())
                 .content(m.getContent())
                 .courseCommentCount(m.getCourseCommentCount())
                 .build());

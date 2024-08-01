@@ -10,6 +10,7 @@ import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,10 +26,10 @@ public class CourseNoticeServiceImpl implements CourseNoticeService {
 	public CourseNoticeResponseDTO createNotice(CourseNoticeRequestDTO courseNoticeRequestDTO) {
 		Course course = courseRepository.findById(courseNoticeRequestDTO.getCourseId())
 				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
-		courseNoticeRequestDTO.setCreatedTime(LocalDateTime.now());
 		Notice notice = convertToEntity(courseNoticeRequestDTO);
 		course.addNotice(notice);
-		return convertToDTO(notice);
+		Notice saveNotice = courseNoticeRepository.save(notice);
+		return convertToDTO(saveNotice);
 	}
 
 	@Override
@@ -36,7 +37,8 @@ public class CourseNoticeServiceImpl implements CourseNoticeService {
         Notice notice = courseNoticeRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_NOTICE));
 
-        // 공지사항: 내용만 수정 가능
+        // 공지사항: 내용, 제목만 수정 가능
+		notice.setTitle(courseNoticeRequestDTO.getTitle());
         notice.setContent(courseNoticeRequestDTO.getContent());
         Notice saveNotice = courseNoticeRepository.save(notice);
 		return convertToDTO(saveNotice);
@@ -50,25 +52,28 @@ public class CourseNoticeServiceImpl implements CourseNoticeService {
 				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
 		course.deleteNotice(notice);
 	}
-	
+
 	private Notice convertToEntity(CourseNoticeRequestDTO courseNoticeRequestDTO) {
-		Notice notice = new Notice();
-		notice.setCreatedTime(courseNoticeRequestDTO.getCreatedTime());
-		notice.setContent(courseNoticeRequestDTO.getContent());
-        Course course = courseRepository.findById(courseNoticeRequestDTO.getCourseId())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
-        notice.setCourse(course);
-		return notice;
+		Course course = courseRepository.findById(courseNoticeRequestDTO.getCourseId())
+										.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
+		return Notice.builder()
+					 .title(courseNoticeRequestDTO.getTitle())
+					 .content(courseNoticeRequestDTO.getContent())
+					 .course(course)
+					 .build();
 	}
 
 	private CourseNoticeResponseDTO convertToDTO(Notice notice) {
-		CourseNoticeResponseDTO courseNoticeResponseDTO = new CourseNoticeResponseDTO();
-		courseNoticeResponseDTO.setId(notice.getId());
-		courseNoticeResponseDTO.setCreatedTime(notice.getCreatedTime());
-		courseNoticeResponseDTO.setContent(notice.getContent());
-		courseNoticeResponseDTO.setCourseId(notice.getCourse().getId());
-		courseNoticeResponseDTO.setCourseCommentCount(notice.getCourseCommentCount());
-		return courseNoticeResponseDTO;
+		return CourseNoticeResponseDTO.builder()
+									  .id(notice.getId())
+									  .createdTime(notice.getCreatedTime())
+									  .updatedTime(notice.getUpdatedTime())
+									  .title(notice.getTitle())
+									  .content(notice.getContent())
+									  .courseId(notice.getCourse().getId())
+									  .courseCommentCount(notice.getCourseCommentCount())
+
+									  .build();
 	}
 
 }

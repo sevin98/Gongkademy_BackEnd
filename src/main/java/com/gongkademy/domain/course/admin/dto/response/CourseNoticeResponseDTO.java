@@ -16,6 +16,8 @@ public class CourseNoticeResponseDTO {
 	
 	private Long id;
 	private LocalDateTime createdTime;
+	private LocalDateTime updatedTime;
+	private String title;
 	private String content;
 	private Long courseId;
 	private Long courseCommentCount;

@@ -179,6 +179,6 @@ public class CourseController {
 
 		 // 선수과목,강의 소개,강의 링크,사진
 		CourseInfoResponseDTO courseInfoResponseDTO = courseService.getCourseInfo(id);
-		return new ResponseEntity<>(courseInfoResponseDTO, HttpStatus.CREATED);
+		return new ResponseEntity<>(courseInfoResponseDTO, HttpStatus.OK);
 	}
 }

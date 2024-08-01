@@ -1,5 +1,7 @@
 package com.gongkademy.domain.course.common.entity;
 
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,11 +15,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Notice {
 
 	@Id
@@ -25,18 +34,35 @@ public class Notice {
 	@Column(name = "notice_id")
 	private Long id;
 
+	@Column(updatable = false)
 	private LocalDateTime createdTime;
+	private LocalDateTime updatedTime;
+
+	private String title;
 
 	private String content;
 
-	private Long courseCommentCount;
+	@Builder.Default
+	private Long courseCommentCount = 0L;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "course_id")
 	private Course course;
 
 	@OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<CourseComment> courseComments = new ArrayList<>();
+
+	@PrePersist
+	protected void onCreate() {
+		this.createdTime = LocalDateTime.now();
+		this.updatedTime = LocalDateTime.now();
+	}
+
+	@PreUpdate
+	protected void onUpdate() {
+		this.updatedTime = LocalDateTime.now();
+	}
 
 	// ==연관관계 메서드==//
 	public void addCourseComment(CourseComment courseComment) {

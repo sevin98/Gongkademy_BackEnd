@@ -1,0 +1,3 @@
+[submodule "src/main/resources/Gongkademy_back_security"]
+	path = src/main/resources/Gongkademy_back_security
+	url = https://github.com/Gongkademy/Gongkademy_back_security.git

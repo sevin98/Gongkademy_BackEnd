@@ -31,5 +31,5 @@ public class ConsultingBoardResponseDTO {
     private Boolean isLiked = false;
     @Builder.Default
     private Boolean isScrapped = false;
-    private List<Comment> comments;
+    private List<CommentResponseDTO> comments;
 }

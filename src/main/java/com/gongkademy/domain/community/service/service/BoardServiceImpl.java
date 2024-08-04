@@ -1,5 +1,8 @@
 package com.gongkademy.domain.community.service.service;
 
+import com.gongkademy.domain.community.common.entity.comment.Comment;
+import com.gongkademy.domain.community.common.mapper.BoardMapper;
+import com.gongkademy.domain.community.common.mapper.CommentMapper;
 import com.gongkademy.domain.community.service.dto.response.BoardResponseDTO;
 import com.gongkademy.domain.community.common.entity.board.Board;
 import com.gongkademy.domain.community.common.entity.board.BoardType;
@@ -8,6 +11,7 @@ import com.gongkademy.domain.community.common.entity.pick.PickType;
 import com.gongkademy.domain.community.common.repository.BoardRepository;
 import com.gongkademy.domain.community.common.repository.CommentRepository;
 import com.gongkademy.domain.community.common.repository.PickRepository;
+import com.gongkademy.domain.community.service.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
@@ -20,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -29,14 +34,15 @@ public class BoardServiceImpl implements BoardService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
     private final PickRepository pickRepository;
-    private final CommentRepository commentRepository;
+    private final BoardMapper boardMapper;
+    private final CommentMapper commentMapper;
 
     // 최신 순 매직넘버 시작
     private final int DEFAULT_TOP = 0;
 
     @Override
     public BoardResponseDTO getBoard(Long id, Long memberId) {
-        Board board = boardRepository.findById(id)
+        Board board = boardRepository.findByIdWithComments(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_BOARD_ID));
 
         boolean isLiked = (memberId != null) && isLikedByMember(board, memberId);
@@ -44,16 +50,16 @@ public class BoardServiceImpl implements BoardService {
 
         board.setHit(board.getHit() + 1);
 
-        return convertToDTO(board, isLiked, isScrapped);
+        return boardMapper.toBoardDTOWithLikesAndScraps(board, isLiked, isScrapped);
     }
 
     @Override
     public BoardResponseDTO getNotLoginBoard(Long id) {
-        Board board = boardRepository.findById(id)
+        Board board = boardRepository.findByIdWithComments(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_BOARD_ID));
         board.setHit(board.getHit() + 1);
 
-        return convertToDTO(board);
+        return boardMapper.toBoardDTO(board);
     }
 
     @Override
@@ -61,27 +67,19 @@ public class BoardServiceImpl implements BoardService {
         Pageable pageable = PageRequest.of(DEFAULT_TOP, LIMIT);
         List<Board> boards = boardRepository.findByBoardTypeOrderByCreateTimeDesc(BoardType.NOTICE,pageable).getContent();
 
-        List<BoardResponseDTO> boardResponseDTOS = new ArrayList<>();
-
-        for (Board board : boards) {
-            boolean isLiked = (memberId != null) && isLikedByMember(board, memberId);
-            boolean isScrapped = (memberId != null) && isScrappedByMember(board, memberId);
-            boardResponseDTOS.add(convertToDTO(board, isLiked, isScrapped));
-        }
-        return boardResponseDTOS;
+        return boards.stream()
+                .map(board -> {
+                    boolean isLiked = (memberId != null) && isLikedByMember(board, memberId);
+                    boolean isScraped = (memberId != null) && isScrappedByMember(board, memberId);
+                    return boardMapper.toBoardDTOWithLikesAndScraps(board, isLiked, isScraped);
+                }).collect(Collectors.toList());
     }
 
     @Override
     public List<BoardResponseDTO> getNotLoginLatestBoards(int index) {
         Pageable pageable = PageRequest.of(DEFAULT_TOP, index);
-        List<Board> boards = boardRepository.findByBoardTypeOrderByCreateTimeDesc(BoardType.NOTICE, pageable).getContent();
-
-        List<BoardResponseDTO> boardResponseDTOS = new ArrayList<>();
-
-        for (Board board : boards) {
-            boardResponseDTOS.add(convertToDTO(board));
-        }
-        return boardResponseDTOS;
+        return boardRepository.findByBoardTypeOrderByCreateTimeDesc(BoardType.NOTICE, pageable).getContent()
+                .stream().map(boardMapper::toBoardDTO).collect(Collectors.toList());
     }
 
     @Override
@@ -132,14 +130,8 @@ public class BoardServiceImpl implements BoardService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
-        List<Pick> likes = pickRepository.findAllByMemberAndPickType(member, PickType.LIKE);
-        List<BoardResponseDTO> likeBoardDTOs = new ArrayList<>();
-
-        for (Pick like : likes) {
-            likeBoardDTOs.add(convertToDTO(like.getBoard()));
-        }
-
-        return likeBoardDTOs;
+        return pickRepository.findAllByMemberAndPickType(member, PickType.LIKE)
+                .stream().map(Pick::getBoard).map(boardMapper::toBoardDTO).collect(Collectors.toList());
     }
 
     // 스크랩한 게시글
@@ -148,14 +140,8 @@ public class BoardServiceImpl implements BoardService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
-        List<Pick> likes = pickRepository.findAllByMemberAndPickType(member, PickType.SCRAP);
-        List<BoardResponseDTO> scrapBoardDTOs = new ArrayList<>();
-
-        for (Pick like : likes) {
-            scrapBoardDTOs.add(convertToDTO(like.getBoard()));
-        }
-
-        return scrapBoardDTOs;
+        return pickRepository.findAllByMemberAndPickType(member, PickType.SCRAP)
+                .stream().map(Pick::getBoard).map(boardMapper::toBoardDTO).collect(Collectors.toList());
 
     }
 
@@ -171,43 +157,5 @@ public class BoardServiceImpl implements BoardService {
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
         Optional<Pick> pickOptional = pickRepository.findByBoardAndMemberAndPickType(board, member, PickType.SCRAP);
         return pickOptional.isPresent();
-    }
-
-    private BoardResponseDTO convertToDTO(Board board) {
-        return BoardResponseDTO.builder().
-                articleId(board.getArticleId())
-                .boardType(board.getBoardType())
-                .memberId(board.getMember().getId())
-                .nickname(board.getMember().getNickname())
-                .title(board.getTitle())
-                .content(board.getContent())
-                .createTime(board.getCreateTime())
-                .likeCount(board.getLikeCount())
-                .scrapCount(board.getScrapCount())
-                .hit(board.getHit())
-                .commentCount(board.getCommentCount())
-                .comments(board.getComments())
-                .build();
-
-    }
-
-    private BoardResponseDTO convertToDTO(Board board, boolean isLiked, boolean isScrapped) {
-
-        return BoardResponseDTO.builder().
-                articleId(board.getArticleId())
-                .boardType(board.getBoardType())
-                .memberId(board.getMember().getId())
-                .nickname(board.getMember().getNickname())
-                .title(board.getTitle())
-                .content(board.getContent())
-                .createTime(board.getCreateTime())
-                .likeCount(board.getLikeCount())
-                .scrapCount(board.getScrapCount())
-                .hit(board.getHit())
-                .commentCount(board.getCommentCount())
-                .comments(board.getComments())
-                .isLiked(isLiked)
-                .isScrapped(isScrapped)
-                .build();
     }
 }

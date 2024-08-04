@@ -4,6 +4,7 @@ import com.gongkademy.domain.member.dto.MemberInfoDTO;
 import com.gongkademy.domain.member.dto.MemberSignUpDTO;
 import com.gongkademy.domain.member.dto.MemberUpdateDTO;
 import com.gongkademy.domain.member.dto.PrincipalDetails;
+import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.entity.MemberRole;
 import com.gongkademy.domain.member.service.MemberServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -50,8 +51,8 @@ public class MemberController {
     @PatchMapping
     public ResponseEntity<?> updateMember(@ModelAttribute MemberUpdateDTO memberUpdateDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         long loginMemberId = principalDetails.getMemberId();
-        memberService.modifyMember(loginMemberId, memberUpdateDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body("회원수정 성공");
+        Member updateMember = memberService.modifyMember(loginMemberId, memberUpdateDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(updateMember);
     }
 
     @DeleteMapping

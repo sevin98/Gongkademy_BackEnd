@@ -81,7 +81,8 @@ public class S3FileService implements FileService {
              ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(IOUtils.toByteArray(is))) {
 
             ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentType("image/" + extension);
+//            metadata.setContentType("image/" + extension);
+            metadata.setContentType(file.getContentType());
             metadata.setContentLength(byteArrayInputStream.available());
 
             // S3에 파일 올리기

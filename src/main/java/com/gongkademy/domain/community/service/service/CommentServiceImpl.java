@@ -1,5 +1,7 @@
 package com.gongkademy.domain.community.service.service;
 
+import com.gongkademy.domain.community.common.mapper.BoardMapper;
+import com.gongkademy.domain.community.common.mapper.CommentMapper;
 import com.gongkademy.domain.community.service.dto.request.CommentRequestDTO;
 import com.gongkademy.domain.community.service.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.common.entity.board.Board;
@@ -32,7 +34,7 @@ public class CommentServiceImpl implements CommentService {
     private final BoardRepository boardRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final NotificationService notificationService;
-
+    private final CommentMapper commentMapper;
 
     @Override
     @Transactional
@@ -44,10 +46,13 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = convertToEntity(commentRequestDTO);
         commentRepository.save(comment);
 
+        Board board = comment.getBoard();
+        updateCommentCount(board);
+
         BoardType boardType = boardRepository.findBoardTypeByBoardId(commentRequestDTO.getArticleId());
         notificationService.sendNotificationIfNeeded(commentRequestDTO, boardType);
 
-        return convertToDTO(comment);
+        return commentMapper.toCommentDTO(comment);
     }
 
     @Override
@@ -62,18 +67,8 @@ public class CommentServiceImpl implements CommentService {
 
         comment.setContent(commentRequestDTO.getContent());
         commentRepository.save(comment);
-        return convertToDTO(comment);
+        return commentMapper.toCommentDTO(comment);
     }
-
-//    @Override
-//    public List<CommentResponseDTO> getComments(Long articleId) {
-//        List<Comment> comments = commentRepository.findByBoardArticleIdAndParentIsNullOrderByCreateTimeAsc(articleId);
-//        List<CommentResponseDTO> commentResponseDTOS = new ArrayList<>();
-//        for (Comment comment : comments) {
-//            commentResponseDTOS.add(convertToDTO(comment));
-//        }
-//        return commentResponseDTOS;
-//    }
 
     @Override
     @Transactional
@@ -85,12 +80,16 @@ public class CommentServiceImpl implements CommentService {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
 
+        Board board = comment.getBoard();
+
         if (comment.getChildren().isEmpty()) {
             commentRepository.delete(comment);
         } else {
             comment.setContent("삭제된 메세지입니다.");
             commentRepository.save(comment);
         }
+        updateCommentCount(board);
+
     }
 
     @Override
@@ -144,21 +143,18 @@ public class CommentServiceImpl implements CommentService {
         return commentBuilder.build();
     }
 
-    private CommentResponseDTO convertToDTO(Comment comment) {
-        List<CommentResponseDTO> childrenDTOs = new ArrayList<>();
-        for (Comment child : comment.getChildren()) {
-            childrenDTOs.add(convertToDTO(child));
-        }
+    private void updateCommentCount(Board board) {
+        Long totalCommentsCount = countComments(board.getComments());
+        board.setCommentCount(totalCommentsCount);
+        boardRepository.save(board);
+    }
 
-        return CommentResponseDTO.builder()
-                .commentId(comment.getCommentId())
-                .articleId(comment.getBoard().getArticleId())
-                .memberId(comment.getMember().getId())
-                .nickname(comment.getNickname())
-                .content(comment.getContent())
-                .likeCount(comment.getLikeCount())
-                .parentId(comment.getParent() != null ? comment.getParent().getCommentId() : null)
-                .children(childrenDTOs)
-                .build();
+    private long countComments(List<Comment> comments) {
+        long count = 0;
+        for (Comment comment : comments) {
+            count++;
+            count += countComments(comment.getChildren());
+        }
+        return count;
     }
 }

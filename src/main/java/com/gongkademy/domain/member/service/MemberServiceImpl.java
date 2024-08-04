@@ -72,7 +72,7 @@ public class MemberServiceImpl implements MemberService{
      * @return 회원 ID
      */
     @Override
-    public void modifyMember(long id, MemberUpdateDTO memberUpdateDTO) {
+    public Member modifyMember(long id, MemberUpdateDTO memberUpdateDTO) {
         Member member = memberRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
         // 프로필 사진 변경
@@ -94,6 +94,8 @@ public class MemberServiceImpl implements MemberService{
             member.setAgreeMarketing(memberUpdateDTO.getAgreeMarketing());
         }
         memberRepository.save(member);
+
+        return member;
     }
 
     /**

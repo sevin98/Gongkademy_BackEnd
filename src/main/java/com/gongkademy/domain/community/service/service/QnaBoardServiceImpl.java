@@ -1,6 +1,9 @@
 package com.gongkademy.domain.community.service.service;
 
+import com.gongkademy.domain.community.common.entity.comment.Comment;
+import com.gongkademy.domain.community.common.mapper.BoardMapper;
 import com.gongkademy.domain.community.service.dto.request.QnaBoardRequestDTO;
+import com.gongkademy.domain.community.service.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.service.dto.response.QnaBoardResponseDTO;
 import com.gongkademy.domain.community.common.entity.board.Board;
 import com.gongkademy.domain.community.common.entity.board.BoardType;
@@ -23,6 +26,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -32,7 +36,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
     private final QnaBoardRepository qnaBoardRepository;
     private final MemberRepository memberRepository;
     private final PickRepository pickRepository;
-    private final S3FileService s3FileService;
+    private final BoardMapper boardMapper;
 
     private final int PAGE_SIZE = 10;
 
@@ -43,9 +47,9 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
         Page<QnaBoardResponseDTO> page;
         if (keyword == null) {
-            page = qnaBoardRepository.findQnaBoard(BoardType.QNA, pageable).map(this::convertToDTO);
+            page = qnaBoardRepository.findQnaBoard(BoardType.QNA, pageable).map(boardMapper::toQnaBoardDTO);
         } else {
-            page = qnaBoardRepository.findQnaBoardsWithKeyword(BoardType.QNA, keyword, pageable).map(this::convertToDTO);
+            page = qnaBoardRepository.findQnaBoardsWithKeyword(BoardType.QNA, keyword, pageable).map(boardMapper::toQnaBoardDTO);
         }
 
         List<QnaBoardResponseDTO> qnaBoards = page.getContent();
@@ -71,7 +75,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
         Page<QnaBoardResponseDTO> page;
 
-        page = qnaBoardRepository.findMyQnaBoard(BoardType.QNA, memberId, pageable).map(this::convertToDTO);
+        page = qnaBoardRepository.findMyQnaBoard(BoardType.QNA, memberId, pageable).map(boardMapper::toQnaBoardDTO);
 
         List<QnaBoardResponseDTO> qnaBoards = page.getContent();
 
@@ -96,9 +100,9 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
         Page<QnaBoardResponseDTO> page;
         if (keyword == null) {
-            page = qnaBoardRepository.findQnaBoard(BoardType.QNA, pageable).map(this::convertToDTO);
+            page = qnaBoardRepository.findQnaBoard(BoardType.QNA, pageable).map(boardMapper::toQnaBoardDTO);
         } else {
-            page = qnaBoardRepository.findQnaBoardsWithKeyword(BoardType.QNA, keyword, pageable).map(this::convertToDTO);
+            page = qnaBoardRepository.findQnaBoardsWithKeyword(BoardType.QNA, keyword, pageable).map(boardMapper::toQnaBoardDTO);
         }
 
         List<QnaBoardResponseDTO> qnaBoards = page.getContent();
@@ -114,9 +118,9 @@ public class QnaBoardServiceImpl implements QnaBoardService {
     // QnaBoard 생성
     @Override
     public QnaBoardResponseDTO createQnaBoard(QnaBoardRequestDTO qnaBoardRequestDto) {
-        QnaBoard qnaBoard = convertToEntity(qnaBoardRequestDto);
+        QnaBoard qnaBoard = boardMapper.toQnaBoardEntity(qnaBoardRequestDto);
         QnaBoard savedBoard = qnaBoardRepository.save(qnaBoard);
-        return convertToDTO(savedBoard);
+        return boardMapper.toQnaBoardDTO(savedBoard);
     }
 
     // QnaBoard 조회 (로그인 한 경우)
@@ -130,7 +134,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
             boolean isScrapped = isScrappedByMember(qnaBoard.getArticleId(), memberId);
 
             qnaBoard.setHit(qnaBoard.getHit() + 1);
-            return convertToDTO(qnaBoard, isLiked, isScrapped);
+            return boardMapper.toQnaBoardDTOWithLikesAndScraps(qnaBoard, isLiked, isScrapped);
         }
 
         throw new CustomException(ErrorCode.INVALID_BOARD_ID);
@@ -144,7 +148,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         if(optionalQnaBoard.isPresent()) {
             QnaBoard qnaBoard = optionalQnaBoard.get();
             qnaBoard.setHit(qnaBoard.getHit() + 1);
-            return convertToDTO(qnaBoard);
+            return boardMapper.toQnaBoardDTO(qnaBoard);
         }
 
         throw new CustomException(ErrorCode.INVALID_BOARD_ID);
@@ -233,7 +237,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
         for (Pick like : likes) {
             Optional<QnaBoard> qnaBoard = qnaBoardRepository.findById(like.getBoard().getArticleId());
-            qnaBoard.ifPresent(board -> likeBoardDTOs.add(convertToDTO(board)));
+            qnaBoard.ifPresent(board -> likeBoardDTOs.add(boardMapper.toQnaBoardDTO(board)));
         }
 
         return likeBoardDTOs;
@@ -250,7 +254,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
         for (Pick like : likes) {
             Optional<QnaBoard> qnaBoard = qnaBoardRepository.findById(like.getBoard().getArticleId());
-            qnaBoard.ifPresent(board -> scrapBoardDTOs.add(convertToDTO(board)));
+            qnaBoard.ifPresent(board -> scrapBoardDTOs.add(boardMapper.toQnaBoardDTO(board)));
         }
 
         return scrapBoardDTOs;
@@ -269,64 +273,5 @@ public class QnaBoardServiceImpl implements QnaBoardService {
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
         Optional<Pick> pickOptional = pickRepository.findByBoardArticleIdAndMemberAndPickType(articleId, member, PickType.SCRAP);
         return pickOptional.isPresent();
-    }
-
-
-
-
-    private QnaBoard convertToEntity(QnaBoardRequestDTO qnaBoardRequestDto) {
-        Member member = memberRepository.findById(qnaBoardRequestDto.getMemberId())
-                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
-
-        return QnaBoard.builder().
-                boardType(qnaBoardRequestDto.getBoardType())
-                .member(member)
-                .title(qnaBoardRequestDto.getTitle())
-                .content(qnaBoardRequestDto.getContent())
-                .lectureTitle(qnaBoardRequestDto.getLectureTitle())
-                .courseTitle(qnaBoardRequestDto.getCourseTitle())
-                .hit(0L)
-                .likeCount(0L)
-                .scrapCount(0L)
-                .commentCount(0L).build();
-    }
-
-
-    private QnaBoardResponseDTO convertToDTO(QnaBoard qnaBoard) {
-        return QnaBoardResponseDTO.builder().
-                boardType(qnaBoard.getBoardType())
-                .articleId(qnaBoard.getArticleId())
-                .memberId(qnaBoard.getMember().getId())
-                .nickname(qnaBoard.getMember().getNickname())
-                .title(qnaBoard.getTitle())
-                .content(qnaBoard.getContent())
-                .lectureTitle(qnaBoard.getLectureTitle())
-                .courseTitle(qnaBoard.getCourseTitle())
-                .likeCount(qnaBoard.getLikeCount())
-                .commentCount(qnaBoard.getCommentCount())
-                .scrapCount(qnaBoard.getScrapCount())
-                .hit(qnaBoard.getHit())
-                .comments(qnaBoard.getComments())
-                .createTime(qnaBoard.getCreateTime()).build();
-    }
-
-    private QnaBoardResponseDTO convertToDTO(QnaBoard qnaBoard, boolean isLiked, boolean isScrapped) {
-        return QnaBoardResponseDTO.builder().
-                boardType(qnaBoard.getBoardType())
-                .articleId(qnaBoard.getArticleId())
-                .memberId(qnaBoard.getMember().getId())
-                .nickname(qnaBoard.getMember().getNickname())
-                .title(qnaBoard.getTitle())
-                .content(qnaBoard.getContent())
-                .lectureTitle(qnaBoard.getLectureTitle())
-                .courseTitle(qnaBoard.getCourseTitle())
-                .likeCount(qnaBoard.getLikeCount())
-                .commentCount(qnaBoard.getCommentCount())
-                .scrapCount(qnaBoard.getScrapCount())
-                .hit(qnaBoard.getHit())
-                .comments(qnaBoard.getComments())
-                .isLiked(isLiked)
-                .isScrapped(isScrapped)
-                .createTime(qnaBoard.getCreateTime()).build();
     }
 }

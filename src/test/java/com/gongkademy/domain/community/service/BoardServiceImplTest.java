@@ -1,76 +1,89 @@
-package com.gongkademy.domain.community.service;
+package com.gongkademy.domain.community.service.service;
 
-
-import com.gongkademy.domain.community.service.dto.response.BoardResponseDTO;
 import com.gongkademy.domain.community.common.entity.board.Board;
-import com.gongkademy.domain.community.common.entity.board.BoardType;
+import com.gongkademy.domain.community.common.entity.comment.Comment;
 import com.gongkademy.domain.community.common.repository.BoardRepository;
-import com.gongkademy.domain.community.service.service.BoardServiceImpl;
+import com.gongkademy.domain.community.common.repository.CommentRepository;
+import com.gongkademy.domain.community.common.entity.board.BoardType;
+import com.gongkademy.domain.member.entity.Member;
+import com.gongkademy.domain.member.repository.MemberRepository;
+import com.gongkademy.global.exception.CustomException;
+import com.gongkademy.global.exception.ErrorCode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
-class BoardServiceImplTest {
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+public class BoardServiceImplTest {
 
-    @Mock
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
     private BoardRepository boardRepository;
 
-    @InjectMocks
-    private BoardServiceImpl boardService;
+    @Autowired
+    private MemberRepository memberRepository;
 
+    @Autowired
+    private CommentRepository commentRepository;
+
+    private Member member;
     private Board board;
 
     @BeforeEach
     void setUp() {
-        board = Board.builder()
-                .articleId(1L)
-                .title("Test Title")
-                .content("Test Content")
-                .boardType(BoardType.NOTICE)
-                .build();
+        member = new Member();
+        member.setEmail("test@example.com");
+        member.setNickname("testUser");
+        memberRepository.save(member);
+
+        board = new Board();
+        board.setTitle("Test Board");
+        board.setContent("test board.");
+        board.setMember(member);
+        board.setBoardType(BoardType.NOTICE);
+        board.setCreateTime(LocalDateTime.now());
+        boardRepository.save(board);
+
+        Comment comment1 = new Comment();
+        comment1.setContent("First comment");
+        comment1.setMember(member);
+        comment1.setBoard(board);
+        commentRepository.save(comment1);
+
+        Comment comment2 = new Comment();
+        comment2.setContent("Second comment");
+        comment2.setMember(member);
+        comment2.setBoard(board);
+        commentRepository.save(comment2);
     }
 
     @Test
-    void testGetLatestBoards() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Board> boardPage = new PageImpl<>(Collections.singletonList(board));
-
-        when(boardRepository.findByBoardTypeOrderByCreateTimeDesc(BoardType.NOTICE, pageable))
-                .thenReturn(boardPage);
-
-        List<BoardResponseDTO> boardResponseDTOS = boardService.getLatestBoards(3, 1L);
-
-        assertNotNull(boardResponseDTOS);
-        assertEquals(1, boardResponseDTOS.size());
-        assertEquals(BoardType.NOTICE, boardResponseDTOS.get(0).getBoardType());
-    }
-
-    @Test
-    void testGetBoard() {
-        when(boardRepository.findById(anyLong())).thenReturn(Optional.of(board));
-
-        BoardResponseDTO boardResponseDTO = boardService.getBoard(1L, 1L);
-
-        assertNotNull(boardResponseDTO);
-        assertEquals(1L, boardResponseDTO.getArticleId());
-        assertEquals("Test Title", boardResponseDTO.getTitle());
-        assertEquals(BoardType.NOTICE, boardResponseDTO.getBoardType());
+    public void testGetBoardWithComments() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/boards/" + board.getArticleId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.articleId").value(board.getArticleId()))
+                .andExpect(jsonPath("$.title").value(board.getTitle()))
+                .andExpect(jsonPath("$.comments").isArray())
+                .andExpect(jsonPath("$.comments.length()").value(2))
+                .andExpect(jsonPath("$.comments[0].content").value("First comment"))
+                .andExpect(jsonPath("$.comments[1].content").value("Second comment"));
     }
 }

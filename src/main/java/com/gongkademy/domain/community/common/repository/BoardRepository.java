@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long> {
 
@@ -30,6 +32,9 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 
     @Query("SELECT b.boardType FROM Board b WHERE b.articleId = :boardId")
     BoardType findBoardTypeByBoardId(@Param("boardId") Long boardId);
+
+    @Query("SELECT b FROM Board b JOIN FETCH b.comments WHERE b.articleId = :articleId")
+    Optional<Board> findByIdWithComments(@Param("articleId") Long articleId);
 
     // Admin_Back
     Page<Board> findAll(Pageable pageable);

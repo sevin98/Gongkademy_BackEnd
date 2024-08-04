@@ -14,7 +14,7 @@ public interface MemberService {
 
     void validateAuthority(Long id, MemberRole role);
     void joinMember(long id, MemberSignUpDTO dto);
-    void modifyMember(long id, MemberUpdateDTO dto);
+    Member modifyMember(long id, MemberUpdateDTO dto);
     void deleteMember(long id);
     void changeNotificationEnabledStatus(long id);
 

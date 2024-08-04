@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface QnaBoardRepository extends JpaRepository<QnaBoard, Long> {
     @Query("SELECT b FROM QnaBoard b WHERE b.boardType = :boardType")
@@ -20,6 +22,9 @@ public interface QnaBoardRepository extends JpaRepository<QnaBoard, Long> {
 
     @Query("SELECT b FROM QnaBoard b WHERE b.boardType = :boardType AND b.member.id = :memberId")
     Page<QnaBoard> findMyQnaBoard(@Param("boardType") BoardType boardType, @Param("memberId") Long memberId, Pageable pageable);
+
+    @Query("SELECT qb FROM QnaBoard qb JOIN FETCH qb.comments WHERE qb.articleId = :articleId")
+    Optional<QnaBoard> findByIdWithComments(@Param("articleId") Long articleId);
 
     // Admin_Back
     Page<QnaBoard> findAll(Pageable pageable);

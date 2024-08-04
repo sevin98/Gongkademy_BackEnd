@@ -1,6 +1,9 @@
 package com.gongkademy.domain.community.service.service;
 
+import com.gongkademy.domain.community.common.entity.comment.Comment;
+import com.gongkademy.domain.community.common.mapper.BoardMapper;
 import com.gongkademy.domain.community.service.dto.request.ConsultingBoardRequestDTO;
+import com.gongkademy.domain.community.service.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.service.dto.response.ConsultingBoardResponseDTO;
 import com.gongkademy.domain.community.common.entity.board.Board;
 import com.gongkademy.domain.community.common.entity.board.BoardType;
@@ -22,6 +25,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -31,6 +35,7 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
     private final PickRepository pickRepository;
+    private final BoardMapper boardMapper;
 
     private final int PAGE_SIZE = 10;
     @Override
@@ -39,9 +44,9 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
         Page<ConsultingBoardResponseDTO> page;
         if (keyword == null) {
-            page = boardRepository.findConsultBoard(BoardType.CONSULT, pageable).map(this::convertToDTO);
+            page = boardRepository.findConsultBoard(BoardType.CONSULT, pageable).map(boardMapper::toConsultingBoardDTO);
         } else {
-            page = boardRepository.findConsultBoardsWithKeyword(BoardType.CONSULT, keyword, pageable).map(this::convertToDTO);
+            page = boardRepository.findConsultBoardsWithKeyword(BoardType.CONSULT, keyword, pageable).map(boardMapper::toConsultingBoardDTO);
         }
 
         List<ConsultingBoardResponseDTO> consultingBoards = page.getContent();
@@ -68,7 +73,7 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
         Page<ConsultingBoardResponseDTO> page;
 
-        page = boardRepository.findMyConsultBoard(BoardType.CONSULT, memberId, pageable).map(this::convertToDTO);
+        page = boardRepository.findMyConsultBoard(BoardType.CONSULT, memberId, pageable).map(boardMapper::toConsultingBoardDTO);
 
         List<ConsultingBoardResponseDTO> consultingBoards = page.getContent();
         Map<String, Object> consults = new HashMap<>();
@@ -94,9 +99,9 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
         Page<ConsultingBoardResponseDTO> page;
         if (keyword == null) {
-            page = boardRepository.findConsultBoard(BoardType.CONSULT, pageable).map(this::convertToDTO);
+            page = boardRepository.findConsultBoard(BoardType.CONSULT, pageable).map(boardMapper::toConsultingBoardDTO);
         } else {
-            page = boardRepository.findConsultBoardsWithKeyword(BoardType.CONSULT, keyword, pageable).map(this::convertToDTO);
+            page = boardRepository.findConsultBoardsWithKeyword(BoardType.CONSULT, keyword, pageable).map(boardMapper::toConsultingBoardDTO);
         }
 
         List<ConsultingBoardResponseDTO> consultingBoards = page.getContent();
@@ -111,9 +116,9 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
 
     @Override
     public ConsultingBoardResponseDTO createConsultingBoard(ConsultingBoardRequestDTO consultingBoardRequestDTO) {
-        Board consultingBoard = convertToEntity(consultingBoardRequestDTO);
+        Board consultingBoard = boardMapper.toBoardEntity(consultingBoardRequestDTO);
         Board savedBoard = boardRepository.save(consultingBoard);
-        return convertToDTO(savedBoard);
+        return boardMapper.toConsultingBoardDTO(savedBoard);
     }
 
     @Override
@@ -126,7 +131,7 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
             boolean isScrapped = isScrappedByMember(consultingBoard.getArticleId(), memberId);
 
             consultingBoard.setHit(consultingBoard.getHit() + 1);
-            return convertToDTO(consultingBoard, isLiked, isScrapped);
+            return boardMapper.toConsultingBoardDTOWithLikesAndScraps(consultingBoard, isLiked, isScrapped);
         }
 
         throw new CustomException(ErrorCode.INVALID_BOARD_ID);
@@ -139,7 +144,7 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
         if(optionalQnaBoard.isPresent()) {
             Board consultingBoard = optionalQnaBoard.get();
             consultingBoard.setHit(consultingBoard.getHit() + 1);
-            return convertToDTO(consultingBoard);
+            return boardMapper.toConsultingBoardDTO(consultingBoard);
         }
 
         throw new CustomException(ErrorCode.INVALID_BOARD_ID);
@@ -227,7 +232,7 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
 
         for (Pick like : likes) {
             Optional<Board> consultingBoard = boardRepository.findById(like.getBoard().getArticleId());
-            consultingBoard.ifPresent(board -> likeBoardDTOs.add(convertToDTO(board)));
+            consultingBoard.ifPresent(board -> likeBoardDTOs.add(boardMapper.toConsultingBoardDTO(board)));
         }
 
         return likeBoardDTOs;
@@ -243,7 +248,7 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
 
         for (Pick like : likes) {
             Optional<Board> consultingBoard = boardRepository.findById(like.getBoard().getArticleId());
-            consultingBoard.ifPresent(board -> scrapBoardDTOs.add(convertToDTO(board)));
+            consultingBoard.ifPresent(board -> scrapBoardDTOs.add(boardMapper.toConsultingBoardDTO(board)));
         }
 
         return scrapBoardDTOs;
@@ -261,58 +266,5 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService{
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
         Optional<Pick> pickOptional = pickRepository.findByBoardArticleIdAndMemberAndPickType(articleId, member, PickType.SCRAP);
         return pickOptional.isPresent();
-    }
-
-    private Board convertToEntity(ConsultingBoardRequestDTO consultingBoardRequestDTO) {
-        Member member = memberRepository.findById(consultingBoardRequestDTO.getMemberId())
-                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
-
-        return Board.builder()
-                .boardType(consultingBoardRequestDTO.getBoardType())
-                .member(member)
-                .title(consultingBoardRequestDTO.getTitle())
-                .content(consultingBoardRequestDTO.getContent())
-                .hit(0L)
-                .likeCount(0L)
-                .scrapCount(0L)
-                .commentCount(0L)
-                .build();
-    }
-
-    private ConsultingBoardResponseDTO convertToDTO(Board consultingBoard) {
-        return ConsultingBoardResponseDTO.builder().
-                articleId(consultingBoard.getArticleId())
-                .boardType(consultingBoard.getBoardType())
-                .memberId(consultingBoard.getMember().getId())
-                .nickname(consultingBoard.getMember().getNickname())
-                .title(consultingBoard.getTitle())
-                .content(consultingBoard.getContent())
-                .createTime(consultingBoard.getCreateTime())
-                .likeCount(consultingBoard.getLikeCount())
-                .scrapCount(consultingBoard.getScrapCount())
-                .hit(consultingBoard.getHit())
-                .commentCount(consultingBoard.getCommentCount())
-                .comments(consultingBoard.getComments())
-                .build();
-
-    }
-
-    private ConsultingBoardResponseDTO convertToDTO(Board consultingBoard, boolean isLiked, boolean isScrapped) {
-        return ConsultingBoardResponseDTO.builder().
-                articleId(consultingBoard.getArticleId())
-                .boardType(consultingBoard.getBoardType())
-                .memberId(consultingBoard.getMember().getId())
-                .nickname(consultingBoard.getMember().getNickname())
-                .title(consultingBoard.getTitle())
-                .content(consultingBoard.getContent())
-                .createTime(consultingBoard.getCreateTime())
-                .likeCount(consultingBoard.getLikeCount())
-                .scrapCount(consultingBoard.getScrapCount())
-                .hit(consultingBoard.getHit())
-                .commentCount(consultingBoard.getCommentCount())
-                .isLiked(isLiked)
-                .isScrapped(isScrapped)
-                .comments(consultingBoard.getComments())
-                .build();
     }
 }

@@ -22,7 +22,7 @@ public class BoardController {
     private final int LIMIT = 3;
 
     // 공지사항 상세보기
-    @GetMapping("/notice/{articleId}")
+    @GetMapping("/notice/{articleId}/login")
     public ResponseEntity<?> getBoard(@PathVariable Long articleId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = (principalDetails != null) ? principalDetails.getMemberId() : null;
         BoardResponseDTO boardResponseDTO = boardService.getBoard(articleId, currentMemberId);
@@ -30,14 +30,14 @@ public class BoardController {
     }
 
     // 비로그인 공지사항 상세보기
-    @GetMapping("/notice/{articleId}/non-login")
+    @GetMapping("/notice/{articleId}")
     public ResponseEntity<?> getNonLogin(@PathVariable Long articleId) {
         BoardResponseDTO boardResponseDTO = boardService.getNotLoginBoard(articleId);
         return ResponseEntity.ok(boardResponseDTO);
     }
 
     // 최신 순 3개 가져오기
-    @GetMapping("/notice/top_latest")
+    @GetMapping("/notice/top_latest/login")
     public ResponseEntity<List<BoardResponseDTO>> getLimitLatestBoards(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = (principalDetails != null) ? principalDetails.getMemberId() : null;
         List<BoardResponseDTO> boardResponseDTOS = boardService.getLatestBoards(LIMIT, currentMemberId);
@@ -48,7 +48,7 @@ public class BoardController {
     }
 
     // 비로그인 공지사항 리스트 보기
-    @GetMapping("/notice/top_latest/non-login")
+    @GetMapping("/notice/top_latest")
     public ResponseEntity<?> getNonLoginLimitLatestBoards() {
         List<BoardResponseDTO> boardResponseDTOS = boardService.getNotLoginLatestBoards(LIMIT);
         if (boardResponseDTOS.isEmpty()) {

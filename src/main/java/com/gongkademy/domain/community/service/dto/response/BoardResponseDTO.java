@@ -25,7 +25,7 @@ public class BoardResponseDTO {
     private Long scrapCount;
     private Long hit;
     private Long commentCount;
-    private List<Comment> comments;
+    private List<CommentResponseDTO> comments;
     private boolean isLiked;
     private boolean isScrapped;
 

@@ -36,5 +36,5 @@ public class QnaBoardResponseDTO {
     private String lectureTitle;
     private String courseTitle;
 
-    private List<Comment> comments;
+    private List<CommentResponseDTO> comments;
 }

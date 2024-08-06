@@ -1,5 +1,7 @@
 package com.gongkademy.domain.community.common.entity.board;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.gongkademy.domain.community.admin.dto.request.BoardRequestDTO;
 import com.gongkademy.domain.community.common.entity.comment.Comment;
 import com.gongkademy.domain.member.entity.Member;
@@ -28,6 +30,7 @@ public class Board {
 
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
+    @JsonBackReference
     private Member member;
 
     @Column(nullable = false)
@@ -63,6 +66,7 @@ public class Board {
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @JsonManagedReference
     private List<Comment> comments = new ArrayList<>();
 
     // 연관관계 편의 메서드

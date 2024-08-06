@@ -64,9 +64,9 @@ public class S3FileService implements FileService {
         }
 
         String extension = filename.substring(lastDotIndex + 1).toLowerCase();
-        List<String> allowedExtentionList = Arrays.asList("jpg", "jpeg", "png", "gif");
+        List<String> allowedExtensionList = Arrays.asList("jpg", "jpeg", "png", "gif");
 
-        if (!allowedExtentionList.contains(extension)) {
+        if (!allowedExtensionList.contains(extension)) {
             throw new AmazonS3Exception("확장자명에 문제가 있습니다");
         }
     }
@@ -74,7 +74,7 @@ public class S3FileService implements FileService {
     // - S3 실제 업로드
     private String uploadFileToS3(MultipartFile file, FileCateg categ) {
         String originalFilename = file.getOriginalFilename(); // 원본 파일명
-        String extension = originalFilename.substring(originalFilename.lastIndexOf(".")); // 확장자명
+//        String extension = originalFilename.substring(originalFilename.lastIndexOf(".")); // 확장자명
         String s3FileName = getFileFolder(categ)+UUID.randomUUID().toString().substring(0, 10) + originalFilename; // 변경된 파일 명
 
         try (InputStream is = file.getInputStream();

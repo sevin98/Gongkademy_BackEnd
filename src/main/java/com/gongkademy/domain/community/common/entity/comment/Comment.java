@@ -1,6 +1,8 @@
 package com.gongkademy.domain.community.common.entity.comment;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.gongkademy.domain.community.common.entity.board.Board;
 import com.gongkademy.domain.member.entity.Member;
 import jakarta.persistence.*;
@@ -25,11 +27,13 @@ public class Comment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "article_id", nullable = false)
+    @JsonBackReference
     private Board board;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
+    @JsonBackReference
     private Member member;
 
     @Column(nullable = false)
@@ -45,10 +49,12 @@ public class Comment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
+    @JsonBackReference
     private Comment parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @JsonManagedReference
     private List<Comment> children = new ArrayList<>();
 
     // 연관 관계 메서드

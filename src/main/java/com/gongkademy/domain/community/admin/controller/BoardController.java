@@ -30,7 +30,7 @@ public class BoardController {
         return ResponseEntity.ok(boardResponseDTO);
     }
 
-//    관리자 전용
+    // 관리자 전용
     @GetMapping("/notice")
     public ResponseEntity<List<BoardResponseDTO>> getAllBoards(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
                                                                @RequestParam(defaultValue = BASE_CRITERIA, value = REQUEST_PARAM_CRITERIA) String criteria) {
@@ -55,7 +55,7 @@ public class BoardController {
     }
 
     // 게시글 수정
-    @PutMapping("/notice/{articleId}")
+    @PatchMapping("/notice/{articleId}")
     public ResponseEntity<?> updateBoard(@PathVariable Long articleId, @RequestBody BoardRequestDTO boardRequestDTO) {
         Long updateArticleId = boardService.updateBoard(articleId, boardRequestDTO);
 

@@ -1,7 +1,5 @@
 package com.gongkademy.domain.community.service.service;
 
-import com.gongkademy.domain.community.common.mapper.BoardMapper;
-import com.gongkademy.domain.community.common.mapper.CommentMapper;
 import com.gongkademy.domain.community.service.dto.request.CommentRequestDTO;
 import com.gongkademy.domain.community.service.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.common.entity.board.Board;
@@ -34,7 +32,6 @@ public class CommentServiceImpl implements CommentService {
     private final BoardRepository boardRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final NotificationService notificationService;
-    private final CommentMapper commentMapper;
 
     @Override
     @Transactional
@@ -52,7 +49,7 @@ public class CommentServiceImpl implements CommentService {
         BoardType boardType = boardRepository.findBoardTypeByBoardId(commentRequestDTO.getArticleId());
         notificationService.sendNotificationIfNeeded(commentRequestDTO, boardType);
 
-        return commentMapper.toCommentDTO(comment);
+        return convertToDTO(comment);
     }
 
     @Override
@@ -67,7 +64,7 @@ public class CommentServiceImpl implements CommentService {
 
         comment.setContent(commentRequestDTO.getContent());
         commentRepository.save(comment);
-        return commentMapper.toCommentDTO(comment);
+        return convertToDTO(comment);
     }
 
     @Override
@@ -157,4 +154,5 @@ public class CommentServiceImpl implements CommentService {
         }
         return count;
     }
+
 }

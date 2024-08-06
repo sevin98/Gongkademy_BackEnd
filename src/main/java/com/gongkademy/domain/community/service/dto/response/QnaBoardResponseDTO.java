@@ -1,11 +1,17 @@
 package com.gongkademy.domain.community.service.dto.response;
 
 import com.gongkademy.domain.community.common.entity.board.BoardType;
+import com.gongkademy.domain.community.common.entity.board.QnaBoard;
 import com.gongkademy.domain.community.common.entity.comment.Comment;
+import com.gongkademy.domain.community.service.dto.request.QnaBoardRequestDTO;
+import com.gongkademy.domain.member.entity.Member;
+import com.gongkademy.global.exception.CustomException;
+import com.gongkademy.global.exception.ErrorCode;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -18,6 +24,7 @@ public class QnaBoardResponseDTO {
     private BoardType boardType;
     private Long memberId;
     private String nickname;
+    private String profilePath;
 
     private String title;
     private String content;
@@ -37,4 +44,5 @@ public class QnaBoardResponseDTO {
     private String courseTitle;
 
     private List<CommentResponseDTO> comments;
+
 }

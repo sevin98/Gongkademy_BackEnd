@@ -1,5 +1,8 @@
 package com.gongkademy.domain.member.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.gongkademy.domain.community.common.entity.board.Board;
 import com.gongkademy.domain.community.common.entity.comment.Comment;
 import com.gongkademy.domain.community.common.entity.comment.CommentLike;
@@ -29,7 +32,9 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = "memberRoleList") //ElementCollection으로 잡힌 애들은 toString 제외를 해줘야 Lazy 로딩이 안됨
+@ToString(exclude = {"memberRoleList", "picks", "comments", "commentLikes", "boards", "courseComments", "courseReviews", "registCourses", "registLectures", "scraps", "courseLikes"})
+//ElementCollection으로 잡힌 애들은 toString 제외를 해줘야 Lazy 로딩이 안됨
+@JsonIgnoreProperties({"HibernateLazyInitializer", "handler"})
 public class Member {
 
     @Id
@@ -99,42 +104,52 @@ public class Member {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @JsonManagedReference
     private List<Pick> picks = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
     @Builder.Default
+    @JsonManagedReference
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @JsonManagedReference
     private List<CommentLike> commentLikes = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
     @Builder.Default
+    @JsonManagedReference
     private List<Board> boards = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
     @Builder.Default
+    @JsonManagedReference
     private List<CourseComment> courseComments = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
     @Builder.Default
+    @JsonManagedReference
     private List<CourseReview> courseReviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
+    @JsonManagedReference
     private List<RegistCourse> registCourses = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
+    @JsonManagedReference
     private List<RegistLecture> registLectures = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
+    @JsonManagedReference
     private List<Scrap> scraps = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
+    @JsonManagedReference
     private List<CourseLike> courseLikes = new ArrayList<>();
 
     // 연관관계 편의 메서드

@@ -1,17 +1,12 @@
 package com.gongkademy.domain.community.service.service;
 
-import com.gongkademy.domain.community.common.entity.comment.Comment;
-import com.gongkademy.domain.community.common.mapper.BoardMapper;
-import com.gongkademy.domain.community.common.mapper.CommentMapper;
 import com.gongkademy.domain.community.service.dto.response.BoardResponseDTO;
 import com.gongkademy.domain.community.common.entity.board.Board;
 import com.gongkademy.domain.community.common.entity.board.BoardType;
 import com.gongkademy.domain.community.common.entity.pick.Pick;
 import com.gongkademy.domain.community.common.entity.pick.PickType;
 import com.gongkademy.domain.community.common.repository.BoardRepository;
-import com.gongkademy.domain.community.common.repository.CommentRepository;
 import com.gongkademy.domain.community.common.repository.PickRepository;
-import com.gongkademy.domain.community.service.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
@@ -21,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,8 +28,6 @@ public class BoardServiceImpl implements BoardService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
     private final PickRepository pickRepository;
-    private final BoardMapper boardMapper;
-    private final CommentMapper commentMapper;
 
     // 최신 순 매직넘버 시작
     private final int DEFAULT_TOP = 0;
@@ -50,7 +42,7 @@ public class BoardServiceImpl implements BoardService {
 
         board.setHit(board.getHit() + 1);
 
-        return boardMapper.toBoardDTOWithLikesAndScraps(board, isLiked, isScrapped);
+        return convertToDTOWithPicks(board, isLiked, isScrapped);
     }
 
     @Override
@@ -59,7 +51,7 @@ public class BoardServiceImpl implements BoardService {
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_BOARD_ID));
         board.setHit(board.getHit() + 1);
 
-        return boardMapper.toBoardDTO(board);
+        return convertToDTO(board);
     }
 
     @Override
@@ -71,7 +63,7 @@ public class BoardServiceImpl implements BoardService {
                 .map(board -> {
                     boolean isLiked = (memberId != null) && isLikedByMember(board, memberId);
                     boolean isScraped = (memberId != null) && isScrappedByMember(board, memberId);
-                    return boardMapper.toBoardDTOWithLikesAndScraps(board, isLiked, isScraped);
+                    return convertToDTOWithPicks(board, isLiked, isScraped);
                 }).collect(Collectors.toList());
     }
 
@@ -79,7 +71,7 @@ public class BoardServiceImpl implements BoardService {
     public List<BoardResponseDTO> getNotLoginLatestBoards(int index) {
         Pageable pageable = PageRequest.of(DEFAULT_TOP, index);
         return boardRepository.findByBoardTypeOrderByCreateTimeDesc(BoardType.NOTICE, pageable).getContent()
-                .stream().map(boardMapper::toBoardDTO).collect(Collectors.toList());
+                .stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
     @Override
@@ -131,7 +123,7 @@ public class BoardServiceImpl implements BoardService {
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
         return pickRepository.findAllByMemberAndPickType(member, PickType.LIKE)
-                .stream().map(Pick::getBoard).map(boardMapper::toBoardDTO).collect(Collectors.toList());
+                .stream().map(Pick::getBoard).map(this::convertToDTO).collect(Collectors.toList());
     }
 
     // 스크랩한 게시글
@@ -141,7 +133,7 @@ public class BoardServiceImpl implements BoardService {
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
         return pickRepository.findAllByMemberAndPickType(member, PickType.SCRAP)
-                .stream().map(Pick::getBoard).map(boardMapper::toBoardDTO).collect(Collectors.toList());
+                .stream().map(Pick::getBoard).map(this::convertToDTO).collect(Collectors.toList());
 
     }
 
@@ -158,4 +150,5 @@ public class BoardServiceImpl implements BoardService {
         Optional<Pick> pickOptional = pickRepository.findByBoardAndMemberAndPickType(board, member, PickType.SCRAP);
         return pickOptional.isPresent();
     }
+
 }

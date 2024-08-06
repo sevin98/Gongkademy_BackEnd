@@ -8,7 +8,6 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MemberUpdateDTO {
-    private String email;
     private String newNickname;
     private Boolean agreeMarketing;
     private MultipartFile profileImage;

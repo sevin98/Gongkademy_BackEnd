@@ -1,7 +1,6 @@
 package com.gongkademy.domain.community.service.service;
 
 import com.gongkademy.domain.community.common.entity.comment.Comment;
-import com.gongkademy.domain.community.common.mapper.BoardMapper;
 import com.gongkademy.domain.community.service.dto.request.QnaBoardRequestDTO;
 import com.gongkademy.domain.community.service.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.service.dto.response.QnaBoardResponseDTO;
@@ -16,7 +15,6 @@ import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
-import com.gongkademy.infra.s3.service.S3FileService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,7 +34,6 @@ public class QnaBoardServiceImpl implements QnaBoardService {
     private final QnaBoardRepository qnaBoardRepository;
     private final MemberRepository memberRepository;
     private final PickRepository pickRepository;
-    private final BoardMapper boardMapper;
 
     private final int PAGE_SIZE = 10;
 
@@ -47,9 +44,9 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
         Page<QnaBoardResponseDTO> page;
         if (keyword == null) {
-            page = qnaBoardRepository.findQnaBoard(BoardType.QNA, pageable).map(boardMapper::toQnaBoardDTO);
+            page = qnaBoardRepository.findQnaBoard(BoardType.QNA, pageable).map(this::convertToDTO);
         } else {
-            page = qnaBoardRepository.findQnaBoardsWithKeyword(BoardType.QNA, keyword, pageable).map(boardMapper::toQnaBoardDTO);
+            page = qnaBoardRepository.findQnaBoardsWithKeyword(BoardType.QNA, keyword, pageable).map(this::convertToDTO);
         }
 
         List<QnaBoardResponseDTO> qnaBoards = page.getContent();
@@ -75,7 +72,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
         Page<QnaBoardResponseDTO> page;
 
-        page = qnaBoardRepository.findMyQnaBoard(BoardType.QNA, memberId, pageable).map(boardMapper::toQnaBoardDTO);
+        page = qnaBoardRepository.findMyQnaBoard(BoardType.QNA, memberId, pageable).map(this::convertToDTO);
 
         List<QnaBoardResponseDTO> qnaBoards = page.getContent();
 
@@ -100,9 +97,9 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, criteria));
         Page<QnaBoardResponseDTO> page;
         if (keyword == null) {
-            page = qnaBoardRepository.findQnaBoard(BoardType.QNA, pageable).map(boardMapper::toQnaBoardDTO);
+            page = qnaBoardRepository.findQnaBoard(BoardType.QNA, pageable).map(this::convertToDTO);
         } else {
-            page = qnaBoardRepository.findQnaBoardsWithKeyword(BoardType.QNA, keyword, pageable).map(boardMapper::toQnaBoardDTO);
+            page = qnaBoardRepository.findQnaBoardsWithKeyword(BoardType.QNA, keyword, pageable).map(this::convertToDTO);
         }
 
         List<QnaBoardResponseDTO> qnaBoards = page.getContent();
@@ -118,9 +115,9 @@ public class QnaBoardServiceImpl implements QnaBoardService {
     // QnaBoard 생성
     @Override
     public QnaBoardResponseDTO createQnaBoard(QnaBoardRequestDTO qnaBoardRequestDto) {
-        QnaBoard qnaBoard = boardMapper.toQnaBoardEntity(qnaBoardRequestDto);
+        QnaBoard qnaBoard = convertToEntity(qnaBoardRequestDto);
         QnaBoard savedBoard = qnaBoardRepository.save(qnaBoard);
-        return boardMapper.toQnaBoardDTO(savedBoard);
+        return convertToDTO(savedBoard);
     }
 
     // QnaBoard 조회 (로그인 한 경우)
@@ -134,7 +131,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
             boolean isScrapped = isScrappedByMember(qnaBoard.getArticleId(), memberId);
 
             qnaBoard.setHit(qnaBoard.getHit() + 1);
-            return boardMapper.toQnaBoardDTOWithLikesAndScraps(qnaBoard, isLiked, isScrapped);
+            return convertToDTOWithPicks(qnaBoard, isLiked, isScrapped);
         }
 
         throw new CustomException(ErrorCode.INVALID_BOARD_ID);
@@ -148,7 +145,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         if(optionalQnaBoard.isPresent()) {
             QnaBoard qnaBoard = optionalQnaBoard.get();
             qnaBoard.setHit(qnaBoard.getHit() + 1);
-            return boardMapper.toQnaBoardDTO(qnaBoard);
+            return convertToDTO(qnaBoard);
         }
 
         throw new CustomException(ErrorCode.INVALID_BOARD_ID);
@@ -237,7 +234,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
         for (Pick like : likes) {
             Optional<QnaBoard> qnaBoard = qnaBoardRepository.findById(like.getBoard().getArticleId());
-            qnaBoard.ifPresent(board -> likeBoardDTOs.add(boardMapper.toQnaBoardDTO(board)));
+            qnaBoard.ifPresent(board -> likeBoardDTOs.add(convertToDTO(board)));
         }
 
         return likeBoardDTOs;
@@ -254,7 +251,7 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
         for (Pick like : likes) {
             Optional<QnaBoard> qnaBoard = qnaBoardRepository.findById(like.getBoard().getArticleId());
-            qnaBoard.ifPresent(board -> scrapBoardDTOs.add(boardMapper.toQnaBoardDTO(board)));
+            qnaBoard.ifPresent(board -> scrapBoardDTOs.add(convertToDTO(board)));
         }
 
         return scrapBoardDTOs;
@@ -274,4 +271,24 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         Optional<Pick> pickOptional = pickRepository.findByBoardArticleIdAndMemberAndPickType(articleId, member, PickType.SCRAP);
         return pickOptional.isPresent();
     }
+
+    private QnaBoard convertToEntity(QnaBoardRequestDTO qnaBoardRequestDto) {
+        Member member = memberRepository.findById(qnaBoardRequestDto.getMemberId())
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
+
+        return QnaBoard.builder().
+                boardType(qnaBoardRequestDto.getBoardType())
+                .member(member)
+                .title(qnaBoardRequestDto.getTitle())
+                .content(qnaBoardRequestDto.getContent())
+                .lectureTitle(qnaBoardRequestDto.getLectureTitle())
+                .courseTitle(qnaBoardRequestDto.getCourseTitle())
+                .hit(0L)
+                .likeCount(0L)
+                .scrapCount(0L)
+                .commentCount(0L)
+                .build();
+    }
+
+
 }

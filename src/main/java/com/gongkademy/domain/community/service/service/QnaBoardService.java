@@ -1,10 +1,14 @@
 package com.gongkademy.domain.community.service.service;
 
+import com.gongkademy.domain.community.common.entity.board.QnaBoard;
+import com.gongkademy.domain.community.common.entity.comment.Comment;
 import com.gongkademy.domain.community.service.dto.request.QnaBoardRequestDTO;
+import com.gongkademy.domain.community.service.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.service.dto.response.QnaBoardResponseDTO;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public interface QnaBoardService {
     // 모든 Qna 게시글 조회하기 (로그인 한 경우)
@@ -42,4 +46,62 @@ public interface QnaBoardService {
 
     // Qna 스크랩한 게시글 조회
     List<QnaBoardResponseDTO> getScrapBoards(Long memberId);
+
+
+
+    default QnaBoardResponseDTO convertToDTO(QnaBoard qnaBoard) {
+        return QnaBoardResponseDTO.builder().
+                boardType(qnaBoard.getBoardType())
+                .articleId(qnaBoard.getArticleId())
+                .memberId(qnaBoard.getMember().getId())
+                .nickname(qnaBoard.getMember().getNickname())
+                .profilePath(qnaBoard.getMember().getProfilePath())
+                .title(qnaBoard.getTitle())
+                .content(qnaBoard.getContent())
+                .lectureTitle(qnaBoard.getLectureTitle())
+                .courseTitle(qnaBoard.getCourseTitle())
+                .likeCount(qnaBoard.getLikeCount())
+                .commentCount(qnaBoard.getCommentCount())
+                .scrapCount(qnaBoard.getScrapCount())
+                .hit(qnaBoard.getHit())
+                .comments(qnaBoard.getComments().stream().map(this::convertToCommentDTO).collect(Collectors.toList()))
+                .createTime(qnaBoard.getCreateTime()).build();
+    }
+
+    default QnaBoardResponseDTO convertToDTOWithPicks(QnaBoard qnaBoard, boolean isLiked, boolean isScrapped) {
+        return QnaBoardResponseDTO.builder().
+                boardType(qnaBoard.getBoardType())
+                .articleId(qnaBoard.getArticleId())
+                .memberId(qnaBoard.getMember().getId())
+                .nickname(qnaBoard.getMember().getNickname())
+                .profilePath(qnaBoard.getMember().getProfilePath())
+                .title(qnaBoard.getTitle())
+                .content(qnaBoard.getContent())
+                .lectureTitle(qnaBoard.getLectureTitle())
+                .courseTitle(qnaBoard.getCourseTitle())
+                .likeCount(qnaBoard.getLikeCount())
+                .commentCount(qnaBoard.getCommentCount())
+                .scrapCount(qnaBoard.getScrapCount())
+                .hit(qnaBoard.getHit())
+                .comments(qnaBoard.getComments().stream().map(this::convertToCommentDTO).collect(Collectors.toList()))
+                .isLiked(isLiked)
+                .isScrapped(isScrapped)
+                .createTime(qnaBoard.getCreateTime()).build();
+    }
+
+    default CommentResponseDTO convertToCommentDTO(Comment comment) {
+        return CommentResponseDTO.builder()
+                .commentId(comment.getCommentId())
+                .memberId(comment.getMember().getId())
+                .articleId(comment.getBoard().getArticleId())
+                .nickname(comment.getMember().getNickname())
+                .profilePath(comment.getMember().getProfilePath())
+                .content(comment.getContent())
+                .likeCount(comment.getLikeCount())
+                .createTime(comment.getCreateTime())
+                .parentId(comment.getParent() != null ? comment.getParent().getCommentId() : null)
+                .children(comment.getChildren().stream().map(this::convertToCommentDTO).collect(Collectors.toList()))
+                .build();
+    }
+
 }

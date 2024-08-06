@@ -1,5 +1,6 @@
 package com.gongkademy.domain.course.service.service;
 
+import com.gongkademy.domain.course.admin.dto.request.CourseNoticeRequestDTO;
 import com.gongkademy.domain.course.common.repository.CourseRepository;
 import com.gongkademy.domain.course.common.repository.CourseReviewRepository;
 import java.time.LocalDateTime;
@@ -39,9 +40,8 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 	@Override
 	public CourseReviewResponseDTO createReview(CourseReviewRequestDTO courseReviewRequestDTO, Long currentMemberId) {
 		CourseReview review = convertToEntity(courseReviewRequestDTO,currentMemberId);
-		
-		Member member = memberRepository.findById(currentMemberId).get();
-		review.setMember(member);
+		Member member = memberRepository.findById(currentMemberId)
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
 		member.addCourseReview(review);
 
 		//이미 수강평있을 때
@@ -102,7 +102,6 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 												.registCourse(null)
 												.course(null)
 												.member(null)
-												.nickname(null)
 												.build();
 		Optional<Member> member = memberRepository.findById(memberId);
 		Optional<Course> courseOptional = courseRepository.findById(courseReviewRequestDTO.getCourseId());
@@ -115,7 +114,6 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 		Optional<Member> memberOptional = memberRepository.findById(memberId);
 		if (memberOptional.isPresent()) {
 			review.setMember(memberOptional.get());
-			review.setNickname(member.get().getNickname());
 		} else {
 			throw new CustomException(ErrorCode.NOT_FOUND_MEMBER);
 		}
@@ -123,15 +121,16 @@ public class CourseReviewServiceImpl implements CourseReviewService {
 	}
 
 	private CourseReviewResponseDTO convertToDTO(CourseReview review) {
-		CourseReviewResponseDTO courseReviewResponseDTO = new CourseReviewResponseDTO();
-		courseReviewResponseDTO.setCourseReviewId(review.getId());
-		courseReviewResponseDTO.setRating(review.getRating());
-		courseReviewResponseDTO.setCreatedTime(review.getCreatedTime());
-		courseReviewResponseDTO.setContent(review.getContent());
-		courseReviewResponseDTO.setLikeCount(review.getLikeCount());
-		courseReviewResponseDTO.setCourseId(review.getCourse().getId());
-		courseReviewResponseDTO.setMemberId(review.getMember().getId());
-		courseReviewResponseDTO.setNickname(review.getNickname());
-		return courseReviewResponseDTO;
+		return CourseReviewResponseDTO.builder()
+				.courseReviewId(review.getId())
+				.rating(review.getRating())
+				.createdTime(review.getCreatedTime())
+				.content(review.getContent())
+				.likeCount(review.getLikeCount())
+				.courseId(review.getCourse().getId())
+				.memberId(review.getMember().getId())
+				.nickname(review.getMember().getNickname())
+				.profilePath(review.getMember().getProfilePath())
+				.build();
 	}
 }

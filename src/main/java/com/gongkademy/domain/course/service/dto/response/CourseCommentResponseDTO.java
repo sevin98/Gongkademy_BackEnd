@@ -2,15 +2,13 @@ package com.gongkademy.domain.course.service.dto.response;
 
 import com.gongkademy.domain.course.common.entity.CommentCateg;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class CourseCommentResponseDTO {
 
 	private Long courseCommentId;
@@ -19,6 +17,7 @@ public class CourseCommentResponseDTO {
 	private CommentCateg commentCateg;
 	private Long memberId;
 	private String nickname;
+	private String profilePath;
 	private String content;
 	private Long likeCount;
 }

@@ -132,7 +132,6 @@ public class CourseCommentServiceImpl implements CourseCommentService {
         Optional<Member> memberOptional = memberRepository.findById(memberId);
         if (memberOptional.isPresent()) {
            comment.setMember(memberOptional.get());
-		   comment.setNickname(memberOptional.get().getNickname());
         } else {
 			throw new CustomException(ErrorCode.NOT_FOUND_MEMBER);
         }
@@ -150,7 +149,8 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 			courseCommentResponseDTO.setCourseReviewId(comment.getCourseReview().getId());
 		courseCommentResponseDTO.setCourseCommentId(comment.getId());
     	courseCommentResponseDTO.setMemberId(comment.getMember().getId());
-    	courseCommentResponseDTO.setNickname(comment.getNickname());
+    	courseCommentResponseDTO.setNickname(comment.getMember().getNickname());
+		courseCommentResponseDTO.setProfilePath(comment.getMember().getProfilePath());
     	courseCommentResponseDTO.setContent(comment.getContent());
     	courseCommentResponseDTO.setLikeCount(comment.getLikeCount());
         return courseCommentResponseDTO;

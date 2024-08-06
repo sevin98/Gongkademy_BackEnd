@@ -47,8 +47,6 @@ public class CourseComment {
 	@JoinColumn(name="member_id")
 	private Member member;
 	
-	private String nickname;
-	
 	private String content;
 	
 	private Long likeCount;

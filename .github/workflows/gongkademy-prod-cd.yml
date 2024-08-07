@@ -60,7 +60,7 @@ jobs:
           file: ./Dockerfile-prod
           push: true
           platforms: linux/arm64
-          tags: ${{ env.DOCKER_HUB_REPOSITORY }}:latest
+          tags: ${{ env.DOCKER_HUB_REPOSITORY_PROD }}:latest
 
   backend-docker-pull-and-run:
     runs-on: [self-hosted, prod]

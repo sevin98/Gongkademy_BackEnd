@@ -1,9 +1,5 @@
 name: ✨ 공카데미 백엔드 CI 테스트 자동화 ✨
 
-permissions:
-  contents: read
-  checks: write
-
 on:
   pull_request:
     branches:
@@ -15,6 +11,10 @@ on:
 defaults:
   run:
     working-directory: .
+
+permissions:
+  contents: read
+  checks: write
 
 jobs:
   build:

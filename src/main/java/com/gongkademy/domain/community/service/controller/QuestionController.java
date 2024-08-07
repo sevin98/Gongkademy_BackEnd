@@ -1,6 +1,8 @@
 package com.gongkademy.domain.community.service.controller;
 
-import com.gongkademy.domain.community.service.dto.request.QnaBoardRequestDTO;
+import com.gongkademy.domain.community.common.entity.board.QnaBoard;
+import com.gongkademy.domain.community.service.dto.request.QnaBoardCreateRequestDTO;
+import com.gongkademy.domain.community.service.dto.request.QnaBoardUpdateRequestDTO;
 import com.gongkademy.domain.community.service.dto.response.QnaBoardResponseDTO;
 import com.gongkademy.domain.community.service.service.QnaBoardService;
 import com.gongkademy.domain.member.dto.PrincipalDetails;
@@ -80,23 +82,23 @@ public class QuestionController {
 
     // Qna 작성
     @PostMapping("")
-    public ResponseEntity<?> createQna(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody QnaBoardRequestDTO qnaBoardRequestDTO) {
+    public ResponseEntity<?> createQna(@AuthenticationPrincipal PrincipalDetails principalDetails, @RequestBody QnaBoardCreateRequestDTO qnaBoardCreateRequestDTO) {
         Long currentMemberId = principalDetails.getMemberId();
         if(currentMemberId == null) throw new CustomException(ErrorCode.JWT_NULL_MEMBER_ID);
 
-        QnaBoardResponseDTO result = qnaboardService.createQnaBoard(qnaBoardRequestDTO);
+        QnaBoardResponseDTO result = qnaboardService.createQnaBoard(qnaBoardCreateRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     // Qna 수정
     @PatchMapping("/{articleId}")
-    public ResponseEntity<?> updateQna(@AuthenticationPrincipal PrincipalDetails principalDetails, @PathVariable Long articleId, @RequestBody QnaBoardRequestDTO qnaBoardRequestDTO) {
+    public ResponseEntity<?> updateQna(@AuthenticationPrincipal PrincipalDetails principalDetails, @PathVariable Long articleId, @RequestBody QnaBoardUpdateRequestDTO qnaBoardUpdateRequestDTO) {
         Long currentMemberId = principalDetails.getMemberId();
         if(currentMemberId == null) throw new CustomException(ErrorCode.JWT_NULL_MEMBER_ID);
 
-        Long updateArticleNo = qnaboardService.updateQnaBoard(articleId, qnaBoardRequestDTO);
+        QnaBoard qnaBoard = qnaboardService.updateQnaBoard(articleId, qnaBoardUpdateRequestDTO);
 
-        return ResponseEntity.status(HttpStatus.OK).body(updateArticleNo);
+        return ResponseEntity.status(HttpStatus.OK).body(qnaBoard);
     }
 
     // Qna 삭제
@@ -148,5 +150,19 @@ public class QuestionController {
 
         List<QnaBoardResponseDTO> scrapBoards = qnaboardService.getScrapBoards(currentMemberId);
         return ResponseEntity.ok(scrapBoards);
+    }
+
+    @GetMapping("/course/{courseId}")
+    public ResponseEntity<?> getByCourse(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
+                                       @PathVariable("courseId")Long courseId){
+        Map<String, Object> result = qnaboardService.findByCourseQnaBoards(pageNo, courseId);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @GetMapping("/lecture/{lectureId}")
+    public ResponseEntity<?> getByLecture(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
+                                       @PathVariable("lectureId")Long lectureId){
+        Map<String, Object> result = qnaboardService.findByLectureQnaBoards(pageNo, lectureId);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 }

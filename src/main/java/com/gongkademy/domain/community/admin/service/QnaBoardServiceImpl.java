@@ -1,9 +1,13 @@
 package com.gongkademy.domain.community.admin.service;
 
+import com.gongkademy.domain.community.admin.dto.request.QnaBoardRequestDTO;
 import com.gongkademy.domain.community.common.entity.board.QnaBoard;
 import com.gongkademy.domain.community.admin.dto.response.QnaBoardResponseDTO;
 import com.gongkademy.domain.community.common.repository.QnaBoardRepository;
-import com.gongkademy.domain.community.service.dto.request.QnaBoardRequestDTO;
+import com.gongkademy.domain.course.common.entity.Course;
+import com.gongkademy.domain.course.common.entity.Lecture;
+import com.gongkademy.domain.course.common.repository.CourseRepository;
+import com.gongkademy.domain.course.common.repository.LectureRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
@@ -16,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +31,8 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
     private final QnaBoardRepository qnaBoardRepository;
     private final MemberRepository memberRepository;
+    private final CourseRepository courseRepository;
+    private final LectureRepository lectureRepository;
 
     private final int PAGE_SIZE = 10;
 
@@ -57,17 +64,21 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         qnaBoardRepository.deleteById(articleId);
     }
 
-    private QnaBoard convertToEntity(QnaBoardRequestDTO qnaBoardRequestDto) {
-        Member member = memberRepository.findById(qnaBoardRequestDto.getMemberId())
+    private QnaBoard convertToEntity(QnaBoardRequestDTO qnaBoardRequestDTO) {
+        Member member = memberRepository.findById(qnaBoardRequestDTO.getMemberId())
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
+        Optional<Course> course = courseRepository.findById(qnaBoardRequestDTO.getCourseId());
+        Optional<Lecture> lecture = lectureRepository.findById(qnaBoardRequestDTO.getLectureId());
+
+
         return QnaBoard.builder().
-                boardType(qnaBoardRequestDto.getBoardType())
+                boardType(qnaBoardRequestDTO.getBoardType())
                 .member(member)
-                .title(qnaBoardRequestDto.getTitle())
-                .content(qnaBoardRequestDto.getContent())
-                .lectureTitle(qnaBoardRequestDto.getLectureTitle())
-                .courseTitle(qnaBoardRequestDto.getCourseTitle())
+                .title(qnaBoardRequestDTO.getTitle())
+                .content(qnaBoardRequestDTO.getContent())
+                .course(course.orElse(null))
+                .lecture(lecture.orElse(null))
                 .hit(0L)
                 .likeCount(0L)
                 .scrapCount(0L)
@@ -83,8 +94,8 @@ public class QnaBoardServiceImpl implements QnaBoardService {
                 .nickname(qnaBoard.getMember().getNickname())
                 .title(qnaBoard.getTitle())
                 .content(qnaBoard.getContent())
-                .lectureTitle(qnaBoard.getLectureTitle())
-                .courseTitle(qnaBoard.getCourseTitle())
+                .courseId(qnaBoard.getCourse().getId())
+                .lectureId(qnaBoard.getLecture().getId())
                 .likeCount(qnaBoard.getLikeCount())
                 .commentCount(qnaBoard.getCommentCount())
                 .scrapCount(qnaBoard.getScrapCount())

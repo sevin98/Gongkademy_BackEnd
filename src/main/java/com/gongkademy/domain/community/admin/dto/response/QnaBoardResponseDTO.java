@@ -25,7 +25,6 @@ public class QnaBoardResponseDTO {
     private Long scrapCount;
     private Long hit;
     private Long commentCount;
-
-    private String lectureTitle;
-    private String courseTitle;
+    private Long courseId;
+    private Long lectureId;
 }

@@ -1,8 +1,11 @@
 package com.gongkademy.domain.community.common.entity.board;
 
 
-import com.gongkademy.domain.community.service.dto.request.QnaBoardRequestDTO;
+import com.gongkademy.domain.course.common.entity.Course;
+import com.gongkademy.domain.course.common.entity.Lecture;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,13 +18,12 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class QnaBoard extends Board {
 
-    private String lectureTitle;
-    private String courseTitle;
+    @ManyToOne
+    @JoinColumn(name = "course_id")
+    private Course course;
 
-    public void update(QnaBoardRequestDTO qnaBoardRequestDto) {
-        this.setTitle(qnaBoardRequestDto.getTitle());
-        this.setContent(qnaBoardRequestDto.getContent());
-        this.setLectureTitle(qnaBoardRequestDto.getLectureTitle());
-        this.setCourseTitle(qnaBoardRequestDto.getCourseTitle());
-    }
+    @ManyToOne
+    @JoinColumn(name = "lecture_id")
+    private Lecture lecture;
+
 }

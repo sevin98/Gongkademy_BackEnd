@@ -35,6 +35,7 @@ public enum ErrorCode {
 
     //QnaBoard
     EMPTY_IMAGE(HttpStatus.NO_CONTENT, "이미지가 존재하지 않습니다."),
+    NO_CONTENT_QNA(HttpStatus.NO_CONTENT, "수정할 질문 게시판이 없습니다."),
 
     //Comment
     INVALID_COMMENT_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 댓글 ID입니다."),

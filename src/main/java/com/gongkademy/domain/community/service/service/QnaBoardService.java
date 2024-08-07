@@ -2,7 +2,8 @@ package com.gongkademy.domain.community.service.service;
 
 import com.gongkademy.domain.community.common.entity.board.QnaBoard;
 import com.gongkademy.domain.community.common.entity.comment.Comment;
-import com.gongkademy.domain.community.service.dto.request.QnaBoardRequestDTO;
+import com.gongkademy.domain.community.service.dto.request.QnaBoardCreateRequestDTO;
+import com.gongkademy.domain.community.service.dto.request.QnaBoardUpdateRequestDTO;
 import com.gongkademy.domain.community.service.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.service.dto.response.QnaBoardResponseDTO;
 
@@ -21,7 +22,7 @@ public interface QnaBoardService {
     Map<String, Object> findAllQnaBoards(int pageNo, String criteria, String keyword);
 
     // Qna 게시글 작성하기
-    QnaBoardResponseDTO createQnaBoard(QnaBoardRequestDTO qnaBoardRequestDTO);
+    QnaBoardResponseDTO createQnaBoard(QnaBoardCreateRequestDTO qnaBoardCreateRequestDTO);
 
     // Qna 게시글 조회하기 (로그인 한 경우)
     QnaBoardResponseDTO findQnaBoard(Long articleId, Long memberId);
@@ -30,7 +31,7 @@ public interface QnaBoardService {
     QnaBoardResponseDTO findQnaBoard(Long articleId);
 
     // Qna 게시글 수정하기
-    Long updateQnaBoard(Long articleId, QnaBoardRequestDTO qnaBoardRequestDTO);
+    QnaBoard updateQnaBoard(Long articleId, QnaBoardUpdateRequestDTO qnaBoardUpdateRequestDTO);
 
     // Qna 게시글 삭제하기
     void deleteQnaBoard(Long articleId, Long memberId);
@@ -47,7 +48,11 @@ public interface QnaBoardService {
     // Qna 스크랩한 게시글 조회
     List<QnaBoardResponseDTO> getScrapBoards(Long memberId);
 
+    // CourseId에 해당하는 QnA 게시판 조회
+    Map<String, Object> findByCourseQnaBoards(int pageNo, Long courseId);
 
+    // lectureId에 해당하는 QnA 게시판 조회
+    Map<String, Object> findByLectureQnaBoards(int pageNo, Long lectureId);
 
     default QnaBoardResponseDTO convertToDTO(QnaBoard qnaBoard) {
         return QnaBoardResponseDTO.builder().
@@ -58,8 +63,8 @@ public interface QnaBoardService {
                 .profilePath(qnaBoard.getMember().getProfilePath())
                 .title(qnaBoard.getTitle())
                 .content(qnaBoard.getContent())
-                .lectureTitle(qnaBoard.getLectureTitle())
-                .courseTitle(qnaBoard.getCourseTitle())
+                .courseId(qnaBoard.getCourse().getId())
+                .lectureId(qnaBoard.getLecture().getId())
                 .likeCount(qnaBoard.getLikeCount())
                 .commentCount(qnaBoard.getCommentCount())
                 .scrapCount(qnaBoard.getScrapCount())
@@ -77,8 +82,8 @@ public interface QnaBoardService {
                 .profilePath(qnaBoard.getMember().getProfilePath())
                 .title(qnaBoard.getTitle())
                 .content(qnaBoard.getContent())
-                .lectureTitle(qnaBoard.getLectureTitle())
-                .courseTitle(qnaBoard.getCourseTitle())
+                .courseId(qnaBoard.getCourse().getId())
+                .lectureId(qnaBoard.getLecture().getId())
                 .likeCount(qnaBoard.getLikeCount())
                 .commentCount(qnaBoard.getCommentCount())
                 .scrapCount(qnaBoard.getScrapCount())
@@ -103,5 +108,4 @@ public interface QnaBoardService {
                 .children(comment.getChildren().stream().map(this::convertToCommentDTO).collect(Collectors.toList()))
                 .build();
     }
-
 }

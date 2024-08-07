@@ -690,7 +690,7 @@ interface com.gongkademy.domain.notification.service.EmitterService {
 ~ void sendNotification(NotificationRequestDTO)
 }
 
-class com.gongkademy.domain.community.service.dto.request.QnaBoardRequestDTO {
+class com.gongkademy.domain.community.service.dto.request.QnaBoardCreateRequestDTO {
 - BoardType boardType
 - Long memberId
 - String title

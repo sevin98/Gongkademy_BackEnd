@@ -1,8 +1,7 @@
 package com.gongkademy.domain.community.service.service;
 
-import com.gongkademy.domain.community.common.entity.comment.Comment;
-import com.gongkademy.domain.community.service.dto.request.QnaBoardRequestDTO;
-import com.gongkademy.domain.community.service.dto.response.CommentResponseDTO;
+import com.gongkademy.domain.community.service.dto.request.QnaBoardCreateRequestDTO;
+import com.gongkademy.domain.community.service.dto.request.QnaBoardUpdateRequestDTO;
 import com.gongkademy.domain.community.service.dto.response.QnaBoardResponseDTO;
 import com.gongkademy.domain.community.common.entity.board.Board;
 import com.gongkademy.domain.community.common.entity.board.BoardType;
@@ -11,6 +10,10 @@ import com.gongkademy.domain.community.common.entity.pick.Pick;
 import com.gongkademy.domain.community.common.entity.pick.PickType;
 import com.gongkademy.domain.community.common.repository.PickRepository;
 import com.gongkademy.domain.community.common.repository.QnaBoardRepository;
+import com.gongkademy.domain.course.common.entity.Course;
+import com.gongkademy.domain.course.common.entity.Lecture;
+import com.gongkademy.domain.course.common.repository.CourseRepository;
+import com.gongkademy.domain.course.common.repository.LectureRepository;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.repository.MemberRepository;
 import com.gongkademy.global.exception.CustomException;
@@ -24,7 +27,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -34,6 +36,8 @@ public class QnaBoardServiceImpl implements QnaBoardService {
     private final QnaBoardRepository qnaBoardRepository;
     private final MemberRepository memberRepository;
     private final PickRepository pickRepository;
+    private final CourseRepository courseRepository;
+    private final LectureRepository lectureRepository;
 
     private final int PAGE_SIZE = 10;
 
@@ -114,8 +118,8 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
     // QnaBoard 생성
     @Override
-    public QnaBoardResponseDTO createQnaBoard(QnaBoardRequestDTO qnaBoardRequestDto) {
-        QnaBoard qnaBoard = convertToEntity(qnaBoardRequestDto);
+    public QnaBoardResponseDTO createQnaBoard(QnaBoardCreateRequestDTO qnaBoardCreateRequestDto) {
+        QnaBoard qnaBoard = convertToEntity(qnaBoardCreateRequestDto);
         QnaBoard savedBoard = qnaBoardRepository.save(qnaBoard);
         return convertToDTO(savedBoard);
     }
@@ -153,19 +157,21 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
     // QnaBoard 수정
     @Override
-    public Long updateQnaBoard(Long articleId, QnaBoardRequestDTO qnaBoardRequestDto) {
-        Optional<QnaBoard> optQnaBoard = qnaBoardRepository.findById(articleId);
+    public QnaBoard updateQnaBoard(Long articleId, QnaBoardUpdateRequestDTO qnaBoardUpdateRequestDTO) {
+        QnaBoard qnaBoard = qnaBoardRepository.findById(articleId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NO_CONTENT_QNA));
 
-        // articleId에 해당하는 게시글이 없는 경우
-        if (optQnaBoard.isEmpty()) throw new CustomException(ErrorCode.INVALID_BOARD_ID);
+//        // articleId에 해당하는 게시글이 없는 경우
+//        if (optQnaBoard.isEmpty()) throw new CustomException(ErrorCode.INVALID_BOARD_ID);
+//
+//        QnaBoard qnaBoard = optQnaBoard.get();
+//
+//        // 게시글 작성자와 수정 요청자가 다른 경우
+//        if (!qnaBoard.getMember().getId().equals(qnaBoardRequestDto.getMemberId())) throw new CustomException(ErrorCode.FORBIDDEN);
 
-        QnaBoard qnaBoard = optQnaBoard.get();
-
-        // 게시글 작성자와 수정 요청자가 다른 경우
-        if (!qnaBoard.getMember().getId().equals(qnaBoardRequestDto.getMemberId())) throw new CustomException(ErrorCode.FORBIDDEN);
-
-        qnaBoard.update(qnaBoardRequestDto);
-        return qnaBoard.getArticleId();
+        qnaBoard.setTitle(qnaBoardUpdateRequestDTO.getTitle());
+        qnaBoard.setContent(qnaBoardUpdateRequestDTO.getContent());
+        return qnaBoard;
     }
 
     // QnaBoard 삭제
@@ -258,6 +264,37 @@ public class QnaBoardServiceImpl implements QnaBoardService {
 
     }
 
+    @Override
+    public Map<String, Object> findByCourseQnaBoards(int pageNo, Long courseId) {
+        Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC));
+        Page<QnaBoardResponseDTO> page;
+        page = qnaBoardRepository.findByCourseId(courseId, pageable).map(this::convertToDTO);
+        List<QnaBoardResponseDTO> qnaBoards = page.getContent();
+        Map<String, Object> qnas = new HashMap<>();
+
+        qnas.put("data", qnaBoards);
+        qnas.put("totalPage", page.getTotalPages());
+        qnas.put("totalCount", page.getTotalElements());
+
+        return qnas;
+    }
+
+    @Override
+    public Map<String, Object> findByLectureQnaBoards(int pageNo, Long lectureId) {
+        Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC));
+        Page<QnaBoardResponseDTO> page;
+        page = qnaBoardRepository.findByCourseId(lectureId, pageable).map(this::convertToDTO);
+        List<QnaBoardResponseDTO> qnaBoards = page.getContent();
+        Map<String, Object> qnas = new HashMap<>();
+
+        qnas.put("data", qnaBoards);
+        qnas.put("totalPage", page.getTotalPages());
+        qnas.put("totalCount", page.getTotalElements());
+
+        return qnas;
+    }
+
+
     private boolean isLikedByMember(Long articleId, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
@@ -272,23 +309,26 @@ public class QnaBoardServiceImpl implements QnaBoardService {
         return pickOptional.isPresent();
     }
 
-    private QnaBoard convertToEntity(QnaBoardRequestDTO qnaBoardRequestDto) {
-        Member member = memberRepository.findById(qnaBoardRequestDto.getMemberId())
+    private QnaBoard convertToEntity(QnaBoardCreateRequestDTO qnaBoardCreateRequestDto) {
+        Member member = memberRepository.findById(qnaBoardCreateRequestDto.getMemberId())
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
 
+        Optional<Course> course = courseRepository.findById(qnaBoardCreateRequestDto.getCourseId());
+
+
+        Optional<Lecture> lecture = lectureRepository.findById(qnaBoardCreateRequestDto.getLectureId());
+
         return QnaBoard.builder().
-                boardType(qnaBoardRequestDto.getBoardType())
+                boardType(qnaBoardCreateRequestDto.getBoardType())
                 .member(member)
-                .title(qnaBoardRequestDto.getTitle())
-                .content(qnaBoardRequestDto.getContent())
-                .lectureTitle(qnaBoardRequestDto.getLectureTitle())
-                .courseTitle(qnaBoardRequestDto.getCourseTitle())
+                .title(qnaBoardCreateRequestDto.getTitle())
+                .content(qnaBoardCreateRequestDto.getContent())
+                .course(course.orElse(null))
+                .lecture(lecture.orElse(null))
                 .hit(0L)
                 .likeCount(0L)
                 .scrapCount(0L)
                 .commentCount(0L)
                 .build();
     }
-
-
 }

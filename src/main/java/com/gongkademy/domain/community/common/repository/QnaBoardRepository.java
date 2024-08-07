@@ -3,6 +3,7 @@ package com.gongkademy.domain.community.common.repository;
 import com.gongkademy.domain.community.common.entity.board.Board;
 import com.gongkademy.domain.community.common.entity.board.BoardType;
 import com.gongkademy.domain.community.common.entity.board.QnaBoard;
+import com.gongkademy.domain.course.common.entity.Course;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,6 +26,14 @@ public interface QnaBoardRepository extends JpaRepository<QnaBoard, Long> {
 
     @Query("SELECT qb FROM QnaBoard qb JOIN FETCH qb.comments WHERE qb.articleId = :articleId")
     Optional<QnaBoard> findByIdWithComments(@Param("articleId") Long articleId);
+
+    // Course 에 대한 QnA 게시판 전체 조회
+    @Query("SELECT qb FROM QnaBoard qb WHERE qb.course.id = :courseId")
+    Page<QnaBoard> findByCourseId(@Param("courseId") Long courseId, Pageable pageable);
+
+    // Lecture 에 대한 QnA 게시판 전체 조회
+    @Query("SELECT qb FROM QnaBoard qb WHERE qb.lecture.id = :lectureId")
+    Page<QnaBoard> findByLectureId(@Param("lectureId") Long lectureId, Pageable pageable);
 
     // Admin_Back
     Page<QnaBoard> findAll(Pageable pageable);

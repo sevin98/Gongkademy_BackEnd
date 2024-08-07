@@ -1,7 +1,9 @@
 FROM openjdk:17-jdk
 
+ENV SPRING_PROFILE=prod
+
 ARG JAR_FILE=build/libs/gongkademy-back-0.0.1-SNAPSHOT.jar
 
 COPY ${JAR_FILE} gongkademy.jar
 
-CMD ["java", "-jar", "-Dspring.profiles.active=prod", "-Duser.timezone=Asia/Seoul", "gongkademy.jar"]
+CMD ["java", "-jar", "-Dspring.profiles.active=${SPRING_PROFILE}", "-Duser.timezone=Asia/Seoul", "gongkademy.jar"]

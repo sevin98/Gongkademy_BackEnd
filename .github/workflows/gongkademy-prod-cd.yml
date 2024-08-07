@@ -1,7 +1,7 @@
-name: ✨ Gongkademy backend PROD CD ✨
+name: ✨ 공카데미 백엔드 CD 자동화  ✨
 
 env:
-  DOCKER_HUB_REPOSITORY: gongkademy/gongkademy-deploy
+  DOCKER_HUB_REPOSITORY: gongkademy/gongkademy-prod
 
 on:
   workflow_dispatch:

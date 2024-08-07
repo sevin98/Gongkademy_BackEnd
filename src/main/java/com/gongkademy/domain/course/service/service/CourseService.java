@@ -11,8 +11,6 @@ import com.gongkademy.domain.course.service.dto.response.LectureDetailResponseDT
 import com.gongkademy.domain.course.service.dto.response.NoticeResponseDTO;
 import java.util.List;
 import java.util.Map;
-
-import com.gongkademy.domain.course.service.dto.response.*;
 import org.springframework.data.domain.Page;
 
 public interface CourseService {
@@ -39,9 +37,7 @@ public interface CourseService {
 	
 	Page<NoticeResponseDTO> getCourseNotices(Long courseId, int pageNo);
 
-	List<CourseResponseDTO> getRegistCoursesNoComplete(Long memberId);
-	
-	List<CourseResponseDTO> getRegistCoursesComplete(Long memberId);
+	List<CourseResponseDTO> getCoursesByCompletionStatus(Long memberId, Boolean isCompeleted);
 
 	CourseLikeResponseDTO like(CourseLikeRequestDTO courseLikeRequestDTO, Long currentMemberId);
 

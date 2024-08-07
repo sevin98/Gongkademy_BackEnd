@@ -40,7 +40,7 @@ public class CourseReview {
 	@JoinColumn(name = "regist_course_id")
 	private RegistCourse registCourse;
 
-	@OneToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "course_id")
 	private Course course;
 
@@ -49,18 +49,14 @@ public class CourseReview {
 	private Member member;
 
 	@OneToMany(mappedBy = "courseReview", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<CourseComment> courseComments = new ArrayList<>();
 
 	@OneToMany(mappedBy = "courseReview", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<CourseLike> courseLikes = new ArrayList<>();
 
 	// ==연관관계 메서드==//
-	public void addCourseComment(CourseComment courseComment) {
-		courseComments.add(courseComment);
-		courseComment.setCourseReview(this);
-		this.updateCourseCommentCount();
-	}
-
 	public void addCourseLike(CourseLike courseLike) {
 		courseLikes.add(courseLike);
 		courseLike.setCourseReview(this);

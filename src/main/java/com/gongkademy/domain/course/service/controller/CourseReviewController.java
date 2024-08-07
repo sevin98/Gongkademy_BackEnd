@@ -2,6 +2,7 @@ package com.gongkademy.domain.course.service.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -56,11 +57,13 @@ public class CourseReviewController {
 
 	// 강좌ID, 페이지 번호, 정렬기준에 따라 강의평 조회
 	@GetMapping("/{courseId}")
-	public ResponseEntity<List<CourseReviewResponseDTO>> getAllReviews(@PathVariable("courseId") Long courseId,
+	public ResponseEntity<Page<CourseReviewResponseDTO>> getAllReviews(@PathVariable("courseId") Long courseId,
 			@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
             @RequestParam(defaultValue = BASE_CRITERIA, value = REQUEST_PARAM_CRITERIA) String criteria,
-            @RequestParam(defaultValue = BASE_DIRECTION, value = REQUEST_PARAM_DIRECTION) String direction) {
-		List<CourseReviewResponseDTO> courseReviewResponseDTOs = courseReviewService.getReviewsPerPage(courseId, pageNo, criteria, direction);
+            @RequestParam(defaultValue = BASE_DIRECTION, value = REQUEST_PARAM_DIRECTION) String direction,
+			@AuthenticationPrincipal PrincipalDetails principalDetails) {
+		Long currentMemberId = principalDetails.getMemberId();
+		Page<CourseReviewResponseDTO> courseReviewResponseDTOs = courseReviewService.getReviewsPerPage(courseId, pageNo, criteria, direction, currentMemberId);
 		return ResponseEntity.ok(courseReviewResponseDTOs);
 	}
 	

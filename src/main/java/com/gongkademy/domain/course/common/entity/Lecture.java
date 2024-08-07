@@ -43,13 +43,6 @@ public class Lecture {
 	private Course course;
 	
 	@OneToMany(mappedBy = "lecture",cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@Builder.Default
 	private List<RegistLecture> registLectures = new ArrayList<>();
-	
-	//== 연관관계 메소드 == //
-	public void addRegistLecture(RegistLecture registLecture) {
-		registLectures.add(registLecture);
-		registLecture.setLecture(this);
-	}
-
-
 }

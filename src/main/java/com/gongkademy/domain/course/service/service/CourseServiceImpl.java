@@ -43,7 +43,6 @@ public class CourseServiceImpl implements CourseService {
 
 	private final int PAGE_SIZE = 10;
 
-	
 	@Override
 	public List<CourseResponseDTO> getAllCourses(Long memberId) {
 		List<CourseResponseDTO> courseResponseDTOs = new ArrayList<>();
@@ -69,31 +68,13 @@ public class CourseServiceImpl implements CourseService {
 	}
 	
 	@Override
-	public List<CourseResponseDTO> getRegistCoursesNoComplete(Long memberId) {
+	public List<CourseResponseDTO> getCoursesByCompletionStatus(Long memberId, Boolean isCompeleted) {
 		List<CourseResponseDTO> courseResponseDTOs = new ArrayList<>();
 		
-		List<RegistCourse> registCourses = registCourseRepository.findAllByMemberIdAndComplete(memberId, false);
+		List<RegistCourse> registCourses = registCourseRepository.findAllByMemberIdAndComplete(memberId, isCompeleted);
 		
 		for(RegistCourse registCourse : registCourses) {
-			Course course = courseRepository.findById(registCourse.getCourse().getId())
-					.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
-
-            CourseResponseDTO dto = this.convertToDTO(course, memberId);
-			dto.setIsRegistered(true);
-            courseResponseDTOs.add(dto);
-		}
-		return courseResponseDTOs;
-	}
-
-	@Override
-	public List<CourseResponseDTO> getRegistCoursesComplete(Long memberId) {
-		List<CourseResponseDTO> courseResponseDTOs = new ArrayList<>();
-		
-		List<RegistCourse> registCourses = registCourseRepository.findAllByMemberIdAndComplete(memberId, true);
-		
-		for(RegistCourse registCourse : registCourses) {
-			Course course = courseRepository.findById(registCourse.getCourse().getId())
-					.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
+			Course course = findCourseByCourseId(registCourse.getCourse().getId());
 
             CourseResponseDTO dto = this.convertToDTO(course, memberId);
 			dto.setIsRegistered(true);
@@ -137,10 +118,8 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public CourseResponseDTO registCourse(Long courseId, Long memberId) {               
-        Member member = memberRepository.findById(memberId)
-        		.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
-        Course course = courseRepository.findById(courseId)
-        		.orElseThrow(() ->new CustomException(ErrorCode.NOT_FOUND_COURSE));
+        Member member = findMemberByMemberId(memberId);
+        Course course = findCourseByCourseId(courseId);
         
         Optional<RegistCourse> check = registCourseRepository.findByCourseIdAndMemberId(courseId, memberId);
         
@@ -160,11 +139,9 @@ public class CourseServiceImpl implements CourseService {
 
 	@Override
 	public CourseResponseDTO scrapCourse(Long courseId, Long memberId) {
-        Member member = memberRepository.findById(memberId)
-        		.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
+        Member member = findMemberByMemberId(memberId);
 
-        Course course = courseRepository.findById(courseId)
-        		.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
+        Course course = findCourseByCourseId(courseId);
 		Boolean isSaved = scrapRepository.existsByMemberIdAndCourseId(memberId, course.getId());
 		
 		CourseResponseDTO dto = this.convertToDTO(course,memberId);
@@ -187,19 +164,17 @@ public class CourseServiceImpl implements CourseService {
 	@Override
 	@Transactional
 	public void deleteRegistCourse(Long courseId, Long memberId) {		
-		RegistCourse registCourse = registCourseRepository.findByCourseIdAndMemberId(courseId, memberId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REGIST_COURSE));
+		RegistCourse registCourse = findRegistCourseByCourseIdAndMemberId(courseId, memberId);
 		
-        Course course = courseRepository.findById(courseId)
-        		.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
+        Course course = findCourseByCourseId(courseId);
 		course.deleteRegist(registCourse);
 	}
 	
 	@Override
 	public Map<String, byte[]> downloadCourseNote(Long courseId) {
-		Course course = courseRepository.findById(courseId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REGIST_COURSE));
+		Course course = findCourseByCourseId(courseId);
 		CourseFile courseNote = course.getCourseNote();
+		if(courseNote == null) throw new CustomException(ErrorCode.NOT_FOUND_COURSE_NOTE);
 
 		Map<String, byte[]> file = new HashMap<>();
 		String fileName = fileService.getdownloadFileName(courseNote.getSaveFile());
@@ -211,18 +186,15 @@ public class CourseServiceImpl implements CourseService {
 
 	@Override
 	public CourseResponseDTO getCourseDetail(Long courseId, Long memberId) {
-		Course course = courseRepository.findById(courseId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
+		Course course = findCourseByCourseId(courseId);
 
 		if(course.getStatus() == CourseStatus.WAIT) throw new CustomException(ErrorCode.WAIT_STATUS_COURSE);
-
 		return convertToDTO(course, memberId);
 	}
 
 	@Override
 	public CourseGuestResponseDTO getCourseDetailInfo(Long courseId) {
-		Course course = courseRepository.findById(courseId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
+		Course course = findCourseByCourseId(courseId);
 
 		if(course.getStatus() == CourseStatus.WAIT) throw new CustomException(ErrorCode.WAIT_STATUS_COURSE);
 		return convertToGuestDTO(course);
@@ -234,18 +206,9 @@ public class CourseServiceImpl implements CourseService {
 		Lecture lecture = lectureRepository.findByCourseIdAndLectureOrder(courseId, lectureOrder)
 				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_NEXT_LECTURE));
 	
-		RegistCourse registCourse = registCourseRepository.findByCourseIdAndMemberId(courseId, currentMemberId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REGIST_COURSE));
+		RegistCourse registCourse = findRegistCourseByCourseIdAndMemberId(courseId, currentMemberId);
 		
-		return LectureDetailResponseDTO.builder()
-				.lectureId(lecture.getId())
-				.time(lecture.getTime())
-				.link(lecture.getLink())
-				.title(lecture.getTitle())
-				.progressTime(registCourse.getProgressTime())
-				.progressPercent(registCourse.getProgressPercent())
-				.totalCourseTime(registCourse.getCourse().getTotalCourseTime())
-				.build();
+		return LectureDetailResponseDTO.of(registCourse, lecture);
 	}
 	
 	@Override
@@ -253,21 +216,12 @@ public class CourseServiceImpl implements CourseService {
 		Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE);
 		
 		Page<Notice> notices = noticeRepository.findAllByCourseId(courseId, pageable);
-		Page<NoticeResponseDTO> noticeResponseDtos = notices.map(m -> NoticeResponseDTO.builder()
-                .id(m.getId())
-                .createdTime(m.getCreatedTime())
-				.updatedTime(m.getUpdatedTime())
-				.title(m.getTitle())
-                .content(m.getContent())
-                .courseCommentCount(m.getCourseCommentCount())
-                .build());
-		return noticeResponseDtos;
+        return notices.map(NoticeResponseDTO::of);
 	}
 	
 	@Override
 	public CourseInfoResponseDTO getCourseInfo(Long courseId) {
-		Course course = courseRepository.findById(courseId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
+		Course course = findCourseByCourseId(courseId);
 		CourseInfoResponseDTO courseInfoResponseDTO = new CourseInfoResponseDTO();
 		
 		// 선수과목
@@ -312,59 +266,32 @@ public class CourseServiceImpl implements CourseService {
 	
 	@Override
 	public CourseLikeResponseDTO like(CourseLikeRequestDTO courseLikeRequestDTO, Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
-		
-        // 강의평 좋아요
-		if(courseLikeRequestDTO.getLikeCateg()== CourseLikeCateg.REVIEW) {
-	        CourseReview review = courseReviewRepository.findById(courseLikeRequestDTO.getCourseReviewId())
-                                                        .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE_REVIEW));
-			
-	        Optional<CourseLike> likeOptional = courseLikeRepository.findByMemberIdAndCourseReviewId(member.getId(), courseLikeRequestDTO.getCourseReviewId());
+		Optional<CourseLike> likeOptional = findLikeByCateg(courseLikeRequestDTO, memberId);
 
-	        if (likeOptional.isPresent()) {
-				CourseLike like = likeOptional.get();
-				review.deleteCourseLike(like);
-			} else {
-		        CourseLike like = convertToEntityCourseLike(courseLikeRequestDTO, memberId);
-		        review.addCourseLike(like);
-		        member.addCourseLike(like);
-		        return convertToDTOCourseLike(like);
-			}
-		} 
-	
-		// 댓글 좋아요
-		else if(courseLikeRequestDTO.getLikeCateg()== CourseLikeCateg.COMMENT) {
-	        CourseComment comment = courseCommentRepository.findById(courseLikeRequestDTO.getCourseCommentId())
-                                                           .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE_COMMENT));
-	        
-	        Optional<CourseLike> likeOptional = courseLikeRepository.findByMemberIdAndCourseCommentId(member.getId(), courseLikeRequestDTO.getCourseCommentId());
-
-			if (likeOptional.isPresent()) {
-				CourseLike like = likeOptional.get();
-				comment.deleteCourseLike(like);
-//				courseCommentRepository.save(comment);
-			} else {
-		        CourseLike like = convertToEntityCourseLike(courseLikeRequestDTO, memberId);
-		        comment.addCourseLike(like);
-//		        courseCommentRepository.save(comment);
-		        return convertToDTOCourseLike(like);
-			}
+	    if (likeOptional.isPresent()) {
+			CourseLike like = likeOptional.get();
+			courseLikeRepository.delete(like);
+			return null;
+		} else {
+			CourseLike like = convertToEntityCourseLike(courseLikeRequestDTO, memberId);
+			CourseLike savedLike = courseLikeRepository.save(like);
+			return convertToDTOCourseLike(savedLike);
 		}
-		return null;
+	}
+
+	private Optional<CourseLike> findLikeByCateg(CourseLikeRequestDTO courseLikeRequestDTO, Long memberId) {
+		CourseLikeCateg likeCateg = courseLikeRequestDTO.getLikeCateg();
+		if (likeCateg == CourseLikeCateg.REVIEW) {
+			return courseLikeRepository.findByMemberIdAndCourseReviewId(memberId, courseLikeRequestDTO.getCourseReviewId());
+		} else if (likeCateg == CourseLikeCateg.COMMENT) {
+			return courseLikeRepository.findByMemberIdAndCourseCommentId(memberId, courseLikeRequestDTO.getCourseCommentId());
+		}
+		throw new CustomException(ErrorCode.NOT_FOUND_LIKE_CATEG);
 	}
 
 	private CourseResponseDTO convertToDTO(Course course, Long memberId) {
-		CourseResponseDTO courseResponseDTO = new CourseResponseDTO();
-		courseResponseDTO.setCourseId(course.getId());
-		courseResponseDTO.setTotalCourseTime(course.getTotalCourseTime());
-		courseResponseDTO.setTitle(course.getTitle());
-		courseResponseDTO.setReviewCount(course.getReviewCount());
-		courseResponseDTO.setRegistCount(course.getRegistCount());
-		courseResponseDTO.setLectureCount(course.getLectureCount());
-		courseResponseDTO.setAvgRating(course.getAvgRating());
-		courseResponseDTO.setSummary(course.getSummary());
-		
+        CourseResponseDTO courseResponseDTO = CourseResponseDTO.of(course);
+
 		// 강좌 대표 이미지 조회
 		if(course.getCourseImg()!=null){
 			String filename = course.getCourseImg().getSaveFile();
@@ -377,19 +304,13 @@ public class CourseServiceImpl implements CourseService {
 		Boolean isSaved = scrapRepository.existsByMemberIdAndCourseId(memberId, course.getId());
 		courseResponseDTO.setIsSaved(isSaved);
 
+		Boolean isReviewWritten = courseReviewRepository.existsByCourseIdAndMemberId(course.getId(), memberId);
+		courseResponseDTO.setIsReviewWritten(isReviewWritten);
 		return courseResponseDTO;
 	}
 
 	private CourseGuestResponseDTO convertToGuestDTO(Course course) {
-		CourseGuestResponseDTO courseResponseDTO = new CourseGuestResponseDTO();
-		courseResponseDTO.setCourseId(course.getId());
-		courseResponseDTO.setTotalCourseTime(course.getTotalCourseTime());
-		courseResponseDTO.setTitle(course.getTitle());
-		courseResponseDTO.setReviewCount(course.getReviewCount());
-		courseResponseDTO.setRegistCount(course.getRegistCount());
-		courseResponseDTO.setLectureCount(course.getLectureCount());
-		courseResponseDTO.setAvgRating(course.getAvgRating());
-		courseResponseDTO.setSummary(course.getSummary());
+		CourseGuestResponseDTO courseResponseDTO = CourseGuestResponseDTO.of(course);
 
 		// 강좌 대표 이미지 조회
 		if(course.getCourseImg()!=null){
@@ -400,33 +321,18 @@ public class CourseServiceImpl implements CourseService {
 	}
 	
 	private CourseContentsResponseDTO convertToDToContents(Lecture lecture) {
-		CourseContentsResponseDTO courseContentsResponseDTO = new CourseContentsResponseDTO();
-		courseContentsResponseDTO.setLectureId(lecture.getId());
-		courseContentsResponseDTO.setLectureOrder(lecture.getLectureOrder());
-		courseContentsResponseDTO.setTime(lecture.getTime());
-		courseContentsResponseDTO.setTitle(lecture.getTitle());
-		courseContentsResponseDTO.setLink(lecture.getLink());
-		return courseContentsResponseDTO;
+		return CourseContentsResponseDTO.of(lecture);
 	}
 
 	private CourseContentsGuestResponseDTO convertToDTOContentsGuest(Lecture lecture) {
-		return CourseContentsGuestResponseDTO.builder()
-				.lectureId(lecture.getId())
-				.lectureOrder(lecture.getLectureOrder())
-				.time(lecture.getTime())
-				.title(lecture.getTitle())
-				.link(lecture.getLink())
-				.build();
+		return CourseContentsGuestResponseDTO.of(lecture);
 	}
 
 	private RegistCourse converToEntityRegistCourse(Long courseId, Long memberId) {
-		Course course = courseRepository.findById(courseId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
-		
-		Member member = memberRepository.findById(memberId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
-		
-	    RegistCourse registCourse = RegistCourse.builder()
+		Course course = findCourseByCourseId(courseId);
+		Member member = findMemberByMemberId(memberId);
+
+		return RegistCourse.builder()
                 .course(course)
                 .member(member)
                 .progressTime(0L)
@@ -434,20 +340,16 @@ public class CourseServiceImpl implements CourseService {
                 .complete(false)
                 .registLectures(new ArrayList<>())
                 .build();
-      return registCourse;
 	}
 	
 	private Scrap convertToEntityScrap(Long courseId, Long memberId) {
-		Course course = courseRepository.findById(courseId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
-		
-		Member member = memberRepository.findById(memberId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
-		
-		Scrap scrap = new Scrap();
-		scrap.setCourse(course);
-		scrap.setMember(member);
-		return scrap;
+		Course course = findCourseByCourseId(courseId);
+		Member member = findMemberByMemberId(memberId);
+
+		return Scrap.builder()
+				.course(course)
+				.member(member)
+				.build();
 	}
 	
     private CourseLike convertToEntityCourseLike(CourseLikeRequestDTO courseLikeDTO, Long memberId) {
@@ -456,42 +358,55 @@ public class CourseServiceImpl implements CourseService {
     	like.setLikeCateg(courseLikeDTO.getLikeCateg());
     	
     	if(courseLikeDTO.getLikeCateg()== CourseLikeCateg.REVIEW) {
-    		Optional<CourseReview> reviewOptional = courseReviewRepository.findById(courseLikeDTO.getCourseReviewId());
-    		if (reviewOptional.isPresent()) {
-    			like.setCourseReview(reviewOptional.get());
-    		} else {
-    			throw new CustomException(ErrorCode.NOT_FOUND_COURSE_REVIEW);
-    		}
+    		CourseReview review = findCourseReviewByCourseReviewId(courseLikeDTO.getCourseReviewId());
+			like.setCourseReview(review);
     	}
         
     	if(courseLikeDTO.getLikeCateg()== CourseLikeCateg.COMMENT) {
-    		Optional<CourseComment> commentOptional = courseCommentRepository.findById(courseLikeDTO.getCourseCommentId());
-    		if (commentOptional.isPresent()) {
-    			like.setCourseComment(commentOptional.get());
-    		} else {
-    			throw new CustomException(ErrorCode.NOT_FOUND_COURSE_COMMENT);
-    		}
+    		CourseComment comment = findCourseCommentByCourseCommentId(courseLikeDTO.getCourseCommentId());
+    		like.setCourseComment(comment);
     	}
         
-        Optional<Member> memberOptional = memberRepository.findById(memberId);
-        if (memberOptional.isPresent()) {
-        	like.setMember(memberOptional.get());
-        } else {
-            throw new CustomException(ErrorCode.NOT_FOUND_MEMBER);
-        }
-        
+        Member member = findMemberByMemberId(memberId);
+        like.setMember(member);
         return like;
     }
 
     private CourseLikeResponseDTO convertToDTOCourseLike(CourseLike courseLike) {
-    	CourseLikeResponseDTO courseLikeResponseDTO = new CourseLikeResponseDTO();
-    	courseLikeResponseDTO.setCourseLikeId(courseLike.getId());
-    	courseLikeResponseDTO.setLikeCateg(courseLike.getLikeCateg());
+    	CourseLikeResponseDTO courseLikeResponseDTO = CourseLikeResponseDTO.of(courseLike);
+
 		if(courseLike.getLikeCateg() == CourseLikeCateg.REVIEW)
     		courseLikeResponseDTO.setCourseReviewId(courseLike.getCourseReview().getId());
+
     	else if(courseLike.getLikeCateg() == CourseLikeCateg.COMMENT)
 			courseLikeResponseDTO.setCourseCommentId(courseLike.getCourseComment().getId());
-    	courseLikeResponseDTO.setMemberId(courseLike.getMember().getId());
+
         return courseLikeResponseDTO;
     }
+
+	// repository에 접근하는 중복메소드 관리
+	private Member findMemberByMemberId(Long memberId){
+		return memberRepository.findById(memberId)
+							   .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
+	}
+
+	private Course findCourseByCourseId(Long courseId) {
+		return courseRepository.findById(courseId)
+							   .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
+	}
+
+	private CourseReview findCourseReviewByCourseReviewId(Long id) {
+		return courseReviewRepository.findById(id)
+									 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE_REVIEW));
+	}
+
+	private CourseComment findCourseCommentByCourseCommentId(Long id) {
+		return courseCommentRepository.findById(id)
+							   .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE_COMMENT));
+	}
+
+	private RegistCourse findRegistCourseByCourseIdAndMemberId(Long courseId, Long memberId) {
+		return registCourseRepository.findByCourseIdAndMemberId(courseId, memberId)
+									 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REGIST_COURSE));
+	}
 }

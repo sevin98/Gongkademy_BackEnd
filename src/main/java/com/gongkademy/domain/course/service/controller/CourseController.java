@@ -13,7 +13,6 @@ import com.gongkademy.domain.course.service.service.CourseService;
 import java.util.List;
 import java.util.Map;
 
-import com.gongkademy.domain.course.service.dto.response.*;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
@@ -154,7 +153,7 @@ public class CourseController {
 	@GetMapping("/nocomplete")
 	public ResponseEntity<?> getRegistCoursesNoComplete(@AuthenticationPrincipal PrincipalDetails principalDetails){
         Long currentMemberId = principalDetails.getMemberId();
-		List<CourseResponseDTO> courseResponseDTOs = courseService.getRegistCoursesNoComplete(currentMemberId);
+		List<CourseResponseDTO> courseResponseDTOs = courseService.getCoursesByCompletionStatus(currentMemberId, false);
 		return new ResponseEntity<>(courseResponseDTOs, HttpStatus.OK);
 	}
 	
@@ -162,10 +161,10 @@ public class CourseController {
 	@GetMapping("/complete")
 	public ResponseEntity<?> getRegistCoursesComplete(@AuthenticationPrincipal PrincipalDetails principalDetails){
         Long currentMemberId = principalDetails.getMemberId();
-		List<CourseResponseDTO> courseResponseDTOs = courseService.getRegistCoursesComplete(currentMemberId);
+		List<CourseResponseDTO> courseResponseDTOs = courseService.getCoursesByCompletionStatus(currentMemberId, true);
 		return new ResponseEntity<>(courseResponseDTOs, HttpStatus.OK);
 	}
-	
+
 	// 4. 좋아요
 	@PostMapping("/like")
 	public ResponseEntity<?> Like(@RequestBody CourseLikeRequestDTO courseLikeRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails){

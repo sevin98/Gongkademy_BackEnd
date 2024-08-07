@@ -1,5 +1,6 @@
 package com.gongkademy.domain.course.service.dto.response;
 
+import com.gongkademy.domain.course.common.entity.Notice;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
@@ -22,4 +23,14 @@ public class NoticeResponseDTO {
 	private String content;
 	private Long courseCommentCount;
 
+	public static NoticeResponseDTO of(Notice notice) {
+ 		return NoticeResponseDTO.builder()
+								.id(notice.getId())
+								.createdTime(notice.getCreatedTime())
+								.updatedTime(notice.getUpdatedTime())
+								.title(notice.getTitle())
+								.content(notice.getContent())
+								.courseCommentCount(notice.getCourseCommentCount())
+								.build();
+	}
 }

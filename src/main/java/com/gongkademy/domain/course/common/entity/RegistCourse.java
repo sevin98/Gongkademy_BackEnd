@@ -46,6 +46,7 @@ public class RegistCourse {
 	private Member member;
 	
 	@OneToMany(mappedBy = "registCourse" ,cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<RegistLecture> registLectures = new ArrayList<>();
 	
 	// 수강 강의 생성
@@ -53,10 +54,6 @@ public class RegistCourse {
         this.registLectures.add(registLecture);
         registLecture.setRegistCourse(this);
     }
-	
-	public void deleteRegistLecture(RegistLecture registLecture) {
-		this.registLectures.remove(registLecture);
-	}
 
 	// 진행률 업데이트
 	public void updateProgress() {

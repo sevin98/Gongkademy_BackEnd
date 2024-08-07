@@ -1,11 +1,9 @@
 package com.gongkademy.domain.course.service.service;
 
-import com.gongkademy.domain.course.admin.dto.request.CourseNoticeRequestDTO;
+import com.gongkademy.domain.course.common.repository.CourseLikeRepository;
 import com.gongkademy.domain.course.common.repository.CourseRepository;
 import com.gongkademy.domain.course.common.repository.CourseReviewRepository;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import com.gongkademy.domain.course.common.repository.RegistCourseRepository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,106 +29,97 @@ import lombok.RequiredArgsConstructor;
 public class CourseReviewServiceImpl implements CourseReviewService {
 
 	private final CourseReviewRepository courseReviewRepository;
+	private final RegistCourseRepository registCourseRepository;
 	private final CourseRepository courseRepository;
 	private final MemberRepository memberRepository;
+	private final CourseLikeRepository courseLikeRepository;
 
 	// 페이지 당 보여줄 리뷰 개수
 	private final int pageSize = 3;
 
 	@Override
 	public CourseReviewResponseDTO createReview(CourseReviewRequestDTO courseReviewRequestDTO, Long currentMemberId) {
-		CourseReview review = convertToEntity(courseReviewRequestDTO,currentMemberId);
-		Member member = memberRepository.findById(currentMemberId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
-		member.addCourseReview(review);
-
+		//수강강좌 없을 때
+		if(!registCourseRepository.existsByMemberIdAndCourseId(courseReviewRequestDTO.getCourseId(), currentMemberId))
+			throw new CustomException(ErrorCode.NOT_FOUND_REGIST_COURSE);
 		//이미 수강평있을 때
 		if(courseReviewRepository.existsByCourseIdAndMemberId(courseReviewRequestDTO.getCourseId(), currentMemberId))
 			throw new CustomException(ErrorCode.DUPLICATE_COURSE_REVIEW);
-		Course course = courseRepository.findById(courseReviewRequestDTO.getCourseId())
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
+
+		CourseReview review = convertToEntity(courseReviewRequestDTO,currentMemberId);
+		Member member = findMemberByMemberId(currentMemberId);
+		member.addCourseReview(review);
+
+
+		Course course = findCourseByCourseId(courseReviewRequestDTO.getCourseId());
 		course.addReview(review);
 		CourseReview saveReview =courseReviewRepository.save(review);
-		return convertToDTO(saveReview);
+		return convertToDTO(saveReview, currentMemberId);
 	}
 
 	@Override
 	public CourseReviewResponseDTO updateReview(Long id, CourseReviewRequestDTO courseReviewRequestDTO, Long currentMemberId) {
-		CourseReview review = courseReviewRepository.findById(id)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE_REVIEW));
-		
-        // 리뷰: 평점, 내용만 수정 가능
+		CourseReview review = findCourseReviewByCourseReviewId(id);
+
+		// 리뷰: 평점, 내용만 수정 가능
 		review.setRating(courseReviewRequestDTO.getRating());
 		review.setContent(courseReviewRequestDTO.getContent());
 		CourseReview saveReview = courseReviewRepository.save(review);
 		
-		Course course = courseRepository.findById(courseReviewRequestDTO.getCourseId())
-				.orElseThrow(() -> new  CustomException(ErrorCode.NOT_FOUND_COURSE));
+		Course course = findCourseByCourseId(courseReviewRequestDTO.getCourseId());
 		course.updateAvgRating();
 		
-		return convertToDTO(saveReview);
+		return convertToDTO(saveReview, currentMemberId);
 	}
 
 	@Override
-	public List<CourseReviewResponseDTO> getReviewsPerPage(Long courseId, int pageNo, String criteria, String direction) {
+	public Page<CourseReviewResponseDTO> getReviewsPerPage(Long courseId, int pageNo, String criteria, String direction, Long currentMemberId) {
 		
 		Sort.Direction  dir = (direction.equalsIgnoreCase("ASC"))? Sort.Direction.ASC : Sort.Direction.DESC;
-		
 		Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(dir, criteria));
 
-		Page<CourseReviewResponseDTO> page = courseReviewRepository.findAllByCourseId(courseId, pageable).map(this::convertToDTO);
-		return page.getContent();
+		Page<CourseReview> pages = courseReviewRepository.findAllByCourseId(courseId, pageable);
+		return pages.map(review -> convertToDTO(review, currentMemberId));
 	}
 
 	@Override
 	@Transactional
 	public void deleteReview(Long id, Long currentMemberId) {
-		CourseReview review = courseReviewRepository.findById(id)
-					.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE_REVIEW));
+		CourseReview review = findCourseReviewByCourseReviewId(id);
 
 		Course course = review.getCourse();
 		course.deleteReview(review);
 	}
 
-	private CourseReview convertToEntity(CourseReviewRequestDTO courseReviewRequestDTO, Long memberId) {
-		CourseReview review = CourseReview.builder()
-												.rating(courseReviewRequestDTO.getRating())
-												.createdTime(LocalDateTime.now())
-												.content(courseReviewRequestDTO.getContent())
-												.likeCount(0L)
-												.courseCommentCount(0L)
-												.registCourse(null)
-												.course(null)
-												.member(null)
-												.build();
-		Optional<Member> member = memberRepository.findById(memberId);
-		Optional<Course> courseOptional = courseRepository.findById(courseReviewRequestDTO.getCourseId());
-		if (courseOptional.isPresent()) {
-			review.setCourse(courseOptional.get());
-		} else {
-			throw new CustomException(ErrorCode.NOT_FOUND_COURSE);
-		}
-
-		Optional<Member> memberOptional = memberRepository.findById(memberId);
-		if (memberOptional.isPresent()) {
-			review.setMember(memberOptional.get());
-		} else {
-			throw new CustomException(ErrorCode.NOT_FOUND_MEMBER);
-		}
-		return review;
+	private CourseReview convertToEntity(CourseReviewRequestDTO request, Long memberId) {
+		Course course = findCourseByCourseId(request.getCourseId());
+		Member member = findMemberByMemberId(memberId);
+        return CourseReviewRequestDTO.toEntity(request, course, member);
 	}
 
-	private CourseReviewResponseDTO convertToDTO(CourseReview review) {
-		return CourseReviewResponseDTO.builder()
-				.courseReviewId(review.getId())
-				.rating(review.getRating())
-				.createdTime(review.getCreatedTime())
-				.content(review.getContent())
-				.likeCount(review.getLikeCount())
-				.courseId(review.getCourse().getId())
-				.memberId(review.getMember().getId())
-				.nickname(review.getMember().getNickname())
-				.profilePath(review.getMember().getProfilePath())
-				.build();
+	private CourseReviewResponseDTO convertToDTO(CourseReview review, Long memberId) {
+		CourseReviewResponseDTO response = CourseReviewResponseDTO.of(review);
+		response.setIsLiked(isLikedByMemberId(memberId, review.getId()));
+		return response;
+	}
+
+	// repository에 접근하는 중복메소드 관리
+	private Member findMemberByMemberId(Long memberId){
+			return memberRepository.findById(memberId)
+								   .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
+	}
+
+	private Course findCourseByCourseId(Long courseId) {
+		return courseRepository.findById(courseId)
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
+	}
+
+	private CourseReview findCourseReviewByCourseReviewId(Long id) {
+		return courseReviewRepository.findById(id)
+									 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE_REVIEW));
+	}
+
+	private Boolean isLikedByMemberId(Long memberId, Long courseReivewId) {
+		return courseLikeRepository.existsByMemberIdAndCourseReviewId(memberId, courseReivewId);
 	}
 }

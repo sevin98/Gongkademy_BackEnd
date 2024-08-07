@@ -12,7 +12,7 @@ public interface CourseCommentService {
 
 	public CourseCommentResponseDTO updateComment(Long id, CourseCommentRequestDTO courseCommentRequestDTO, Long currentMemberId);
 
-	public List<CourseCommentResponseDTO> getAllComments(CommentCateg categ, Long id);
+	public List<CourseCommentResponseDTO> getAllComments(CommentCateg categ, Long id, Long currentMemberId);
 
 	public void deleteComment(Long id, Long currentMemberId);
 

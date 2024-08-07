@@ -5,12 +5,11 @@ import com.gongkademy.domain.course.common.entity.CourseComment;
 import com.gongkademy.domain.course.common.entity.CourseReview;
 import com.gongkademy.domain.course.common.entity.Notice;
 import com.gongkademy.domain.course.common.repository.CourseCommentRepository;
+import com.gongkademy.domain.course.common.repository.CourseLikeRepository;
 import com.gongkademy.domain.course.common.repository.CourseNoticeRepository;
 import com.gongkademy.domain.course.common.repository.CourseReviewRepository;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,51 +31,32 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 	private final MemberRepository memberRepository;
 	private final CourseReviewRepository courseReviewRepository;
 	private final CourseNoticeRepository noticeRepository;
-	
+	private final CourseLikeRepository courseLikeRepository;
+
 	@Override
 	public CourseCommentResponseDTO createComment(CourseCommentRequestDTO courseCommentRequestDTO, Long currentMemberId) {
 		CourseComment comment = convertToEntity(courseCommentRequestDTO, currentMemberId);
-		
-		Member member = memberRepository.findById(currentMemberId)
-				.orElseThrow();
-		comment.setMember(member); //댓글 작성자 = 현재이용자
-		member.addCourseComment(comment);
-		
-        if(comment.getCommentCateg()== CommentCateg.REVIEW) {
-        	CourseReview review = comment.getCourseReview();
-        	review.addCourseComment(comment);
-        }
-        
-        else if(comment.getCommentCateg()==CommentCateg.NOTICE) {
-        	Notice notice = comment.getNotice();
-        	notice.addCourseComment(comment);
-        }
+
 		CourseComment saveComment = courseCommentRepository.save(comment);
-        return convertToDTO(saveComment);
+        return convertToDTO(saveComment, currentMemberId);
 	}
 
 	@Override
 	public CourseCommentResponseDTO updateComment(Long id, CourseCommentRequestDTO courseCommentRequestDTO, Long currentMemberId) {
-        Optional<CourseComment> commentOptional = courseCommentRepository.findById(id);
-        
-        if (commentOptional.isPresent()) {
-        	CourseComment comment = commentOptional.get();
-    		// 요청 사용자 == 로그인 사용자 확인
-            if (!comment.getMember().getId().equals(currentMemberId)) {
-                throw new CustomException(ErrorCode.FORBIDDEN);
-            }
-        	
-            comment.setContent(courseCommentRequestDTO.getContent());
-            courseCommentRepository.save(comment);
-            return convertToDTO(comment);
-        }
+        CourseComment comment = findCommentByCommentId(id);
 
-        throw new CustomException(ErrorCode.NOT_FOUND_COURSE_COMMENT);
+		// 요청 사용자 == 로그인 사용자 확인
+		checkMemberIsWriter(currentMemberId, comment);
+
+        comment.setContent(courseCommentRequestDTO.getContent());
+        courseCommentRepository.save(comment);
+        return convertToDTO(comment, currentMemberId);
 	}
-	
+
+
 	@Override
 	@Transactional(readOnly = true)
-	public List<CourseCommentResponseDTO> getAllComments(CommentCateg categ, Long id) {
+	public List<CourseCommentResponseDTO> getAllComments(CommentCateg categ, Long id, Long currentMemberId) {
 		List<CourseComment> comments = new ArrayList<>();
 		
 		if(categ == CommentCateg.NOTICE) comments = courseCommentRepository.findAllByCommentCategAndNoticeId(categ, id);
@@ -84,7 +64,7 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 
         List<CourseCommentResponseDTO> courseCommentResponseDTOs = new ArrayList<>();
         for (CourseComment comment : comments) {
-        	courseCommentResponseDTOs.add(convertToDTO(comment));
+        	courseCommentResponseDTOs.add(convertToDTO(comment, currentMemberId));
         }
         return courseCommentResponseDTOs;
 	}
@@ -92,20 +72,19 @@ public class CourseCommentServiceImpl implements CourseCommentService {
 	@Override
 	@Transactional
 	public void deleteComment(Long id, Long currentMemberId) {
-		Optional<CourseComment> comment = courseCommentRepository.findById(id);
-		// 요청 사용자 == 로그인 사용자 확인
-        if (!comment.get().getMember().getId().equals(currentMemberId)) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
+		CourseComment comment = findCommentByCommentId(id);
 
-		if (comment.get().getCommentCateg() == CommentCateg.REVIEW) {
-			CourseReview review = comment.get().getCourseReview();
-			review.deleteCourseComment(comment.get());
+		// 요청 사용자 == 로그인 사용자 확인
+		checkMemberIsWriter(currentMemberId, comment);
+
+		if (comment.getCommentCateg() == CommentCateg.REVIEW) {
+			CourseReview review = comment.getCourseReview();
+			review.deleteCourseComment(comment);
 		}
 
-		else if (comment.get().getCommentCateg() == CommentCateg.NOTICE) {
-			Notice notice = comment.get().getNotice();
-			notice.deleteCourseComment(comment.get());
+		else if (comment.getCommentCateg() == CommentCateg.NOTICE) {
+			Notice notice = comment.getNotice();
+			notice.deleteCourseComment(comment);
 		}
 	}
 	
@@ -113,47 +92,57 @@ public class CourseCommentServiceImpl implements CourseCommentService {
     	CourseComment comment = new CourseComment();
     	
     	if(courseCommentRequestDTO.getCommentType()==CommentCateg.REVIEW) {
-    		Optional<CourseReview> reviewOptional = courseReviewRepository.findById(courseCommentRequestDTO.getCourseReviewId());
-    		if (reviewOptional.isPresent()) {
-    			comment.setCourseReview(reviewOptional.get());
-    		} else {
-    			throw new CustomException(ErrorCode.NOT_FOUND_COURSE_REVIEW);
-    		}
+    		CourseReview review = courseReviewRepository.findById(courseCommentRequestDTO.getCourseReviewId())
+					.orElseThrow(() ->new CustomException(ErrorCode.NOT_FOUND_COURSE_REVIEW));
+    		comment.setCourseReview(review);
     	}
+
     	if(courseCommentRequestDTO.getCommentType()==CommentCateg.NOTICE) {
-    		Optional<Notice> noticeOptional = noticeRepository.findById(courseCommentRequestDTO.getNoticeId());
-    		if (noticeOptional.isPresent()) {
-    			comment.setNotice(noticeOptional.get());
-    		} else {
-    			throw new CustomException(ErrorCode.NOT_FOUND_COURSE_NOTICE);
-    		}
+    		Notice notice = noticeRepository.findById(courseCommentRequestDTO.getNoticeId())
+					.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE_NOTICE));
+    		comment.setNotice(notice);
     	}
         comment.setCommentCateg(courseCommentRequestDTO.getCommentType());
-        Optional<Member> memberOptional = memberRepository.findById(memberId);
-        if (memberOptional.isPresent()) {
-           comment.setMember(memberOptional.get());
-        } else {
-			throw new CustomException(ErrorCode.NOT_FOUND_MEMBER);
-        }
-    	comment.setContent(courseCommentRequestDTO.getContent());
+        Member member = findMemberByMemberId(memberId);
+        comment.setMember(member);
+
+		comment.setContent(courseCommentRequestDTO.getContent());
     	comment.setLikeCount(courseCommentRequestDTO.getLikeCount());
         return comment;
     }
 
-    private CourseCommentResponseDTO convertToDTO(CourseComment comment) {
-    	CourseCommentResponseDTO courseCommentResponseDTO = new CourseCommentResponseDTO();
-		courseCommentResponseDTO.setCommentCateg(comment.getCommentCateg());
+	private CourseCommentResponseDTO convertToDTO(CourseComment comment, Long currentMemberId) {
+		CourseCommentResponseDTO response = CourseCommentResponseDTO.of(comment);
+		response.setIsLiked(isLikedByMemberId(comment.getId(), currentMemberId));
+
 		if(comment.getCommentCateg() == CommentCateg.NOTICE)
-			courseCommentResponseDTO.setNoticeId(comment.getNotice().getId());
+			response.setNoticeId(comment.getNotice().getId());
 		else if(comment.getCommentCateg() == CommentCateg.REVIEW)
-			courseCommentResponseDTO.setCourseReviewId(comment.getCourseReview().getId());
-		courseCommentResponseDTO.setCourseCommentId(comment.getId());
-    	courseCommentResponseDTO.setMemberId(comment.getMember().getId());
-    	courseCommentResponseDTO.setNickname(comment.getMember().getNickname());
-		courseCommentResponseDTO.setProfilePath(comment.getMember().getProfilePath());
-    	courseCommentResponseDTO.setContent(comment.getContent());
-    	courseCommentResponseDTO.setLikeCount(comment.getLikeCount());
-        return courseCommentResponseDTO;
+			response.setCourseReviewId(comment.getCourseReview().getId());
+
+        return response;
     }
+
+	// repository에 접근하는 중복메소드 관리
+	private Member findMemberByMemberId(Long memberId){
+		return memberRepository.findById(memberId)
+							   .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
+	}
+
+	private CourseComment findCommentByCommentId(Long CourseCommentId){
+		return courseCommentRepository.findById(CourseCommentId)
+									  .orElseThrow(()->new CustomException(ErrorCode.NOT_FOUND_COURSE_COMMENT));
+
+	}
+
+	private Boolean isLikedByMemberId(Long memberId, Long courseCommentId) {
+		return courseLikeRepository.existsByMemberIdAndCourseCommentId(memberId, courseCommentId);
+	}
+
+	private void checkMemberIsWriter(Long currentMemberId, CourseComment comment) {
+		if (!comment.getMember().getId().equals(currentMemberId)) {
+			throw new CustomException(ErrorCode.FORBIDDEN);
+		}
+	}
 
 }

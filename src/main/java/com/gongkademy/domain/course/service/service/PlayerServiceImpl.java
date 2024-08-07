@@ -41,28 +41,22 @@ public class PlayerServiceImpl implements PlayerService{
 	@Override
 	public PlayerResponseDTO getPlayerLatestLecture(Long lectureId, Long memberId) {
 		// 수강 강의 중 가장 최근 수강 강의 조회
-		RegistLecture registLectureLatest = registLectureRepository.findByLectureIdAndMemberId(lectureId, memberId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REGIST_LECTURE));
+		RegistLecture registLectureLatest = findRegistLectureByRegistLectureIdAndMemberId(lectureId, memberId);
 
-		Lecture lecture = lectureRepository.findById(registLectureLatest.getLecture().getId())
-                                           .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_LECTURE));
-		
-		PlayerResponseDTO playerResponseDTO = this.convertToDTO(lecture, registLectureLatest);
-		
-		return playerResponseDTO;
+		Lecture lecture = findLectureByLectureId(registLectureLatest.getLecture().getId());
+
+        return this.convertToDTO(lecture, registLectureLatest);
 	}
 
 	@Override
 	public void updatePlayerLatest(PlayerRequestDTO playerRequestDTO, Long memberId) {
 		Long lectureId = playerRequestDTO.getLectureId();
-		RegistLecture registLecture = registLectureRepository.findByLectureIdAndMemberId(lectureId, memberId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REGIST_LECTURE));
+		RegistLecture registLecture = findRegistLectureByRegistLectureIdAndMemberId(lectureId, memberId);
 
 		registLecture.updateSavePoint(playerRequestDTO.getSavePoint());
 		registLecture.updateRegistCourse();
 		
-		Lecture lecture = lectureRepository.findById(lectureId)
-				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_LECTURE));
+		Lecture lecture = findLectureByLectureId(lectureId);
 		
 		if(lecture.getTime() == registLecture.getSavePoint()) registLecture.updateComplete();
 		
@@ -75,5 +69,13 @@ public class PlayerServiceImpl implements PlayerService{
 				.savePoint(registLecture.getSavePoint())
 				.recentDate(registLecture.getRecentDate())
 				.build();
+	}
+	private RegistLecture findRegistLectureByRegistLectureIdAndMemberId(Long registLectureId, Long memberId) {
+		return registLectureRepository.findByLectureIdAndMemberId(registLectureId, memberId)
+									 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REGIST_LECTURE));
+	}
+	private Lecture findLectureByLectureId(Long lectureId) {
+		return lectureRepository.findById(lectureId)
+								.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_LECTURE));
 	}
 }

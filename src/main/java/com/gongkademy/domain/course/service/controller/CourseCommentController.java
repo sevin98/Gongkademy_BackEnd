@@ -47,12 +47,14 @@ public class CourseCommentController {
 
     // 카테고리(리뷰, 공지사항)의 글 ID에 해당하는 댓글 모두 반환
     @GetMapping
-    public ResponseEntity<List<CourseCommentResponseDTO>> getAllComments(@RequestBody CourseCommentRequestDTO courseCommentRequestDTO) {
+    public ResponseEntity<List<CourseCommentResponseDTO>> getAllComments(@RequestBody CourseCommentRequestDTO courseCommentRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Long currentMemberId = principalDetails.getMemberId();
+
         CommentCateg categ = courseCommentRequestDTO.getCommentType();
         Long id = 0L;
         if(categ == CommentCateg.NOTICE) id = courseCommentRequestDTO.getNoticeId();
         else if(categ == CommentCateg.REVIEW) id = courseCommentRequestDTO.getCourseReviewId();
-        List<CourseCommentResponseDTO> courseCommentResponseDTOs = courseCommentService.getAllComments(categ, id);
+        List<CourseCommentResponseDTO> courseCommentResponseDTOs = courseCommentService.getAllComments(categ, id, currentMemberId);
         return ResponseEntity.ok(courseCommentResponseDTOs);
     }
     

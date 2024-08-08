@@ -85,6 +85,9 @@ public class CourseServiceImpl implements CourseService {
 
 	@Override
 	public List<CourseContentsResponseDTO> getCourseContents(Long courseId, Long memberId) {
+		Course course = findCourseByCourseId(courseId);
+		if(course.getStatus() == CourseStatus.WAIT) throw new CustomException(ErrorCode.WAIT_STATUS_COURSE);
+
 		List<Lecture> lectures = lectureRepository.findByCourseId(courseId);
 		List<CourseContentsResponseDTO> courseContentsDTOs = new ArrayList<>();
 		
@@ -106,6 +109,9 @@ public class CourseServiceImpl implements CourseService {
 
 	@Override
 	public List<CourseContentsGuestResponseDTO> getCourseContentsForGuest(Long courseId) {
+		Course course = findCourseByCourseId(courseId);
+		if(course.getStatus() == CourseStatus.WAIT) throw new CustomException(ErrorCode.WAIT_STATUS_COURSE);
+
 		List<Lecture> lectures = lectureRepository.findByCourseId(courseId);
 		List<CourseContentsGuestResponseDTO> courseContentsDTOs = new ArrayList<>();
 

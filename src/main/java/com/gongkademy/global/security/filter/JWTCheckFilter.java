@@ -52,7 +52,9 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         log.info("메소드와 엔드포인트");
         log.info(excludeMethods);
         log.info(excludeEndpoints);
-        return excludeMethods.contains(request.getMethod()) && excludeEndpoints.contains(request.getRequestURI());
+        String requestURI = request.getRequestURI();
+        return excludeMethods.contains(request.getMethod()) && excludeEndpoints.stream()
+                .anyMatch(uri -> requestURI.matches(uri.replace("**", ".*")));
     }
 
     /**

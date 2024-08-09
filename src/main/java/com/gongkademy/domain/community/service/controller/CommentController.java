@@ -1,10 +1,13 @@
 package com.gongkademy.domain.community.service.controller;
 
+import com.gongkademy.domain.community.service.docs.CommentControllerDocs;
 import com.gongkademy.domain.community.service.dto.request.CommentRequestDTO;
 import com.gongkademy.domain.community.service.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.common.entity.board.BoardType;
 import com.gongkademy.domain.community.service.service.CommentService;
 import com.gongkademy.domain.member.dto.PrincipalDetails;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController("serviceCommentController")
 @RequestMapping("/community")
 @RequiredArgsConstructor
-public class CommentController {
+public class CommentController implements CommentControllerDocs {
 
     private final CommentService commentService;
 
@@ -34,7 +37,7 @@ public class CommentController {
     }
 
     // 댓글 수정 - Authentication
-    @PutMapping("/comment/{commentId}")
+    @PatchMapping("/comment/{commentId}")
     public ResponseEntity<?> updateComment(@PathVariable Long commentId, @RequestBody CommentRequestDTO commentRequestDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         Long currentMemberId = principalDetails.getMemberId();
         CommentResponseDTO updatedComment = commentService.updateComment(commentId, currentMemberId, commentRequestDTO);

@@ -1,19 +1,22 @@
 package com.gongkademy.domain.community.admin.controller;
 
+import com.gongkademy.domain.community.admin.docs.AdminCommentControllerDocs;
 import com.gongkademy.domain.community.admin.dto.request.CommentRequestDTO;
 import com.gongkademy.domain.community.admin.dto.response.CommentResponseDTO;
 import com.gongkademy.domain.community.admin.service.CommentService;
 import com.gongkademy.domain.member.dto.PrincipalDetails;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@RestController("adminCommentController")
-@RequestMapping("admin/community")
+@RestController("AdminCommentController")
+@RequestMapping("/admin/community")
 @RequiredArgsConstructor
-public class CommentController {
+public class CommentController implements AdminCommentControllerDocs {
 
     private final CommentService commentService;
 

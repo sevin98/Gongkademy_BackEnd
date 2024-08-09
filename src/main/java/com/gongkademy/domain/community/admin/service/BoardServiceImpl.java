@@ -127,21 +127,4 @@ public class BoardServiceImpl implements BoardService {
                 .build();
     }
 
-    private BoardResponseDTO convertToDTO(Board board) {
-        return BoardResponseDTO.builder().
-                articleId(board.getArticleId())
-                .boardType(board.getBoardType())
-                .memberId(board.getMember().getId())
-                .nickname(board.getMember().getNickname())
-                .title(board.getTitle())
-                .content(board.getContent())
-                .createTime(board.getCreateTime())
-                .likeCount(board.getLikeCount())
-                .scrapCount(board.getScrapCount())
-                .hit(board.getHit())
-                .commentCount(board.getCommentCount())
-                .build();
-
-    }
-
 }

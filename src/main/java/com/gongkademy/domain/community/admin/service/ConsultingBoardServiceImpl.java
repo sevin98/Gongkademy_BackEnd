@@ -71,22 +71,7 @@ public class ConsultingBoardServiceImpl implements ConsultingBoardService {
                 .build();
     }
 
-    private BoardResponseDTO convertToDTO(Board consultingBoard) {
-        return BoardResponseDTO.builder().
-                articleId(consultingBoard.getArticleId())
-                .boardType(consultingBoard.getBoardType())
-                .memberId(consultingBoard.getMember().getId())
-                .nickname(consultingBoard.getMember().getNickname())
-                .title(consultingBoard.getTitle())
-                .content(consultingBoard.getContent())
-                .createTime(consultingBoard.getCreateTime())
-                .likeCount(consultingBoard.getLikeCount())
-                .scrapCount(consultingBoard.getScrapCount())
-                .hit(consultingBoard.getHit())
-                .commentCount(consultingBoard.getCommentCount())
-                .build();
 
-    }
     /*
     @Override
     public BoardResponseDTO createConsultingBoard(BoardRequestDTO ConsultingBoardRequestDTO) {

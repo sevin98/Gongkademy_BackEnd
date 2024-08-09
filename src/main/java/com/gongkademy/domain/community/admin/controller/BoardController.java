@@ -1,9 +1,12 @@
 package com.gongkademy.domain.community.admin.controller;
 
 
+import com.gongkademy.domain.community.admin.docs.AdminBoardControllerDocs;
 import com.gongkademy.domain.community.admin.dto.request.BoardRequestDTO;
 import com.gongkademy.domain.community.admin.dto.response.BoardResponseDTO;
 import com.gongkademy.domain.community.admin.service.BoardService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("adminBoardController")
+@RestController("AdminBoardController")
 @RequestMapping("/admin/community")
 @RequiredArgsConstructor
-public class BoardController {
+public class BoardController implements AdminBoardControllerDocs {
 
     private final BoardService boardService;
 

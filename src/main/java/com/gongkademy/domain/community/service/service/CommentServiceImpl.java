@@ -133,7 +133,7 @@ public class CommentServiceImpl implements CommentService {
         // 대댓글 로직
         if (commentRequestDTO.getParentId() != null) {
             Comment parent = commentRepository.findById(commentRequestDTO.getParentId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.INVALID_PARENT_COMMENT_ID));
+                    .orElseThrow(() -> new CustomException(ErrorCode.NO_PARENT_COMMENT_ID));
             commentBuilder.parent(parent);
         }
 

@@ -1,8 +1,11 @@
 package com.gongkademy.domain.community.admin.controller;
 
 
+import com.gongkademy.domain.community.admin.docs.AdminQuestionControllerDocs;
 import com.gongkademy.domain.community.admin.dto.response.QnaBoardResponseDTO;
 import com.gongkademy.domain.community.admin.service.QnaBoardService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -11,11 +14,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("adminQuestionController")
-@RequestMapping("admin/community/question")
+@RestController("AdminQuestionController")
+@RequestMapping("/admin/community/question")
 @RequiredArgsConstructor
 @Slf4j
-public class QuestionController {
+public class QuestionController implements AdminQuestionControllerDocs {
     private final QnaBoardService qnaboardService;
 
     private final String START_PAGE_NO = "0";
@@ -24,6 +27,7 @@ public class QuestionController {
     private final String REQUEST_PARAM_CRITERIA = "criteria";
     // Qna 전체 리스트 반환
     @GetMapping("")
+    @Operation(summary = "질문 리스트 조회")
     public ResponseEntity<?> getAllQna( @RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
                                            @RequestParam(defaultValue = BASE_CRITERIA, value = REQUEST_PARAM_CRITERIA) String criteria){
         List<QnaBoardResponseDTO> result = qnaboardService.findAllQnaBoards(pageNo, criteria);
@@ -32,6 +36,7 @@ public class QuestionController {
 
     // Qna 상세 조회
     @GetMapping("/{articleNo}")
+    @Operation(summary = "질문 상세조회")
     public ResponseEntity<?> getQna(@PathVariable Long articleNo) {
         QnaBoardResponseDTO result = qnaboardService.findQnaBoard(articleNo);
         return ResponseEntity.status(HttpStatus.OK).body(result);
@@ -39,6 +44,7 @@ public class QuestionController {
 
     // Qna 삭제
     @DeleteMapping("/{articleNo}")
+    @Operation(summary = "질문 삭제")
     public ResponseEntity<?> deleteQna(@PathVariable Long articleNo) {
         qnaboardService.deleteQnaBoard(articleNo);
         return ResponseEntity.status(HttpStatus.OK).build();

@@ -104,28 +104,12 @@ public class CommentServiceImpl implements CommentService {
         // 대댓글 로직
         if (commentRequestDTO.getParentId() != null) {
             Comment parent = commentRepository.findById(commentRequestDTO.getParentId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.INVALID_PARENT_COMMENT_ID));
+                    .orElseThrow(() -> new CustomException(ErrorCode.NO_PARENT_COMMENT_ID));
             commentBuilder.parent(parent);
         }
 
         return commentBuilder.build();
     }
 
-    private CommentResponseDTO convertToDTO(Comment comment) {
-        List<CommentResponseDTO> childrenDTOs = new ArrayList<>();
-        for (Comment child : comment.getChildren()) {
-            childrenDTOs.add(convertToDTO(child));
-        }
 
-        return CommentResponseDTO.builder()
-                .commentId(comment.getCommentId())
-                .articleId(comment.getBoard().getArticleId())
-                .memberId(comment.getMember().getId())
-                .nickname(comment.getNickname())
-                .content(comment.getContent())
-                .likeCount(comment.getLikeCount())
-                .parentId(comment.getParent() != null ? comment.getParent().getCommentId() : null)
-                .children(childrenDTOs)
-                .build();
-    }
 }

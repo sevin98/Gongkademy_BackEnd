@@ -1,11 +1,14 @@
 package com.gongkademy.domain.community.service.controller;
 
+import com.gongkademy.domain.community.service.docs.ConsultingControllerDocs;
 import com.gongkademy.domain.community.service.dto.request.BoardRequestDTO;
 import com.gongkademy.domain.community.service.dto.response.BoardResponseDTO;
 import com.gongkademy.domain.community.service.service.ConsultingBoardService;
 import com.gongkademy.domain.member.dto.PrincipalDetails;
 import com.gongkademy.global.exception.CustomException;
 import com.gongkademy.global.exception.ErrorCode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,7 +23,7 @@ import java.util.Map;
 @RequestMapping("/community/consulting")
 @RequiredArgsConstructor
 @Slf4j
-public class ConsultingController {
+public class ConsultingController implements ConsultingControllerDocs {
 
     private final ConsultingBoardService consultingBoardService;
 
@@ -29,9 +32,10 @@ public class ConsultingController {
     private final String REQUEST_PARAM_PAGE = "page";
     private final String REQUEST_PARAM_CRITERIA = "criteria";
     private final String KEY_WORD = "keyword";
+
     // Consulting 전체 리스트 반환 (로그인 한 경우)
     @GetMapping("/login")
-    public ResponseEntity<?> getAllConsulitng(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
+    public ResponseEntity<?> getAllConsulting(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
                                        @RequestParam(defaultValue = BASE_CRITERIA, value = REQUEST_PARAM_CRITERIA) String criteria,
                                               @RequestParam(value = KEY_WORD) String keyword,
                                               @AuthenticationPrincipal PrincipalDetails principalDetails){
@@ -43,7 +47,7 @@ public class ConsultingController {
     }
 
     @GetMapping("/myboard")
-    public ResponseEntity<?> getMyConsulitng(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
+    public ResponseEntity<?> getMyConsulting(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
                                               @RequestParam(defaultValue = BASE_CRITERIA, value = REQUEST_PARAM_CRITERIA) String criteria,
                                               @AuthenticationPrincipal PrincipalDetails principalDetails){
         Long currentMemberId = principalDetails.getMemberId();
@@ -55,12 +59,13 @@ public class ConsultingController {
 
     // Consulting 전체 리스트 반환 (로그인 하지 않은 경우)
     @GetMapping
-    public ResponseEntity<?> getAllConsulitng(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
+    public ResponseEntity<?> getAllConsulting(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
                                               @RequestParam(defaultValue = BASE_CRITERIA, value = REQUEST_PARAM_CRITERIA) String criteria,
                                               @RequestParam(value = KEY_WORD) String keyword){
         Map<String, Object> result = consultingBoardService.findAllConsultingBoards(pageNo, criteria, keyword);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
+
 
     // Consulting 상세 조회 (로그인 한 경우)
     @GetMapping("/{articleId}/login")

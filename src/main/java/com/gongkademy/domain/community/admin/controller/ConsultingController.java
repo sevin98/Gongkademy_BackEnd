@@ -1,8 +1,11 @@
 package com.gongkademy.domain.community.admin.controller;
 
 
+import com.gongkademy.domain.community.admin.docs.AdminConsultingControllerDocs;
 import com.gongkademy.domain.community.admin.dto.response.BoardResponseDTO;
 import com.gongkademy.domain.community.admin.service.ConsultingBoardService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -11,11 +14,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("adminConsultingController")
-@RequestMapping("admin/community/consulting")
+@RestController("AdminConsultingController")
+@RequestMapping("/admin/community/consulting")
 @RequiredArgsConstructor
 @Slf4j
-public class ConsultingController {
+public class ConsultingController implements AdminConsultingControllerDocs {
 
     private final ConsultingBoardService consultingBoardService;
 

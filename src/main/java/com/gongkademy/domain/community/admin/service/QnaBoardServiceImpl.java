@@ -85,47 +85,4 @@ public class QnaBoardServiceImpl implements QnaBoardService {
                 .commentCount(0L).build();
     }
 
-
-    private QnaBoardResponseDTO convertToDTO(QnaBoard qnaBoard) {
-        return QnaBoardResponseDTO.builder().
-                boardType(qnaBoard.getBoardType())
-                .articleId(qnaBoard.getArticleId())
-                .memberId(qnaBoard.getMember().getId())
-                .nickname(qnaBoard.getMember().getNickname())
-                .title(qnaBoard.getTitle())
-                .content(qnaBoard.getContent())
-                .courseId(qnaBoard.getCourse().getId())
-                .lectureId(qnaBoard.getLecture().getId())
-                .likeCount(qnaBoard.getLikeCount())
-                .commentCount(qnaBoard.getCommentCount())
-                .scrapCount(qnaBoard.getScrapCount())
-                .hit(qnaBoard.getHit())
-                .createTime(qnaBoard.getCreateTime()).build();
-
-    }
-
-
-    /*
-    // QnaBoard 생성
-    @Override
-    public QnaBoardResponseDTO createQnaBoard(QnaBoardRequestDTO qnaBoardRequestDto) {
-        QnaBoard qnaBoard = convertToEntity(qnaBoardRequestDto);
-        QnaBoard savedBoard = qnaBoardRepository.save(qnaBoard);
-        return convertToDTO(savedBoard);
-    }
-
-    // QnaBoard 수정
-    @Override
-    public Long updateQnaBoard(Long articleId, QnaBoardRequestDTO qnaBoardRequestDto) {
-        Optional<QnaBoard> optQnaBoard = qnaBoardRepository.findById(articleId);
-
-        // articleId에 해당하는 게시글이 없는 경우
-        if (optQnaBoard.isEmpty()) {
-            return null;
-        }
-        QnaBoard qnaBoard = optQnaBoard.get();
-        qnaBoard.update(qnaBoardRequestDto);
-        return qnaBoard.getArticleId();
-    }
-    */
 }

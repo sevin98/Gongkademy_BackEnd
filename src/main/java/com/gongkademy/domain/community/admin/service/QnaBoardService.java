@@ -1,6 +1,7 @@
 package com.gongkademy.domain.community.admin.service;
 
 import com.gongkademy.domain.community.admin.dto.response.QnaBoardResponseDTO;
+import com.gongkademy.domain.community.common.entity.board.QnaBoard;
 
 import java.util.List;
 
@@ -21,4 +22,24 @@ public interface QnaBoardService {
     // Qna 게시글 수정하기
     Long updateQnaBoard(Long articleId, QnaBoardRequestDTO qnaBoardRequestDTO);
     */
+
+
+    default QnaBoardResponseDTO convertToDTO(QnaBoard qnaBoard) {
+        return QnaBoardResponseDTO.builder().
+                boardType(qnaBoard.getBoardType())
+                .articleId(qnaBoard.getArticleId())
+                .memberId(qnaBoard.getMember().getId())
+                .nickname(qnaBoard.getMember().getNickname())
+                .title(qnaBoard.getTitle())
+                .content(qnaBoard.getContent())
+                .courseId(qnaBoard.getCourse().getId())
+                .lectureId(qnaBoard.getLecture().getId())
+                .likeCount(qnaBoard.getLikeCount())
+                .commentCount(qnaBoard.getCommentCount())
+                .scrapCount(qnaBoard.getScrapCount())
+                .hit(qnaBoard.getHit())
+                .createTime(qnaBoard.getCreateTime()).build();
+
+    }
+
 }

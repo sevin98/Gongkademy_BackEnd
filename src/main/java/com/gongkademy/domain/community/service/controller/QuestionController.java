@@ -1,6 +1,8 @@
 package com.gongkademy.domain.community.service.controller;
 
+
 import com.gongkademy.domain.community.common.entity.board.QnaBoard;
+import com.gongkademy.domain.community.service.docs.QuestionControllerDocs;
 import com.gongkademy.domain.community.service.dto.request.QnaBoardCreateRequestDTO;
 import com.gongkademy.domain.community.service.dto.request.QnaBoardUpdateRequestDTO;
 import com.gongkademy.domain.community.service.dto.response.QnaBoardResponseDTO;
@@ -22,7 +24,7 @@ import java.util.Map;
 @RequestMapping("/community/question")
 @RequiredArgsConstructor
 @Slf4j
-public class QuestionController {
+public class QuestionController implements QuestionControllerDocs {
     private final QnaBoardService qnaboardService;
 
     private final String START_PAGE_NO = "0";
@@ -152,6 +154,7 @@ public class QuestionController {
         return ResponseEntity.ok(scrapBoards);
     }
 
+    // 특정 Course의 질문 게시글
     @GetMapping("/course/{courseId}")
     public ResponseEntity<?> getByCourse(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
                                        @PathVariable("courseId")Long courseId){
@@ -159,6 +162,7 @@ public class QuestionController {
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
+    // 특정 Lecture의 질문 게시글
     @GetMapping("/lecture/{lectureId}")
     public ResponseEntity<?> getByLecture(@RequestParam(defaultValue = START_PAGE_NO, value = REQUEST_PARAM_PAGE) int pageNo,
                                        @PathVariable("lectureId")Long lectureId){

@@ -7,6 +7,8 @@ import com.gongkademy.domain.member.dto.PrincipalDetails;
 import com.gongkademy.domain.member.entity.Member;
 import com.gongkademy.domain.member.entity.MemberRole;
 import com.gongkademy.domain.member.service.MemberServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ import static com.gongkademy.domain.member.entity.MemberRole.USER;
 @RequestMapping("/members")
 @RequiredArgsConstructor
 @Log4j2
+@Tag(name = "유저관련 API", description = "<h3>- MemberController</h3>")
 public class MemberController {
 
     private final MemberServiceImpl memberService;
@@ -33,6 +36,8 @@ public class MemberController {
 //    }
 
     @GetMapping("/role/{memberRole}")
+    @Operation(summary = "유저 권한 확인",
+            tags = "유저관련 API")
     public ResponseEntity<?> checkMemberRole(@AuthenticationPrincipal PrincipalDetails principalDetails, @PathVariable String memberRole) {
         Long memberId = principalDetails.getMemberId();
         memberService.validateAuthority(memberId, MemberRole.valueOf(memberRole));
@@ -41,6 +46,8 @@ public class MemberController {
     }
 
     @GetMapping
+    @Operation(summary = "유저 정보 조회",
+            tags = "유저관련 API")
     public ResponseEntity<MemberInfoDTO> getMemberInfo(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         long loginMemberId = principalDetails.getMemberId();
         MemberInfoDTO memberInfo = memberService.getMemberInfo(loginMemberId);
@@ -49,6 +56,8 @@ public class MemberController {
     }
 
     @PatchMapping
+    @Operation(summary = "유저 정보 수정",
+            tags = "유저관련 API")
     public ResponseEntity<?> updateMember(@ModelAttribute MemberUpdateDTO memberUpdateDTO, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         long loginMemberId = principalDetails.getMemberId();
         Member updateMember = memberService.modifyMember(loginMemberId, memberUpdateDTO);
@@ -56,6 +65,8 @@ public class MemberController {
     }
 
     @DeleteMapping
+    @Operation(summary = "유저 삭제",
+            tags = "유저관련 API")
     public ResponseEntity<?> deleteMember(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         long loginMemberId = principalDetails.getMemberId();
         log.info("loginMemberId는 : " + loginMemberId);
@@ -65,6 +76,8 @@ public class MemberController {
 
     // TODO: URL 경로에 대해 회의 필요
     @PatchMapping("/notification")
+    @Operation(summary = "유저 알림",
+            tags = "유저관련 API")
     public ResponseEntity<?> changeNotificationEnabledStatus(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         memberService.changeNotificationEnabledStatus(principalDetails.getMemberId());
         return ResponseEntity.status(HttpStatus.CREATED).body("알림 on/off 상태 변경 성공");

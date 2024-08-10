@@ -312,19 +312,24 @@ public class QnaBoardServiceImpl implements QnaBoardService {
     private QnaBoard convertToEntity(QnaBoardCreateRequestDTO qnaBoardCreateRequestDto) {
         Member member = memberRepository.findById(qnaBoardCreateRequestDto.getMemberId())
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_ID));
-
-        Optional<Course> course = courseRepository.findById(qnaBoardCreateRequestDto.getCourseId());
-
-
-        Optional<Lecture> lecture = lectureRepository.findById(qnaBoardCreateRequestDto.getLectureId());
+        Course course = null;
+        Lecture lecture = null;
+        if (qnaBoardCreateRequestDto.getCourseId() != null) {
+            course = courseRepository.findById(qnaBoardCreateRequestDto.getCourseId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COURSE));
+        }
+        if (qnaBoardCreateRequestDto.getLectureId() != null) {
+            lecture = lectureRepository.findById(qnaBoardCreateRequestDto.getLectureId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_LECTURE));
+        }
 
         return QnaBoard.builder().
                 boardType(qnaBoardCreateRequestDto.getBoardType())
                 .member(member)
                 .title(qnaBoardCreateRequestDto.getTitle())
                 .content(qnaBoardCreateRequestDto.getContent())
-                .course(course.orElse(null))
-                .lecture(lecture.orElse(null))
+                .course(course)
+                .lecture(lecture)
                 .hit(0L)
                 .likeCount(0L)
                 .scrapCount(0L)

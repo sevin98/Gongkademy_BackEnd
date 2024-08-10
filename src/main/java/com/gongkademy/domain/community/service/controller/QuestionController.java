@@ -88,8 +88,12 @@ public class QuestionController implements QuestionControllerDocs {
         Long currentMemberId = principalDetails.getMemberId();
         if(currentMemberId == null) throw new CustomException(ErrorCode.JWT_NULL_MEMBER_ID);
 
-        QnaBoardResponseDTO result = qnaboardService.createQnaBoard(qnaBoardCreateRequestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        try {
+            QnaBoardResponseDTO result = qnaboardService.createQnaBoard(qnaBoardCreateRequestDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        } catch (CustomException exception) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+        }
     }
 
     // Qna 수정
